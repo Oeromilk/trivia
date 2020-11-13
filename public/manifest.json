@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Trivible",
+  "name": "Bingeable Show Trivia",
   "icons": [
     {
       "src": "favicon.ico",
