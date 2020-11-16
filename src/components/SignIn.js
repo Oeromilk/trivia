@@ -36,6 +36,9 @@ const useStyles = makeStyles((theme) => ({
   },
   input: {
       marginBottom: theme.spacing(3)
+  },
+  forgotPassword: {
+      cursor: 'pointer'
   }
 }));
 
@@ -55,6 +58,10 @@ export default function SignIn() {
         event.preventDefault();
         auth.signInWithEmailAndPassword(email, password);
         history.push("/");
+    }
+    function handleForgotPassword(event){
+        event.preventDefault();
+        history.push("/forgot-password");
     }
 
   return (
@@ -106,9 +113,9 @@ export default function SignIn() {
           </Button>
           <Grid container>
             <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
+              <Typography className={classes.forgotPassword} variant="body2">
+                  <Link onClick={handleForgotPassword}>Forgot password?</Link>
+              </Typography>
             </Grid>
             <Grid item>
               <Link href="/sign-up" variant="body2">

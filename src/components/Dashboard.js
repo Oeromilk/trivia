@@ -1,11 +1,11 @@
 import React from 'react';
-import Container from '@material-ui/core/Container';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import { auth } from './firebase/firebaseConfig';
 
-export default function Landing(){
+import Container from '@material-ui/core/Container';
+
+export default function Dashboard(){
     return (
         <React.Fragment>
-            <CssBaseline />
             <Container>
                 <h1>Dashboard</h1>
             </Container>

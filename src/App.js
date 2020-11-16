@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { makeStyles, ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { CssBaseline } from '@material-ui/core';
 import 'fontsource-roboto';
 import { auth } from './components/firebase/firebaseConfig';
 
@@ -14,12 +15,13 @@ import ListItem from '@material-ui/core/ListItem';
 import Typography from '@material-ui/core/Typography';
 import MenuIcon from '@material-ui/icons/Menu';
 
-import Landing from './components/Landing';
+import Dashboard from './components/Dashboard';
 import GameView from './components/GameView';
 import LeaderBoard from './components/Leaderboard';
 import UserProfile from './components/UserProfile';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
+import ForgotPassword from './components/ForgotPassword';
 
 import {
   BrowserRouter as Router,
@@ -27,7 +29,6 @@ import {
   Route,
   Link
 } from "react-router-dom";
-import { CssBaseline } from '@material-ui/core';
 
 const theme = createMuiTheme({
   palette: {
@@ -105,7 +106,7 @@ function SignOut(){
 
 function SignInButton(){
   const classes = useStyles();
-  
+
   return (
     <Link to="/sign-in" style={noTextDecoration}>
       <Button className={classes.linkStyle} variant="outlined" >Sign In</Button>
@@ -137,6 +138,7 @@ function MobileDrawer(props){
                 <Button className={classes.linkStyle}>Dashboard</Button>
               </Link>
             </ListItem>
+            
             <ListItem>
             {((props.currentUser !== null) ? <SignOut /> : <SignInButton />)}
             </ListItem>
@@ -183,8 +185,6 @@ function LandingNoUser(){
   const classes = useStyles();
 
   return (
-    <React.Fragment>
-      <CssBaseline />
       <div className={classes.root}>
         <Container>
           <Grid container>
@@ -214,7 +214,6 @@ function LandingNoUser(){
           </Grid>
         </Container>
       </div>
-    </React.Fragment>
   )
 }
 
@@ -236,6 +235,7 @@ export default function App(){
   return (
       <ThemeProvider theme={theme}>
         <Router>
+          <CssBaseline />
           <React.Fragment>
             <TopBar currentUser={currentUser} />
           </React.Fragment>
@@ -256,8 +256,11 @@ export default function App(){
             <Route path="/sign-in">
               <SignIn />
             </Route>
+            <Route path="/forgot-password">
+              <ForgotPassword />
+            </Route>
             <Route path="/">
-              {((currentUser !== null) ? <Landing /> : <LandingNoUser/>)}
+              {((currentUser !== null) ? <Dashboard /> : <LandingNoUser/>)}
             </Route>
           </Switch>
         </Router>
