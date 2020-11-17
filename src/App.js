@@ -14,6 +14,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Typography from '@material-ui/core/Typography';
 import MenuIcon from '@material-ui/icons/Menu';
+import Divider from '@material-ui/core/Divider';
 
 import Dashboard from './components/Dashboard';
 import GameView from './components/GameView';
@@ -138,7 +139,12 @@ function MobileDrawer(props){
                 <Button className={classes.linkStyle}>Dashboard</Button>
               </Link>
             </ListItem>
-            
+            <ListItem>
+              <Link to="/leaderboard" style={noTextDecoration}>
+                <Button className={classes.linkStyle}>Leader Board</Button>
+              </Link>
+            </ListItem>
+            <Divider />
             <ListItem>
             {((props.currentUser !== null) ? <SignOut /> : <SignInButton />)}
             </ListItem>
@@ -160,9 +166,6 @@ function TopBar(props){
               <div className={classes.desktopSection}>
                 <Link to="/" style={noTextDecoration}>
                   <Button className={classes.linkStyle} variant="outlined">Dashboard</Button>
-                </Link>
-                <Link to="/game" style={noTextDecoration}>
-                  <Button className={classes.linkStyle} variant="outlined">New Game</Button>
                 </Link>
                 <Link to="/leaderboard" style={noTextDecoration}>
                   <Button className={classes.linkStyle} variant="outlined">Leader Board</Button>
@@ -229,9 +232,7 @@ export default function App(){
       }
     })
   }, [])
-  useEffect(()=>{
-    console.log(currentUser)
-  })
+  
   return (
       <ThemeProvider theme={theme}>
         <Router>
