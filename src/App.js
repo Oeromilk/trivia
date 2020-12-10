@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { ReactComponent as MovieWatching } from './images/movie-watching.svg';
 import { makeStyles, ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { CssBaseline } from '@material-ui/core';
 import 'fontsource-roboto';
@@ -15,6 +16,7 @@ import ListItem from '@material-ui/core/ListItem';
 import Typography from '@material-ui/core/Typography';
 import MenuIcon from '@material-ui/icons/Menu';
 import Divider from '@material-ui/core/Divider';
+import Paper from '@material-ui/core/Paper';
 
 import Dashboard from './components/Dashboard';
 import GameView from './components/GameView';
@@ -56,6 +58,32 @@ const useStyles = makeStyles((theme) => ({
   toolBarStyle: {
     background: 'linear-gradient(45deg, #53a6ff 30%, #FF8E53 90%)'
   },
+  movieWatching: {
+    height: '341px',
+    width: '265px',
+    display: 'block',
+    margin: '0 auto'
+  },
+  callToAction: {
+    [theme.breakpoints.up('md')]: {
+      paddingLeft: theme.spacing(6)
+    },
+    display: 'flex',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    marginBottom: theme.spacing(9)
+  },
+  signUpAction: {
+    marginTop: theme.spacing(6),
+    marginBottom: theme.spacing(9)
+  },
+  highlightedOrangeText: {
+    color: '#FF8E53'
+  },
+  highlightedBlueText: {
+    color: '#53a6ff',
+    fontSize: '4rem'
+  },
   title: {
     marginRight: theme.spacing(2),
     flexGrow: 1,
@@ -66,6 +94,14 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down('sm')]: {
       display: 'none'
     }
+  },
+  ruleStyle: {
+    paddingTop: theme.spacing(1),
+    paddingRight: theme.spacing(1),
+    paddingLeft: theme.spacing(1),
+    paddingBottom: theme.spacing(3),
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(3)
   },
   mobileSection: {
     [theme.breakpoints.up('md')]: {
@@ -192,26 +228,62 @@ function LandingNoUser(){
         <Container>
           <Grid container>
             <Grid item xs={12} className={classes.landingSpacing}>
-              <Typography variant="h1" className={classes.landingTitle}>Trivible</Typography>
+              <Typography variant="h1" align="center" className={classes.landingTitle}>Trivible</Typography>
             </Grid>
-            <Grid item xs={3}></Grid>
-            <Grid item xs={9} className={classes.landingSpacing}>
-              <Typography variant="h3" align="right">Bingeable TV Show Trivia</Typography>
-            </Grid>
-            <Grid item xs={9} className={classes.landingSpacing}>
-              <Typography variant="h5">Are you always trying to stump your friends and family with trivia questions from your favorite shows?</Typography>
-            </Grid>
-            <Grid item xs={3}></Grid>
-            <Grid item xs={3}></Grid>
-            <Grid item xs={9} className={classes.landingSpacing}>
-              <Typography variant="h5" align="right">Do you have what it takes to claim first place on the leaderboards?</Typography>
-            </Grid>
+            
             <Grid item xs={12} className={classes.landingSpacing}>
-              <Typography variant="subtitle1" align="center">Ready to start your trivia adventure and take your place on the leaderboard?</Typography>
+              <Typography variant="h3" align="center">
+                <span className={classes.highlightedBlueText}>Bingeable</span> TV Show <span className={classes.highlightedOrangeText}>Trivia</span>
+              </Typography>
             </Grid>
-            <Grid item xs={12} className={classes.landingSpacing}>
+            <Grid item xs={12} md={6} className={classes.callToAction}>
+              <Typography variant="h4" align="justify">Are you always trying to stump your friends and family with <span className={classes.highlightedOrangeText}>trivia</span> questions from your favorite shows?</Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <MovieWatching className={classes.movieWatching}/>
+            </Grid>
+            <Grid item xs={12} className={classes.landingTitle}>
+              <Typography variant="h5" align="center">Here is how it works!</Typography>
+            </Grid>
+            <Grid item xs={false} md={3}></Grid>
+            <Grid item xs={12} md={6}>
+              <Paper variant="outlined" className={classes.ruleStyle}>
+                <Typography variant="h6" align="center" color="primary">1st</Typography>
+                <Typography variant="subtitle1" align="center">
+                  When you start a new game you get 3 chances.
+                  <br/>
+                  A wrong answer or not answering in time loses you a chance.
+                  <br/>
+                  After the 3 chances are gone your run is over.
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={false} md={3}></Grid>
+            <Grid item xs={false} md={3}></Grid>
+            <Grid item xs={12} md={6}>
+              <Paper variant="outlined" className={classes.ruleStyle}>
+                <Typography variant="h6" align="center" color="primary">2nd</Typography>
+                <Typography variant="subtitle1" align="center">
+                  You have several seconds to answer the question, if you don't choose in time, you get it wrong.
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={false} md={3}></Grid>
+            <Grid item xs={false} md={3}></Grid>
+            <Grid item xs={12} md={6}>
+              <Paper variant="outlined" className={classes.ruleStyle}>
+                <Typography variant="h6" align="center" color="primary">3rd</Typography>
+                <Typography variant="subtitle1" align="center">
+                  You will continue to get new questions until your run out of chances.
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" align="center">Ready to start your <span className={classes.highlightedOrangeText}>trivia</span> adventure and take your place on the leaderboard?</Typography>
+            </Grid>
+            <Grid item xs={12} className={classes.signUpAction}>
               <Grid container justify="center">
-                <Button variant="outlined" size="large" href="/sign-up">Sign Up</Button>
+                <Button variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
               </Grid>  
             </Grid>
           </Grid>

@@ -41,10 +41,10 @@ export default function SignUp() {
     const [confirmPassword, setConfirmPassword] = React.useState('');
     const [validPassword, setValidPassword] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState('');
+    const [passwordLength, setPasswordLength] = React.useState('');
 
     useEffect(() => {
         validatePassword();
-        console.log(auth);
     })
     function handleEmail(event){
         setEmail(event.target.value);
@@ -63,10 +63,17 @@ export default function SignUp() {
         if(password !== '' && password === confirmPassword){
             setValidPassword(true);
         }
+
         if(email !== '' && password === confirmPassword){
             setErrorMessage("Passwords match!");
         } else {
             setErrorMessage("Passwords must match!");
+        }
+
+        if(password.length !== 6 && confirmPassword.length !== 6){
+            setPasswordLength('Password must be at lest 6 characters!')
+        } else {
+            setPasswordLength('Valid Password!')
         }
     }
 
@@ -123,6 +130,9 @@ export default function SignUp() {
                 </Grid>
                 <Grid item xs={12}>
                     <FormHelperText error={!validPassword}>{errorMessage}</FormHelperText>
+                </Grid>
+                <Grid item xs={12}>
+                    <FormHelperText error={!validPassword}>{passwordLength}</FormHelperText>
                 </Grid>
             </Grid>
             <Button

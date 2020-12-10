@@ -1,10 +1,10 @@
 import React from 'react';
 import { auth } from './firebase/firebaseConfig';
+import { useHistory } from "react-router-dom";
 import { makeStyles } from '@material-ui/core/styles';
 
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
@@ -22,7 +22,6 @@ const useStyles = makeStyles((theme) => ({
             maxWidth: '90%',
             marginBottom: theme.spacing(3)
         }
-
     },
     grid: {
         marginTop: theme.spacing(3)
@@ -32,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
             height: '400px'
         },
         [theme.breakpoints.down('sm')]: {
-            height: '250px'
+            height: '300px'
         }
     },
     paper: {
@@ -46,7 +45,13 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 export default function Dashboard(){
+    const history = useHistory();
     const classes = useStyles();
+
+    function handleNewGame(event){
+        event.preventDefault();
+        history.push("/game");
+    }
     return (
         <React.Fragment>
             <Container className={classes.root}>
@@ -54,17 +59,17 @@ export default function Dashboard(){
                     <Grid item xs={12} >
                         <Typography variant="h3">Dashboard</Typography>
                     </Grid>
-                    <Grid item md={4} sm={5} xs={12} className={classes.card}>
+                    <Grid item lg={4} sm={5} xs={12} className={classes.card}>
                         <Card className={classes.paper} elevation={3}>
                             <CardContent>
                                 <Typography variant="h5" color="primary">Ready to test your knowledge?</Typography>
                             </CardContent>
                             <CardActions>
-                                <Button color="secondary" variant="outlined">New Game</Button>
+                                <Button color="secondary" variant="outlined" onClick={handleNewGame}>New Game</Button>
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item md={4} sm={7} xs={12} className={classes.card}>
+                    <Grid item lg={4} sm={7} xs={12} className={classes.card}>
                         <Card className={classes.paper} elevation={3}>
                             <CardContent>
                                 <Typography variant="h6">Friends</Typography>
@@ -77,7 +82,7 @@ export default function Dashboard(){
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item md={4} sm={12} xs={12} className={classes.card}>
+                    <Grid item lg={4} sm={12} xs={12} className={classes.card}>
                         <Card className={classes.paper} elevation={3}>
                             <CardContent>
                                 <Typography variant="h6">Achievments</Typography>
