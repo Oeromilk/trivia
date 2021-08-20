@@ -1,5 +1,5 @@
-import React from 'react';
-import { auth } from './firebase/firebaseConfig';
+import React, { useEffect } from 'react';
+import { auth, fireStore } from './firebase/firebaseConfig';
 import { useHistory } from "react-router-dom";
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -44,6 +44,30 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
+function FriendsList(){
+    const [friends, setFriends] = React.useState(['id1', 'id2', 'id3'])
+
+    const friendsList = friends.map((friend)=> {
+        return <ListItem key={friend}>{friend}</ListItem>;
+    })
+
+    useEffect(() => {
+        let user = auth.currentUser;
+        const usersRef = fireStore.collection('users');
+        if(user !== null){
+            usersRef.doc(user.uid).get().then((doc) => {
+                if(doc.exists){
+                    setFriends(doc.data().friendsList)
+                }
+            })
+        }
+    }, [])
+
+    return (
+        <List>{friendsList}</List>
+    )
+}
+
 export default function Dashboard(){
     const history = useHistory();
     const classes = useStyles();
@@ -73,9 +97,7 @@ export default function Dashboard(){
                         <Card className={classes.paper} elevation={3}>
                             <CardContent>
                                 <Typography variant="h6">Friends</Typography>
-                                <List>
-                                    <ListItem>User Name</ListItem>
-                                </List>
+                                <FriendsList />
                             </CardContent>
                             <CardActions>
                             <Button color="secondary" variant="outlined" className={classes.cardAction}>See All</Button>

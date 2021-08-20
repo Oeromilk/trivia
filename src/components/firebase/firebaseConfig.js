@@ -17,8 +17,11 @@ firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const fireStore = firebase.firestore();
+const arrayUnion = firebase.firestore.FieldValue.arrayUnion;
 
 export {
+    firebase,
     auth,
-    fireStore
+    fireStore,
+    arrayUnion
 }

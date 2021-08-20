@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { auth } from './firebase/firebaseConfig';
+import { useHistory } from "react-router-dom";
 
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -35,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SignUp() {
+    const history = useHistory();
     const classes = useStyles();
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
@@ -45,20 +47,26 @@ export default function SignUp() {
 
     useEffect(() => {
         validatePassword();
-    })
+    }, [confirmPassword, password])
+
     function handleEmail(event){
         setEmail(event.target.value);
     }
+
     function handlePassword(event){
         setPassword(event.target.value);
     }
+
     function handleConfrimPassword(event){
         setConfirmPassword(event.target.value);
     }
+
     function handleSignUp(event){
         event.preventDefault();
         auth.createUserWithEmailAndPassword(email, password);
+        history.push("/profile");
     }
+    
     function validatePassword(){
         if(password !== '' && password === confirmPassword){
             setValidPassword(true);

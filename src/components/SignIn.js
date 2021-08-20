@@ -1,5 +1,5 @@
 import React from 'react';
-import { auth } from './firebase/firebaseConfig';
+import { auth, firebase } from './firebase/firebaseConfig';
 import { useHistory } from "react-router-dom";
 
 import Avatar from '@material-ui/core/Avatar';
@@ -48,21 +48,36 @@ export default function SignIn() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
 
-    function handleEmail(event){
-        setEmail(event.target.value);
-    }
-    function handlePassword(event){
-        setPassword(event.target.value);
-    }
-    function handleSignIn(event){
-        event.preventDefault();
-        auth.signInWithEmailAndPassword(email, password);
+  function handleEmail(event){
+    setEmail(event.target.value);
+  }
+
+  function handlePassword(event){
+    setPassword(event.target.value);
+  }
+
+  function handleSignIn(event){
+    event.preventDefault();
+    auth.signInWithEmailAndPassword(email, password);
+    history.push("/");
+  }
+
+  function handleForgotPassword(event){
+    event.preventDefault();
+    history.push("/forgot-password");
+  }
+
+  function handleSignInWithGoogle(){
+    var provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+    .then((result) => {
+      if(result.user){
         history.push("/");
-    }
-    function handleForgotPassword(event){
-        event.preventDefault();
-        history.push("/forgot-password");
-    }
+      }
+    }).catch((error) => {
+      console.log(error)
+    });
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -110,6 +125,15 @@ export default function SignIn() {
             onClick={handleSignIn}
           >
             Sign In
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+            onClick={handleSignInWithGoogle}
+          >
+            Sign In With Google
           </Button>
           <Grid container>
             <Grid item xs>
