@@ -45,10 +45,6 @@ const createProfileStyles = makeStyles((theme) => ({
     }
 }));
 
-// const updateProfileStyles = makeStyles((theme) => ({
-
-// }))
-
 function CreateProfile(props){
     const classes = createProfileStyles();
     const history = useHistory();
