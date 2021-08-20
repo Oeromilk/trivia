@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { auth, fireStore } from './firebase/firebaseConfig';
 import { useHistory } from "react-router-dom";
 
@@ -44,6 +44,10 @@ const createProfileStyles = makeStyles((theme) => ({
         textAlign: 'center'
     }
 }));
+
+// const updateProfileStyles = makeStyles((theme) => ({
+
+// }))
 
 function CreateProfile(props){
     const classes = createProfileStyles();
@@ -129,9 +133,72 @@ function CreateProfile(props){
     )
 }
 
-function UpdateProfile(){
+function UpdateProfile(props){
+    const classes = createProfileStyles();
+    const history = useHistory();
+    const [userInfo, setUserInfo] = useState(null);
+    const [avatar, setAvatar] = React.useState('');
+
+    useEffect(() => {
+        fireStore.collection("users").doc(props.user.uid).get().then((doc) => {
+            if(doc.exists){
+                setUserInfo(doc.data())
+            }
+        })
+    }, [])
+
+    function handleAvatar(event){
+        setAvatar(event.target.value)
+    }
+
+    function handleUpdate(event){
+        event.preventDefault();
+        if(avatar !== ''){
+            if(avatar !== userInfo.avatar){
+                fireStore.collection("users").doc(props.user.uid).update({
+                    avatar: avatar
+                }).then(() => {
+                    console.log("Document successfully updated!");
+                    history.push("/")
+                }).catch((error) => {
+                    // The document probably doesn't exist.
+                    console.error("Error updating document: ", error);
+                })
+            } else {
+                console.log(`Selected avatar: ${avatar} matches current avatar: ${userInfo.avatar}`)
+            }
+        }
+    }
+
     return (
-        <div>Update</div>
+        <div className={classes.root}>
+            <Avatar className={classes.avatar}>
+                <AccountCircleIcon />
+            </Avatar>
+            <Typography variant="h2">Update Profile</Typography>
+            <form className={classes.form}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <Typography variant="h5" align="center">Username: {userInfo != null ? userInfo.username : "loading"}</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Typography variant="h5" align="center">Avatar: {userInfo != null ? userInfo.avatar : "loading"}</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl component="fieldset">
+                            <FormLabel component="legend">Select an Avatar:</FormLabel>
+                            <RadioGroup aria-label="Avatar" name="avatar" value={avatar} onChange={handleAvatar}>
+                                <FormControlLabel value="Michael" control={<Radio />} label="Michael" />
+                                <FormControlLabel value="Dwight" control={<Radio />} label="Dwight" />
+                                <FormControlLabel value="Jim" control={<Radio />} label="Jim" />
+                                <FormControlLabel value="Pam" control={<Radio />} label="Pam" />
+                            </RadioGroup>
+                        </FormControl>
+                    </Grid>
+                </Grid>
+                <Button fullWidth variant="contained" color="primary" className={classes.createProfile} onClick={handleUpdate}>Update Profile</Button>
+            </form>
+        </div>
     )
 }
 
