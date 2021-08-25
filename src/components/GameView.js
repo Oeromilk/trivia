@@ -1,9 +1,9 @@
 import React from 'react';
 import Timer from './Timer';
-import { auth, fireStore, arrayUnion } from './firebase/firebaseConfig';
+import { firebase, auth, fireStore, arrayUnion } from './firebase/firebaseConfig';
 import { ReactComponent as ChanceElement } from '../images/chance.svg';
 import { makeStyles } from '@material-ui/core/styles';
-import { Container, CssBaseline, Grid, Button, Typography, FormControl, FormControlLabel, Radio, RadioGroup, Chip, Snackbar } from '@material-ui/core';
+import { Container, CssBaseline, Grid, Button, Typography, FormControl, FormControlLabel, Radio, RadioGroup, Chip, Snackbar, Box } from '@material-ui/core';
 import MuiAlert from '@material-ui/lab/Alert';
 
 const useStyles = makeStyles((theme) => ({
@@ -65,17 +65,27 @@ const useStyles = makeStyles((theme) => ({
             width: '90%',
         },
         margin: '0 auto'
-    },
-    snackSuccesStyle: {
-        backgroundColor: 'green'
-    },
-    snackWarningStyle: {
-        backgroundColor: 'orange'
     }
 }))
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
+function StartScreen(props){
+    return (
+        <Container style={(props.isShown ? {} : {display: 'none'})}>
+            <Grid style={{paddingTop: '25em'}} container spacing={10}>
+                <Grid item xs={12}>
+                    <Typography align="center" variant="h1">Ready to go?</Typography>
+                </Grid>
+                <Grid item style={{display: 'flex', justifyContent: 'center'}} xs={12}>
+                    <Button style={{margin: '0 auto'}} size="large" variant="contained" color="primary" onClick={props.startGame}>Start Game</Button>
+
+                </Grid>
+            </Grid>
+        </Container>
+    )
 }
 
 export default function GameView(){
@@ -85,12 +95,14 @@ export default function GameView(){
     const [open, setOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState('');
     const [severity, setSeverity] = React.useState('warning');
+    const [isShown, setIsShown] = React.useState(true);
+    const [isNextQuestion, setIsNextQuestion] = React.useState(false);
     const [chances, setChances] = React.useState(3);
     const [questionsSeen, setQuestionsSeen] = React.useState(0);
     const [currentQuestionId, setCurrentQuestionId] = React.useState('');
     const [isQuestionLoading, setIsQuestionLoading] = React.useState(true);
     const [isCorrect, setIsCorrect] = React.useState(null);
-    const [timeUp, setTimeUp] = React.useState(true);
+    const [timeUp, setTimeUp] = React.useState(false);
     const [currentQuestion, setCurrentQuestion] = React.useState(null);
 
     React.useEffect(() => {
@@ -108,20 +120,22 @@ export default function GameView(){
         //     "difficulty": 3
         // }})
         // setIsQuestionLoading(false);
-        getNewQuestion();
+        // getNewQuestion();
     }, [])
 
     React.useEffect(() => {
         if(chances < 2){
             return;
         }
-        if(!timeUp){
+
+        if(!timeUp && currentQuestionId !== ''){
+            setIsNextQuestion(true);
             setChances((newChances) => newChances - 1);
             setSnackMessage("Ran out of time!")
             setSeverity("warning")
             setOpen(true);
-            getNewQuestion();
-        }
+            // getNewQuestion();
+        }  
     }, [timeUp]);
 
     React.useEffect(() => {
@@ -138,38 +152,59 @@ export default function GameView(){
             let userRef = fireStore.collection('users').doc(currentUser.uid);
             userRef.update({
                 questionsAnswered: arrayUnion(currentQuestionId)
-            }).then(() => {
-                getNewQuestion();
             })
+            // .then(() => {
+            //     getNewQuestion();
+            // })
         } else if(isCorrect === false && isCorrect != null){
             setChances((newChances) => newChances - 1);
-            getNewQuestion();
+            //getNewQuestion();
         }
         
     }, [isCorrect]);
 
     function getNewQuestion(){
         setQuestionsSeen((nextQuestion) => nextQuestion + 1);
-        setIsQuestionLoading(true); 
+        setIsQuestionLoading(true);
+        setIsNextQuestion(false)
+        if(open){
+            setOpen(false)
+        } 
         if(currentUser !== null){
             let userRef = fireStore.collection('users').doc(currentUser.uid);
             userRef.get().then((doc) => {
                 if(doc.exists){
-                    fireStore.collection("theOfficeTriviaQuestions").orderBy("questionInfo").limit(1).get().then((querySnapshot) => {
+                    fireStore.collection("theOfficeTriviaQuestions")
+                    .where(firebase.firestore.FieldPath.documentId(), "not-in", doc.data().questionsAnswered).limit(1)
+                    .get().then((querySnapshot) => {
                         querySnapshot.forEach((nextDoc) => {
                             if(nextDoc.exists){
-                                if(!doc.data().questionsAnswered.includes(nextDoc.id)){
-                                    console.log(nextDoc.data())
-                                    setCurrentQuestionId(nextDoc.id);
-                                    setCurrentQuestion(nextDoc.data());
-                                    setIsQuestionLoading(false);
-                                    setTimeUp(true);
-                                }
+                                setCurrentQuestionId(nextDoc.id);
+                                setCurrentQuestion(nextDoc.data());
+                                setIsQuestionLoading(false);
+                                setTimeUp(true);
                             } else {
-                                // no more questions end game?
-                            }  
+                                console.log("No more questions!")
+                            }
                         })
                     })
+                    // fireStore.collection("theOfficeTriviaQuestions").orderBy("questionInfo").limit(1).get().then((querySnapshot) => {
+                    //     querySnapshot.forEach((nextDoc) => {
+                    //         if(nextDoc.exists){
+                    //             console.log("hello 4")
+                    //             if(!doc.data().questionsAnswered.includes(nextDoc.id)){
+                    //                 console.log("hello 5")
+                    //                 console.log(nextDoc.data())
+                    //                 setCurrentQuestionId(nextDoc.id);
+                    //                 setCurrentQuestion(nextDoc.data());
+                    //                 setIsQuestionLoading(false);
+                    //                 setTimeUp(true);
+                    //             }
+                    //         } else {
+                    //             // no more questions end game?
+                    //         }  
+                    //     })
+                    // })
                 }
             })
         }
@@ -181,6 +216,8 @@ export default function GameView(){
 
     function checkAnswer(event){
         event.preventDefault();
+
+        setIsNextQuestion(true);
        
         if(choice === currentQuestion.questionInfo.answer){
             setIsCorrect(true);
@@ -195,6 +232,15 @@ export default function GameView(){
         }
     }
 
+    function startGame(){
+        setIsShown(false);
+        getNewQuestion();
+    }
+
+    function handleNextQuestion(){
+        getNewQuestion();
+    }
+
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -206,8 +252,9 @@ export default function GameView(){
     return (
         <React.Fragment>
             <CssBaseline />
-            <Container className={classes.root}>
-                <Grid container spacing={3}>
+            <StartScreen isShown={isShown} startGame={startGame}/>
+            <Container style={(isShown ? {display: 'none'} : {})} className={classes.root}>
+                <Grid display={isShown ? 'none' : ''} container spacing={3}>
                     <Grid item xs={12}>
                         <Typography align="center" variant="h3">Chances Remaining:</Typography>
                     </Grid>
@@ -248,13 +295,18 @@ export default function GameView(){
                                         <FormControlLabel key="Loading" value="Loading" control={<Radio />} label="Loading" />
                                     }
                                 </RadioGroup>
-                                <Button className={classes.buttonStyle} variant="contained" color="secondary" size="large" onClick={checkAnswer}>Check Choice</Button>
+                                <Button className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
                             </FormControl>
                         </form>
                     </Grid>
+                    <Grid container justify="center" item xs={12}>
+                        <Box display={isNextQuestion ? '' : 'none'}>
+                            <Button variant="contained" color="primary" size="large" onClick={handleNextQuestion}>Next Question</Button>
+                        </Box>
+                    </Grid>
                 </Grid>
             </Container>
-            <Snackbar open={open} autoHideDuration={1500} onClose={handleClose} key={questionsSeen}>
+            <Snackbar open={open} autoHideDuration={2500} onClose={handleClose} key={questionsSeen}>
                 <Alert onClose={handleClose} severity={severity}>{snackMessage}</Alert>
             </Snackbar>
         </React.Fragment>
