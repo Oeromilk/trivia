@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import AvatarContainer from './Avatar';
 import { auth, fireStore } from './firebase/firebaseConfig';
 import { useHistory } from "react-router-dom";
-
 import { makeStyles } from '@material-ui/core/styles';
-//import IconButton from '@material-ui/core/IconButton';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-//import FaceIcon from '@material-ui/icons/Face';
 import Avatar from '@material-ui/core/Avatar';
 import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
-//import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -25,6 +21,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 const createProfileStyles = makeStyles((theme) => ({
     root: {
         marginTop: theme.spacing(6),
+        marginBottom: theme.spacing(6),
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -32,7 +29,15 @@ const createProfileStyles = makeStyles((theme) => ({
     avatar: {
         margin: theme.spacing(1),
         background: theme.palette.secondary.main,
-      },
+    },
+    createAvatar: {
+        width: 64,
+        height: 64
+    },
+    updateAvatar: {
+        width: 64,
+        height: 64
+    },
     form: {
         width: '100%',
         marginTop: theme.spacing(3)
@@ -47,6 +52,23 @@ const createProfileStyles = makeStyles((theme) => ({
 
 function CreateProfile(props){
     const classes = createProfileStyles();
+    const avatars = [
+        "Andy",
+        "Angela",
+        "Creed",
+        "Dwight",
+        "Jim",
+        "Kelly",
+        "Kevin",
+        "Meredith",
+        "Michael",
+        "Oscar",
+        "Pam",
+        "Phyllis",
+        "Ryan",
+        "Stanley",
+        "Toby"
+    ]
     const history = useHistory();
     const [username, setUsername] = React.useState('');
     const [usernameHelperText, setUsernameHelperText] = React.useState('');
@@ -98,7 +120,7 @@ function CreateProfile(props){
     return (
         <div className={classes.root}>
             <Avatar className={classes.avatar}>
-                <AccountCircleIcon />
+                <AvatarContainer avatar={avatar.toLowerCase()} />
             </Avatar>
             <Typography variant="h2">Create Profile</Typography>
             <form className={classes.form}>
@@ -115,10 +137,13 @@ function CreateProfile(props){
                         <FormControl component="fieldset">
                             <FormLabel component="legend">Select an Avatar:</FormLabel>
                             <RadioGroup aria-label="Avatar" name="avatar" value={avatar} onChange={handleAvatar}>
-                                <FormControlLabel value="Michael" control={<Radio />} label="Michael" />
-                                <FormControlLabel value="Dwight" control={<Radio />} label="Dwight" />
-                                <FormControlLabel value="Jim" control={<Radio />} label="Jim" />
-                                <FormControlLabel value="Pam" control={<Radio />} label="Pam" />
+                                {
+                                    avatars.map((avatar) => {
+                                        return (
+                                            <FormControlLabel key={avatar} value={avatar} control={<Radio />} label={avatar} />
+                                        )
+                                    })
+                                }
                             </RadioGroup>
                         </FormControl>
                     </Grid>
@@ -132,8 +157,25 @@ function CreateProfile(props){
 function UpdateProfile(props){
     const classes = createProfileStyles();
     const history = useHistory();
+    const avatars = [
+        "Andy",
+        "Angela",
+        "Creed",
+        "Dwight",
+        "Jim",
+        "Kelly",
+        "Kevin",
+        "Meredith",
+        "Michael",
+        "Oscar",
+        "Pam",
+        "Phyllis",
+        "Ryan",
+        "Stanley",
+        "Toby"
+    ]
     const [userInfo, setUserInfo] = useState(null);
-    const [avatar, setAvatar] = React.useState('');
+    const [avatar, setAvatar] = React.useState('Andy');
 
     useEffect(() => {
         fireStore.collection("users").doc(props.user.uid).get().then((doc) => {
@@ -168,8 +210,8 @@ function UpdateProfile(props){
 
     return (
         <div className={classes.root}>
-            <Avatar className={classes.avatar}>
-                <AccountCircleIcon />
+            <Avatar className={classes.updateAvatar}>
+                {userInfo != null ? <AvatarContainer avatar={userInfo.avatar.toLowerCase()} /> : null}
             </Avatar>
             <Typography variant="h2">Update Profile</Typography>
             <form className={classes.form}>
@@ -181,13 +223,22 @@ function UpdateProfile(props){
                         <Typography variant="h5" align="center">Avatar: {userInfo != null ? userInfo.avatar : "loading"}</Typography>
                     </Grid>
                     <Grid item xs={12}>
+                        <Typography variant="subtitle1">Selected Avatar</Typography>
+                        <Avatar style={{width: 48, height: 48}} >
+                            <AvatarContainer avatar={avatar.toLowerCase()} />
+                        </Avatar> 
+                    </Grid>
+                    <Grid item xs={12}>
                         <FormControl component="fieldset">
                             <FormLabel component="legend">Select an Avatar:</FormLabel>
                             <RadioGroup aria-label="Avatar" name="avatar" value={avatar} onChange={handleAvatar}>
-                                <FormControlLabel value="Michael" control={<Radio />} label="Michael" />
-                                <FormControlLabel value="Dwight" control={<Radio />} label="Dwight" />
-                                <FormControlLabel value="Jim" control={<Radio />} label="Jim" />
-                                <FormControlLabel value="Pam" control={<Radio />} label="Pam" />
+                                {
+                                    avatars.map((avatar) => {
+                                        return (
+                                            <FormControlLabel key={avatar} value={avatar} control={<Radio />} label={avatar} />
+                                        )
+                                    })
+                                }
                             </RadioGroup>
                         </FormControl>
                     </Grid>

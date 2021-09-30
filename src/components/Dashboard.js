@@ -88,8 +88,8 @@ export default function Dashboard(){
                             <CardContent>
                                 <Typography variant="h5" color="primary">Ready to test your knowledge?</Typography>
                             </CardContent>
-                            <CardActions>
-                                <Button color="secondary" variant="outlined" onClick={handleNewGame}>New Game</Button>
+                            <CardActions style={{justifyContent: "end"}}>
+                                <Button color="secondary" variant="contained" onClick={handleNewGame}>New Game</Button>
                             </CardActions>
                         </Card>
                     </Grid>
@@ -99,8 +99,8 @@ export default function Dashboard(){
                                 <Typography variant="h6">Friends</Typography>
                                 <FriendsList />
                             </CardContent>
-                            <CardActions>
-                            <Button color="secondary" variant="outlined" className={classes.cardAction}>See All</Button>
+                            <CardActions style={{justifyContent: "end"}}>
+                                <Button color="secondary" variant="outlined" className={classes.cardAction}>See All</Button>
                             </CardActions>
                         </Card>
                     </Grid>
@@ -112,7 +112,7 @@ export default function Dashboard(){
                                     <ListItem>Acievment Title</ListItem>
                                 </List>
                             </CardContent>
-                            <CardActions>
+                            <CardActions style={{justifyContent: "end"}}>
                                 <Button color="secondary" variant="outlined" className={classes.cardAction}>See All</Button>
                             </CardActions>
                         </Card>

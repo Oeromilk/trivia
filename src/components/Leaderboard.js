@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { auth, fireStore } from './firebase/firebaseConfig';
-
+import { fireStore } from './firebase/firebaseConfig';
+import AvatarContainer from './Avatar';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
+import Avatar from '@material-ui/core/Avatar';
 import EmojiEventsIcon from '@material-ui/icons/EmojiEvents';
 
 const leaderboardStyles = makeStyles((theme) => ({
@@ -96,7 +97,7 @@ export default function LeaderBoard(){
             <Paper className={bgColor}>
                 <Grid container className={classes.userInfo}>
                     <Grid item xs={2}>
-                        {user.avatar}
+                        <Avatar style={{width: 48, height: 48}}><AvatarContainer avatar={user.avatar.toLowerCase()} /></Avatar>
                     </Grid>
                     <Grid item xs={7} style={{ display: "flex", alignItems: "center"}}>
                         {index < 3 &&
