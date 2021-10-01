@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { fireStore } from './firebase/firebaseConfig';
 import AvatarContainer from './Avatar';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Paper from '@material-ui/core/Paper';
-import Avatar from '@material-ui/core/Avatar';
-import EmojiEventsIcon from '@material-ui/icons/EmojiEvents';
+import makeStyles from '@mui/styles/makeStyles';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import CssBaseline from '@mui/material/CssBaseline';
+import Paper from '@mui/material/Paper';
+import Avatar from '@mui/material/Avatar';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 const leaderboardStyles = makeStyles((theme) => ({
     leaderBoardContainer: {
         marginBottom: theme.spacing(6)
     },
     heading: {
-        background: 'linear-gradient(45deg, #FF8E53 30%, #53a6ff 90%)',
+        backgroundColor: '#242424',
         marginTop: theme.spacing(3),
-        padding: theme.spacing(3),
+        paddingTop: theme.spacing(3),
+        paddingBottom: theme.spacing(3),
+        paddingLeft: theme.spacing(3),
         borderRadius: theme.spacing(1)
     },
     item: {
@@ -130,7 +132,7 @@ export default function LeaderBoard(){
             <CssBaseline />
             <Container maxWidth="md">
                 <Grid container className={classes.leaderBoardContainer}>
-                    <Grid item xs={12} className={classes.heading}>
+                    <Grid sx={{boxShadow: 8}} item xs={12} className={classes.heading}>
                         <Typography variant="h3">Leaderboard</Typography>
                     </Grid>
                     {topTenUsersList}

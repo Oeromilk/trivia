@@ -2,18 +2,18 @@ import React, { useEffect } from 'react';
 import { auth } from './firebase/firebaseConfig';
 import { useHistory } from "react-router-dom";
 
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import Input from '@mui/material/Input';
+import InputLabel from '@mui/material/InputLabel';
+import Link from '@mui/material/Link';
+import Grid from '@mui/material/Grid';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import FormHelperText from '@mui/material/FormHelperText';
+import makeStyles from '@mui/styles/makeStyles';
+import Container from '@mui/material/Container';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -86,82 +86,82 @@ export default function SignUp() {
     }
 
   return (
-    <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-            <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-            Sign up
-            </Typography>
-            <form className={classes.form} >
-            <Grid container spacing={2}>
-                <Grid item xs={12}>
-                    <InputLabel htmlFor="email">Email</InputLabel>
-                    <Input
-                        required
-                        fullWidth
-                        id="email"
-                        name="email"
-                        autoComplete="email"
-                        value={email}
-                        onChange={handleEmail}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <InputLabel htmlFor="password">Password</InputLabel>
-                    <Input
-                        required
-                        fullWidth
-                        name="password"
-                        type="password"
-                        id="password"
-                        autoComplete="current-password"
-                        value={password}
-                        onChange={handlePassword}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <InputLabel htmlFor="confirmPassword">Confirm Password</InputLabel>
-                    <Input
-                        variant="outlined"
-                        required
-                        fullWidth
-                        name="confirmPassword"
-                        type="password"
-                        id="confirmPassword"
-                        autoComplete="current-password"
-                        value={confirmPassword}
-                        onChange={handleConfrimPassword}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <FormHelperText error={!validPassword}>{errorMessage}</FormHelperText>
-                </Grid>
-                <Grid item xs={12}>
-                    <FormHelperText error={!validPassword}>{passwordLength}</FormHelperText>
-                </Grid>
-            </Grid>
-            <Button
-                disabled={!validPassword}
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-                onClick={handleSignUp}
-            >
-                Sign Up
-            </Button>
-            <Grid container justify="flex-end">
-                <Grid item>
-                <Link href="/sign-in" variant="body2">
-                    Already have an account? Sign in
-                </Link>
-                </Grid>
-            </Grid>
-            </form>
-        </div>
-    </Container>
+      <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <div className={classes.paper}>
+              <Avatar className={classes.avatar}>
+              <LockOutlinedIcon />
+              </Avatar>
+              <Typography component="h1" variant="h5">
+              Sign up
+              </Typography>
+              <form className={classes.form} >
+              <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                      <InputLabel htmlFor="email">Email</InputLabel>
+                      <Input
+                          required
+                          fullWidth
+                          id="email"
+                          name="email"
+                          autoComplete="email"
+                          value={email}
+                          onChange={handleEmail}
+                      />
+                  </Grid>
+                  <Grid item xs={12}>
+                      <InputLabel htmlFor="password">Password</InputLabel>
+                      <Input
+                          required
+                          fullWidth
+                          name="password"
+                          type="password"
+                          id="password"
+                          autoComplete="current-password"
+                          value={password}
+                          onChange={handlePassword}
+                      />
+                  </Grid>
+                  <Grid item xs={12}>
+                      <InputLabel htmlFor="confirmPassword">Confirm Password</InputLabel>
+                      <Input
+                          variant="outlined"
+                          required
+                          fullWidth
+                          name="confirmPassword"
+                          type="password"
+                          id="confirmPassword"
+                          autoComplete="current-password"
+                          value={confirmPassword}
+                          onChange={handleConfrimPassword}
+                      />
+                  </Grid>
+                  <Grid item xs={12}>
+                      <FormHelperText error={!validPassword}>{errorMessage}</FormHelperText>
+                  </Grid>
+                  <Grid item xs={12}>
+                      <FormHelperText error={!validPassword}>{passwordLength}</FormHelperText>
+                  </Grid>
+              </Grid>
+              <Button
+                  disabled={!validPassword}
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                  onClick={handleSignUp}
+              >
+                  Sign Up
+              </Button>
+              <Grid container justifyContent="flex-end">
+                  <Grid item>
+                  <Link href="/sign-in" variant="body2">
+                      Already have an account? Sign in
+                  </Link>
+                  </Grid>
+              </Grid>
+              </form>
+          </div>
+      </Container>
   );
 }

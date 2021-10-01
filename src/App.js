@@ -1,26 +1,27 @@
 import React, { useEffect } from 'react';
 import { ReactComponent as MovieWatching } from './images/movie-watching.svg';
-import { makeStyles, ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import { CssBaseline } from '@material-ui/core';
+import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+import { CssBaseline } from '@mui/material';
 import 'fontsource-roboto';
 import { auth } from './components/firebase/firebaseConfig';
 
-import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
-import AppBar from '@material-ui/core/AppBar';
-import ToolBar from '@material-ui/core/Toolbar';
-import Button from '@material-ui/core/Button';
-import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import Typography from '@material-ui/core/Typography';
-import MenuIcon from '@material-ui/icons/Menu';
-import Divider from '@material-ui/core/Divider';
-import Paper from '@material-ui/core/Paper';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+import AppBar from '@mui/material/AppBar';
+import ToolBar from '@mui/material/Toolbar';
+import Button from '@mui/material/Button';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import Typography from '@mui/material/Typography';
+import MenuIcon from '@mui/icons-material/Menu';
+import Divider from '@mui/material/Divider';
+import Paper from '@mui/material/Paper';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import Dashboard from './components/Dashboard';
 import GameView from './components/GameView';
@@ -38,9 +39,9 @@ import {
   useHistory
 } from "react-router-dom";
 
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
-    type: 'dark',
+    mode: 'dark',
     primary: {
       main: '#52A5FF'
     },
@@ -110,7 +111,7 @@ const useStyles = makeStyles((theme) => ({
     cursor: "pointer"
   },
   desktopSection: {
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       display: 'none'
     }
   },
@@ -159,7 +160,7 @@ function SignOut(){
   }
   return (
     <Link to="/" style={noTextDecoration}>
-      <Button className={classes.linkStyle} variant="outlined" onClick={handleSignOut}>Sign Out</Button>
+      <Button className={classes.linkStyle} color="inherit" variant="outlined" onClick={handleSignOut}>Sign Out</Button>
     </Link>
   )
 }
@@ -169,7 +170,7 @@ function SignInButton(){
 
   return (
     <Link to="/sign-in" style={noTextDecoration}>
-      <Button className={classes.linkStyle} variant="outlined" >Sign In</Button>
+      <Button className={classes.linkStyle} color="inherit" variant="outlined" >Sign In</Button>
     </Link>
   )
 }
@@ -180,13 +181,13 @@ function SignedInLinks(){
   return (
     <React.Fragment>
       <Link to="/" style={noTextDecoration}>
-        <Button className={classes.linkStyle} variant="outlined">Dashboard</Button>
+        <Button className={classes.linkStyle} color="inherit" variant="outlined">Dashboard</Button>
       </Link>
       <Link to="/leaderboard" style={noTextDecoration}>
-        <Button className={classes.linkStyle} variant="outlined">Leader Board</Button>
+        <Button className={classes.linkStyle} color="inherit" variant="outlined">Leader Board</Button>
       </Link>
       <Link to="/profile" style={noTextDecoration}>
-        <Button className={classes.linkStyle} variant="outlined">Profile</Button>
+        <Button className={classes.linkStyle} color="inherit" variant="outlined">Profile</Button>
       </Link>
     </React.Fragment>
   )
@@ -206,28 +207,28 @@ function MobileDrawer(props){
   return (
     <React.Fragment>
       <Button onClick={toggleDrawer(true)}>
-        <MenuIcon fontSize="large"/>
+        <MenuIcon sx={{color: 'white'}} fontSize="large"/>
       </Button>
       <Drawer anchor={'right'} open={state} onClose={toggleDrawer(false)}>
         <div className={classes.list} role="presentation" onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)}>
           <List>
             <ListItem>
               <Link to="/" style={noTextDecoration}>
-                <Button className={classes.linkStyle}>Dashboard</Button>
+                <Button className={classes.linkStyle} color="inherit">Dashboard</Button>
               </Link>
             </ListItem>
             <ListItem>
               <Link to="/leaderboard" style={noTextDecoration}>
-                <Button className={classes.linkStyle}>Leader Board</Button>
+                <Button className={classes.linkStyle} color="inherit">Leader Board</Button>
               </Link>
             </ListItem>
             <ListItem>
               <Link to="/profile" style={noTextDecoration}>
-                <Button className={classes.linkStyle}>Profile</Button>
+                <Button className={classes.linkStyle} color="inherit">Profile</Button>
               </Link>
             </ListItem>
             <Divider />
-            <ListItem>
+            <ListItem sx={{ paddingTop: 3}}>
             {((props.currentUser !== null) ? <SignOut /> : <SignInButton />)}
             </ListItem>
           </List>
@@ -248,7 +249,7 @@ function TopBar(props){
   return (
     <div className={classes.root}>
           <AppBar position="static">
-            <ToolBar className={classes.toolBarStyle}>
+            <ToolBar>
               <Typography className={classes.title} variant="h6" onClick={handleHome}>Trivible</Typography>
               <div className={classes.desktopSection}>
                 {((props.currentUser !== null) ? <SignedInLinks /> : null)}
@@ -330,76 +331,78 @@ function LandingNoUser(){
   const classes = useStyles();
 
   return (
-      <div className={classes.root}>
-        <Container>
-          <Grid container>
-            <Grid item xs={12} className={classes.landingSpacing}>
-              <Typography variant="h1" align="center" className={classes.h1Banner}>Trivible</Typography>
-            </Grid>
-            
-            <Grid item xs={12} className={classes.landingSpacing}>
-              <Typography variant="h3" align="center">
-                <span className={classes.highlightedBlueText}>Bingeable</span> TV Show <span className={classes.highlightedOrangeText}>Trivia</span>
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6} className={classes.callToAction}>
-              <Typography variant="h4" align="justify">Are you always trying to stump your friends and family with <span className={classes.highlightedOrangeText}>trivia</span> questions from your favorite shows?</Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <MovieWatching className={classes.movieWatching}/>
-            </Grid>
-            <Grid item xs={12} className={classes.landingTitle}>
-              <Typography variant="h5" align="center">Here is how it works!</Typography>
-            </Grid>
-            <Grid item xs={false} md={3}></Grid>
-            <Grid item xs={12} md={6}>
-              <Paper variant="outlined" className={classes.ruleStyle}>
-                <Typography variant="h6" align="center" color="primary">1st</Typography>
-                <Typography variant="subtitle1" align="center">
-                  When you start a new game you get 3 chances.
-                  <br/>
-                  A wrong answer or not answering in time loses you a chance.
-                  <br/>
-                  After the 3 chances are done, your run is over.
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={false} md={3}></Grid>
-            <Grid item xs={false} md={3}></Grid>
-            <Grid item xs={12} md={6}>
-              <Paper variant="outlined" className={classes.ruleStyle}>
-                <Typography variant="h6" align="center" color="primary">2nd</Typography>
-                <Typography variant="subtitle1" align="center">
-                  You have several seconds to answer the question, if you don't choose in time, you get it wrong.
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={false} md={3}></Grid>
-            <Grid item xs={false} md={3}></Grid>
-            <Grid item xs={12} md={6}>
-              <Paper variant="outlined" className={classes.ruleStyle}>
-                <Typography variant="h6" align="center" color="primary">3rd</Typography>
-                <Typography variant="subtitle1" align="center">
-                  You will continue to get new questions until your run out of chances.
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="h6" align="center">Ready to start your <span className={classes.highlightedOrangeText}>trivia</span> adventure and take your place on the leaderboard?</Typography>
-            </Grid>
-            <Grid item xs={12} className={classes.signUpAction}>
-              <Grid container justify="center">
-                <Button variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
-              </Grid>  
-            </Grid>
-            <Grid item md={2}></Grid>
-            <Grid item xs={12} md={8}>
-              <FAQ />
-            </Grid>
+    <div className={classes.root}>
+      <Container>
+        <Grid container>
+          <Grid item xs={12} className={classes.landingSpacing}>
+            <Typography variant="h1" align="center" className={classes.h1Banner}>Trivible</Typography>
+          </Grid> 
+          <Grid item xs={12} className={classes.landingSpacing}>
+            <Typography variant="h3" align="center">
+              <span className={classes.highlightedBlueText}>Bingeable</span> TV Show <span className={classes.highlightedOrangeText}>Trivia</span>
+            </Typography>
           </Grid>
-        </Container>
-      </div>
-  )
+          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginBottom: 5 }}>
+            <Button variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
+          </Grid>
+          <Grid item xs={12} md={6} className={classes.callToAction}>
+            <Typography variant="h4" align="justify">Are you always trying to stump your friends and family with <span className={classes.highlightedOrangeText}>trivia</span> questions from your favorite shows?</Typography>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <MovieWatching className={classes.movieWatching}/>
+          </Grid>
+          <Grid item xs={12} className={classes.landingTitle}>
+            <Typography variant="h5" align="center">Here is how it works!</Typography>
+          </Grid>
+          <Grid item xs={false} md={3}></Grid>
+          <Grid item xs={12} md={6}>
+            <Paper variant="outlined" className={classes.ruleStyle}>
+              <Typography variant="h6" align="center" color="primary">1st</Typography>
+              <Typography variant="subtitle1" align="center">
+                When you start a new game you get 3 chances.
+                <br/>
+                A wrong answer or not answering in time loses you a chance.
+                <br/>
+                After the 3 chances are done, your run is over.
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={false} md={3}></Grid>
+          <Grid item xs={false} md={3}></Grid>
+          <Grid item xs={12} md={6}>
+            <Paper variant="outlined" className={classes.ruleStyle}>
+              <Typography variant="h6" align="center" color="primary">2nd</Typography>
+              <Typography variant="subtitle1" align="center">
+                You have several seconds to answer the question, if you don't choose in time, you get it wrong.
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={false} md={3}></Grid>
+          <Grid item xs={false} md={3}></Grid>
+          <Grid item xs={12} md={6}>
+            <Paper variant="outlined" className={classes.ruleStyle}>
+              <Typography variant="h6" align="center" color="primary">3rd</Typography>
+              <Typography variant="subtitle1" align="center">
+                You will continue to get new questions until your run out of chances.
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="h6" align="center">Ready to start your <span className={classes.highlightedOrangeText}>trivia</span> adventure and take your place on the leaderboard?</Typography>
+          </Grid>
+          <Grid item xs={12} className={classes.signUpAction}>
+            <Grid container justifyContent="center">
+              <Button variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
+            </Grid>  
+          </Grid>
+          <Grid item md={2}></Grid>
+          <Grid item xs={12} md={8}>
+            <FAQ />
+          </Grid>
+        </Grid>
+      </Container>
+    </div>
+  );
 }
 
 export default function App(){
@@ -416,6 +419,7 @@ export default function App(){
   }, [])
   
   return (
+    <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
         <Router>
           <CssBaseline />
@@ -448,5 +452,6 @@ export default function App(){
           </Switch>
         </Router>
       </ThemeProvider>
-  )
+    </StyledEngineProvider>
+  );
 }

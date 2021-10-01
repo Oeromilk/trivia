@@ -1,14 +1,14 @@
 import React from 'react';
 import { useHistory } from "react-router-dom";
 
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import Input from '@mui/material/Input';
+import InputLabel from '@mui/material/InputLabel';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import makeStyles from '@mui/styles/makeStyles';
+import Container from '@mui/material/Container';
 import { auth } from './firebase/firebaseConfig';
 
 const forgotStyles = makeStyles((theme) => ({

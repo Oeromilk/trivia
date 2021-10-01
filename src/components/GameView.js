@@ -2,9 +2,9 @@ import React from 'react';
 import Timer from './Timer';
 import { firebase, auth, fireStore, arrayUnion } from './firebase/firebaseConfig';
 import { ReactComponent as ChanceElement } from '../images/chance.svg';
-import { makeStyles } from '@material-ui/core/styles';
-import { Container, CssBaseline, Grid, Button, Typography, FormControl, FormControlLabel, Radio, RadioGroup, Chip, Snackbar, Box } from '@material-ui/core';
-import MuiAlert from '@material-ui/lab/Alert';
+import makeStyles from '@mui/styles/makeStyles';
+import { Container, CssBaseline, Grid, Button, Typography, FormControl, FormControlLabel, Radio, RadioGroup, Chip, Snackbar, Box } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
         [theme.breakpoints.up('md')]: {
             maxWidth: '50%'
         },
-        [theme.breakpoints.down('sm')]: {
+        [theme.breakpoints.down('md')]: {
             maxWidth: '90%',
         }
     },
@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
         [theme.breakpoints.up('md')]: {
             width: '50%'
         },
-        [theme.breakpoints.down('sm')]: {
+        [theme.breakpoints.down('md')]: {
             width: '90%',
         },
         margin: '0 auto'
@@ -106,6 +106,7 @@ export default function GameView(){
     const [currentQuestion, setCurrentQuestion] = React.useState(null);
 
     React.useEffect(() => {
+        // testing purposes
         // setCurrentQuestion({questionInfo:{
         //     "question": "How many children do Holly and Michael have?",
         //     "episode": 20,
@@ -119,6 +120,8 @@ export default function GameView(){
         //     "answer": "4",
         //     "difficulty": 3
         // }})
+
+        // possible area for hardcore mode
         // setIsQuestionLoading(false);
         // getNewQuestion();
     }, [])
@@ -127,7 +130,7 @@ export default function GameView(){
         if(chances < 2){
             return;
         }
-        
+
         let picked;
 
         if(currentQuestion !== null){
@@ -140,6 +143,8 @@ export default function GameView(){
             setSnackMessage("Ran out of time!")
             setSeverity("warning")
             setOpen(true);
+
+            // possible hardcore mode
             // getNewQuestion();
         }
     }, [timeUp]);
@@ -159,11 +164,13 @@ export default function GameView(){
             userRef.update({
                 questionsAnswered: arrayUnion(currentQuestionId)
             })
+            // possible hardcore mode
             // .then(() => {
             //     getNewQuestion();
             // })
         } else if(isCorrect === false && isCorrect != null){
             setChances((newChances) => newChances - 1);
+            // possible hardcore mode
             //getNewQuestion();
         }
         
@@ -305,7 +312,7 @@ export default function GameView(){
                             </FormControl>
                         </form>
                     </Grid>
-                    <Grid container justify="center" item xs={12}>
+                    <Grid container justifyContent="center" item xs={12}>
                         <Box display={isNextQuestion ? '' : 'none'}>
                             <Button variant="contained" color="primary" size="large" onClick={handleNextQuestion}>Next Question</Button>
                         </Box>
@@ -316,5 +323,5 @@ export default function GameView(){
                 <Alert onClose={handleClose} severity={severity}>{snackMessage}</Alert>
             </Snackbar>
         </React.Fragment>
-    )
+    );
 };

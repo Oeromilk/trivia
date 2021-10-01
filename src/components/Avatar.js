@@ -1,5 +1,5 @@
 import React from "react";
-import Avatar from '@material-ui/core/Avatar';
+import Avatar from '@mui/material/Avatar';
 
 export default function AvatarContainer(props){
     const [img, setImg] = React.useState("");
