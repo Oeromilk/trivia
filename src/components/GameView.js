@@ -127,15 +127,21 @@ export default function GameView(){
         if(chances < 2){
             return;
         }
+        
+        let picked;
 
-        if(!timeUp && currentQuestionId !== ''){
+        if(currentQuestion !== null){
+            picked = choice === currentQuestion.questionInfo.answer;
+        }
+         
+        if(!picked && !timeUp && currentQuestionId !== ''){
             setIsNextQuestion(true);
             setChances((newChances) => newChances - 1);
             setSnackMessage("Ran out of time!")
             setSeverity("warning")
             setOpen(true);
             // getNewQuestion();
-        }  
+        }
     }, [timeUp]);
 
     React.useEffect(() => {
