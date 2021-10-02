@@ -1,7 +1,7 @@
 import React from 'react';
-import { auth, firebase } from './firebase/firebaseConfig';
+import { auth } from './firebase/firebaseConfig';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useHistory } from "react-router-dom";
-
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SignIn() {
-    let history = useHistory();
+  let history = useHistory();
   const classes = useStyles();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -58,8 +58,12 @@ export default function SignIn() {
 
   function handleSignIn(event){
     event.preventDefault();
-    auth.signInWithEmailAndPassword(email, password);
-    history.push("/");
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        if(userCredential){
+          history.push("/");
+        }
+      });
   }
 
   function handleForgotPassword(event){
@@ -68,8 +72,8 @@ export default function SignIn() {
   }
 
   function handleSignInWithGoogle(){
-    var provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
+    var provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
     .then((result) => {
       if(result.user){
         history.push("/");

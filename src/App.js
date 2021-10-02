@@ -4,7 +4,8 @@ import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/
 import makeStyles from '@mui/styles/makeStyles';
 import { CssBaseline } from '@mui/material';
 import 'fontsource-roboto';
-import { auth } from './components/firebase/firebaseConfig';
+import { auth } from "./components/firebase/firebaseConfig";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
@@ -156,7 +157,7 @@ function SignOut(){
   const classes = useStyles();
 
   function handleSignOut(){
-    auth.signOut();
+    signOut(auth);
   }
   return (
     <Link to="/" style={noTextDecoration}>
@@ -409,7 +410,7 @@ export default function App(){
   const [currentUser, setCurrentUser] = React.useState(null);
 
   useEffect(() => {
-    auth.onAuthStateChanged(function(user){
+    onAuthStateChanged(auth, function(user){
       if(user !== null){
         setCurrentUser(user);
       } else {

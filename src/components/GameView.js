@@ -1,6 +1,8 @@
 import React from 'react';
 import Timer from './Timer';
-import { firebase, auth, fireStore, arrayUnion } from './firebase/firebaseConfig';
+import { auth } from './firebase/firebaseConfig';
+import { collection, query, where, doc, updateDoc, getDoc, getDocs, arrayUnion, documentId } from "firebase/firestore";
+import { db } from './firebase/firebaseConfig';
 import { ReactComponent as ChanceElement } from '../images/chance.svg';
 import makeStyles from '@mui/styles/makeStyles';
 import { Container, CssBaseline, Grid, Button, Typography, FormControl, FormControlLabel, Radio, RadioGroup, Chip, Snackbar, Box } from '@mui/material';
@@ -68,9 +70,9 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-function Alert(props) {
-    return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
+const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+})
 
 function StartScreen(props){
     return (
@@ -160,10 +162,11 @@ export default function GameView(){
             return;
         }
         if(isCorrect){
-            let userRef = fireStore.collection('users').doc(currentUser.uid);
-            userRef.update({
-                questionsAnswered: arrayUnion(currentQuestionId)
-            })
+            updateIfCorrect();
+            // let userRef = fireStore.collection('users').doc(currentUser.uid);
+            // userRef.update({
+            //     questionsAnswered: arrayUnion(currentQuestionId)
+            // })
             // possible hardcore mode
             // .then(() => {
             //     getNewQuestion();
@@ -176,7 +179,14 @@ export default function GameView(){
         
     }, [isCorrect]);
 
-    function getNewQuestion(){
+    async function updateIfCorrect() {
+        const userRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userRef, {
+            questionsAnswered: arrayUnion(currentQuestionId)
+        })
+    }
+
+    async function getNewQuestion(){
         setQuestionsSeen((nextQuestion) => nextQuestion + 1);
         setIsQuestionLoading(true);
         setIsNextQuestion(false)
@@ -184,42 +194,18 @@ export default function GameView(){
             setOpen(false)
         } 
         if(currentUser !== null){
-            let userRef = fireStore.collection('users').doc(currentUser.uid);
-            userRef.get().then((doc) => {
-                if(doc.exists){
-                    fireStore.collection("theOfficeTriviaQuestions")
-                    .where(firebase.firestore.FieldPath.documentId(), "not-in", doc.data().questionsAnswered).limit(1)
-                    .get().then((querySnapshot) => {
-                        querySnapshot.forEach((nextDoc) => {
-                            if(nextDoc.exists){
-                                setCurrentQuestionId(nextDoc.id);
-                                setCurrentQuestion(nextDoc.data());
-                                setIsQuestionLoading(false);
-                                setTimeUp(true);
-                            } else {
-                                console.log("No more questions!")
-                            }
-                        })
-                    })
-                    // fireStore.collection("theOfficeTriviaQuestions").orderBy("questionInfo").limit(1).get().then((querySnapshot) => {
-                    //     querySnapshot.forEach((nextDoc) => {
-                    //         if(nextDoc.exists){
-                    //             console.log("hello 4")
-                    //             if(!doc.data().questionsAnswered.includes(nextDoc.id)){
-                    //                 console.log("hello 5")
-                    //                 console.log(nextDoc.data())
-                    //                 setCurrentQuestionId(nextDoc.id);
-                    //                 setCurrentQuestion(nextDoc.data());
-                    //                 setIsQuestionLoading(false);
-                    //                 setTimeUp(true);
-                    //             }
-                    //         } else {
-                    //             // no more questions end game?
-                    //         }  
-                    //     })
-                    // })
-                }
-            })
+            const userRef = doc(db, "users", currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            if(userSnap.exists()) {
+                const q = query(collection(db, "theOfficeTriviaQuestions"), where(documentId(), "not-in", userSnap.data().questionsAnswered));
+                const querySnap = await getDocs(q);
+                querySnap.forEach((doc) => {
+                    setCurrentQuestionId(doc.id);
+                    setCurrentQuestion(doc.data());
+                    setIsQuestionLoading(false);
+                    setTimeUp(true);
+                })
+            }
         }
     }
 
@@ -325,3 +311,38 @@ export default function GameView(){
         </React.Fragment>
     );
 };
+
+// let userRef = fireStore.collection('users').doc(currentUser.uid);
+            // userRef.get().then((doc) => {
+            //     if(doc.exists){
+            //         fireStore.collection("theOfficeTriviaQuestions")
+            //         .where(firebaseApp.firestore.FieldPath.documentId(), "not-in", doc.data().questionsAnswered).limit(1)
+            //         .get().then((querySnapshot) => {
+            //             querySnapshot.forEach((nextDoc) => {
+            //                 if(nextDoc.exists){
+            //                     setCurrentQuestionId(nextDoc.id);
+            //                     setCurrentQuestion(nextDoc.data());
+            //                     setIsQuestionLoading(false);
+            //                     setTimeUp(true);
+            //                 } else {
+            //                     console.log("No more questions!")
+            //                 }
+            //             })
+            //         })
+            // fireStore.collection("theOfficeTriviaQuestions").orderBy("questionInfo").limit(1).get().then((querySnapshot) => {
+            //     querySnapshot.forEach((nextDoc) => {
+            //         if(nextDoc.exists){
+            //             console.log("hello 4")
+            //             if(!doc.data().questionsAnswered.includes(nextDoc.id)){
+            //                 console.log("hello 5")
+            //                 console.log(nextDoc.data())
+            //                 setCurrentQuestionId(nextDoc.id);
+            //                 setCurrentQuestion(nextDoc.data());
+            //                 setIsQuestionLoading(false);
+            //                 setTimeUp(true);
+            //             }
+            //         } else {
+            //             // no more questions end game?
+            //         }  
+            //     })
+            // })

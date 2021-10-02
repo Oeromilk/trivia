@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import AvatarContainer from './Avatar';
-import { auth, fireStore } from './firebase/firebaseConfig';
+import { db, auth } from './firebase/firebaseConfig';
+import { onAuthStateChanged } from '@firebase/auth';
+import { doc, getDoc, getDocs, updateDoc, collection, query, where } from '@firebase/firestore';
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
 import Avatar from '@mui/material/Avatar';
@@ -76,34 +78,29 @@ function CreateProfile(props){
     const [avatar, setAvatar] = React.useState('Michael');
 
     useEffect(() => {
-        var usersRef = fireStore.collection('users');
-        usersRef.where("username", "==", username).get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                if(doc.exists){
-                    setUsernameHelperText("Username is taken, please select another.")
-                    setIsValid(true)
-                }
-            })
-        })
-
-        if(username !== ''){
-            setUsernameHelperText("Username is available!")
-            setIsValid(false)
-        }
+        getUsers()
 
     }, [username])
 
-    function handleUsername(event){
-        setUsername(event.target.value)
+    async function getUsers(){
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("username", "==", username));
+        const querySnap = await getDocs(q);
+        querySnap.forEach((doc) => {
+            if(doc.exists()){
+                setUsernameHelperText("Username is taken, please select another.");
+                setIsValid(true);
+            }
+        })
+        if(username !== ""){
+            setUsernameHelperText("Username is available!")
+            setIsValid(false)
+        }
     }
 
-    function handleAvatar(event){
-        setAvatar(event.target.value)
-    }
-
-    function handleUserInfo(event){
-        event.preventDefault()
-        fireStore.collection("users").doc(props.user.uid).set({
+    async function updateUser(){
+        const userRef = doc(db, "users", props.user.uid);
+        await updateDoc(userRef, {
             username: username,
             avatar: avatar,
             achievementPoints: 0,
@@ -111,10 +108,20 @@ function CreateProfile(props){
             questionsAnswered: []
         }).then(() => {
             history.push("/");
-            console.log("Success");
-        }).catch((error) => {
-            console.error("Error Writing Document: ", error)
         })
+    }
+
+    function handleUsername(event){
+        setUsername(event.target.value);
+    }
+
+    function handleAvatar(event){
+        setAvatar(event.target.value);
+    }
+
+    function handleUserInfo(event){
+        event.preventDefault();
+        updateUser();
     }
 
     return (
@@ -174,16 +181,30 @@ function UpdateProfile(props){
         "Stanley",
         "Toby"
     ]
+    const userRef = doc(db, "users", props.user.uid);
     const [userInfo, setUserInfo] = useState(null);
     const [avatar, setAvatar] = React.useState('Andy');
 
     useEffect(() => {
-        fireStore.collection("users").doc(props.user.uid).get().then((doc) => {
-            if(doc.exists){
-                setUserInfo(doc.data())
-            }
-        })
+        getUserInfo();
     }, [])
+
+    async function getUserInfo(){
+        const userSnap = await getDoc(userRef);
+        if(userSnap.exists()){
+            setUserInfo(userSnap.data());
+        }
+    }
+
+    async function updateAvatar(){
+        await updateDoc(userRef, {
+            avatar: avatar
+        }).then(() => {
+            history.push("/")
+        }).catch((error) => {
+            console.error(error);
+        })
+    }
 
     function handleAvatar(event){
         setAvatar(event.target.value)
@@ -193,15 +214,7 @@ function UpdateProfile(props){
         event.preventDefault();
         if(avatar !== ''){
             if(avatar !== userInfo.avatar){
-                fireStore.collection("users").doc(props.user.uid).update({
-                    avatar: avatar
-                }).then(() => {
-                    console.log("Document successfully updated!");
-                    history.push("/")
-                }).catch((error) => {
-                    // The document probably doesn't exist.
-                    console.error("Error updating document: ", error);
-                })
+                updateAvatar();
             } else {
                 console.log(`Selected avatar: ${avatar} matches current avatar: ${userInfo.avatar}`)
             }
@@ -254,27 +267,29 @@ export default function UserProfile(props){
     const [currentUser, setCurrentUser] = React.useState(null);
 
     useEffect(() => {
-        auth.onAuthStateChanged((user) => {
-            if(user !== null){
+        onAuthStateChanged(auth, (user) => {
+            if(user){
                 setCurrentUser(user);
-                var userRef = fireStore.collection("users").doc(user.uid);
-
-                userRef.get().then((doc) => {
-                    if(doc.exists){
-                        setProfileExists(true)
-                    } else {
-                        setProfileExists(false)
-                    }
-                })
+                getUser(user);
             } else {
-                setCurrentUser(null)
+                setCurrentUser(null);
             }
-          })
+        })
         
           return () => {
 
           }
     }, [])
+
+    async function getUser(u) {
+        const userRef = doc(db, "users", u.uid)
+        const userSnap = await getDoc(userRef);
+        if(userSnap.exists()){
+            setProfileExists(true);
+        } else {
+            setProfileExists(false);
+        }
+    }
 
     return (
         <React.Fragment>

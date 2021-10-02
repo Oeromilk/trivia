@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { auth } from './firebase/firebaseConfig';
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useHistory } from "react-router-dom";
 
 import Avatar from '@mui/material/Avatar';
@@ -63,8 +64,9 @@ export default function SignUp() {
 
     function handleSignUp(event){
         event.preventDefault();
-        auth.createUserWithEmailAndPassword(email, password);
-        history.push("/profile");
+        createUserWithEmailAndPassword(auth, email, password).then((userCred) => {
+            history.push("/profile");
+        })
     }
     
     function validatePassword(){

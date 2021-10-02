@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { auth, fireStore } from './firebase/firebaseConfig';
+import { db, auth } from './firebase/firebaseConfig';
+import { doc, getDoc } from "firebase/firestore";
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
-
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -53,16 +53,25 @@ function FriendsList(){
     })
 
     useEffect(() => {
-        let user = auth.currentUser;
-        const usersRef = fireStore.collection('users');
-        if(user !== null){
-            usersRef.doc(user.uid).get().then((doc) => {
-                if(doc.exists){
-                    setFriends(doc.data().friendsList)
-                }
-            })
-        }
+        getUserFriends();
+        // const usersRef = fireStore.collection('users');
+        // if(user !== null){
+        //     usersRef.doc(user.uid).get().then((doc) => {
+        //         if(doc.exists){
+        //             setFriends(doc.data().friendsList)
+        //         }
+        //     })
+        // }
     }, [])
+
+    async function getUserFriends(){
+        const user = auth.currentUser;
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if(userSnap.exists()){
+            setFriends(userSnap.data().friendsList);
+        }
+    }
 
     return (
         <List>{friendsList}</List>

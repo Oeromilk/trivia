@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { fireStore } from './firebase/firebaseConfig';
+import { db } from './firebase/firebaseConfig';
+import { getDocs, query, orderBy, collection, limit } from '@firebase/firestore';
 import AvatarContainer from './Avatar';
 import makeStyles from '@mui/styles/makeStyles';
 import Container from '@mui/material/Container';
@@ -117,15 +118,18 @@ export default function LeaderBoard(){
     })
 
     useEffect(() => {
-        var usersRef = fireStore.collection('users').orderBy('achievementPoints', 'desc').limit(10);
-        let topTen = [];
-        usersRef.get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                topTen.push(doc.data())
-            })
-            setTopTenUsers(topTen)
-        })
+        getUsers();
     }, [])
+
+    async function getUsers(){
+        let newList = [];
+        const q = query(collection(db, "users"), orderBy("achievementPoints", "desc"), limit(10));
+        const querySnap = await getDocs(q);
+        querySnap.forEach((doc) => {
+            newList.push(doc.data());
+        })
+        setTopTenUsers(newList);
+    }
 
     return (
         <React.Fragment>
