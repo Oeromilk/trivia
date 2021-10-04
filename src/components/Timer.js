@@ -14,7 +14,7 @@ export default function Timer(props){
     const [timeLeft, setTimeLeft] = React.useState(100);
 
     React.useEffect(() => {
-        if(props.timeUp){
+        if(props.timeUp && !props.isNextQuestion){
             setTimeLeft(100);
             var timer;
             setTimeout(() => {
@@ -23,9 +23,13 @@ export default function Timer(props){
                 }, 60);
             }, 750)
 
-            return () => clearTimeout(timer)
+            if(props.isNextQuestion){
+                setTimeLeft(1);
+                clearInterval(timer);
+            }
+            return () => clearInterval(timer)
         }
-    }, [props.timeUp]);
+    }, [props.timeUp, props.isNextQuestion]);
 
     useEffect(() => {
         if(timeLeft <= 0){

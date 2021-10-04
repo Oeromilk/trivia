@@ -107,7 +107,7 @@ export default function GameView(){
     const [timeUp, setTimeUp] = React.useState(false);
     const [currentQuestion, setCurrentQuestion] = React.useState(null);
 
-    React.useEffect(() => {
+    //React.useEffect(() => {
         // testing purposes
         // setCurrentQuestion({questionInfo:{
         //     "question": "How many children do Holly and Michael have?",
@@ -126,52 +126,38 @@ export default function GameView(){
         // possible area for hardcore mode
         // setIsQuestionLoading(false);
         // getNewQuestion();
-    }, [])
+    //}, [])
 
     React.useEffect(() => {
-        if(chances < 2){
-            return;
-        }
-
-        let picked;
-
         if(currentQuestion !== null){
-            picked = choice === currentQuestion.questionInfo.answer;
-        }
-         
-        if(!picked && !timeUp && currentQuestionId !== ''){
-            setIsNextQuestion(true);
-            setChances((newChances) => newChances - 1);
-            setSnackMessage("Ran out of time!")
-            setSeverity("warning")
-            setOpen(true);
+            if(!timeUp && currentQuestionId !== '' && isCorrect === false){
+                setIsNextQuestion(true);
+                setChances((newChances) => newChances - 1);
+                setSnackMessage("Ran out of time!")
+                setSeverity("warning")
+                setOpen(true);
 
-            // possible hardcore mode
-            // getNewQuestion();
+                // possible hardcore mode
+                // getNewQuestion();
+            }
         }
     }, [timeUp]);
 
     React.useEffect(() => {
         if(chances < 1){
-            console.log('done son')
+            console.log('done son');
         }
     }, [chances]);
 
     React.useEffect(() => {
-        if(chances < 2){
-            return;
-        }
         if(isCorrect){
             updateIfCorrect();
-            // let userRef = fireStore.collection('users').doc(currentUser.uid);
-            // userRef.update({
-            //     questionsAnswered: arrayUnion(currentQuestionId)
-            // })
+            
             // possible hardcore mode
             // .then(() => {
             //     getNewQuestion();
             // })
-        } else if(isCorrect === false && isCorrect != null){
+        } else if(isCorrect === false && isCorrect !== null){
             setChances((newChances) => newChances - 1);
             // possible hardcore mode
             //getNewQuestion();
@@ -189,9 +175,9 @@ export default function GameView(){
     async function getNewQuestion(){
         setQuestionsSeen((nextQuestion) => nextQuestion + 1);
         setIsQuestionLoading(true);
-        setIsNextQuestion(false)
+        setIsNextQuestion(false);
         if(open){
-            setOpen(false)
+            setOpen(false);
         } 
         if(currentUser !== null){
             const userRef = doc(db, "users", currentUser.uid);
@@ -220,13 +206,13 @@ export default function GameView(){
        
         if(choice === currentQuestion.questionInfo.answer){
             setIsCorrect(true);
-            setSnackMessage("Correct!")
+            setSnackMessage("Correct!");
             setSeverity("success");
             setOpen(true);
         } else {
             setIsCorrect(false);
-            setSnackMessage("Incorrect!")
-            setSeverity("warning")
+            setSnackMessage("Incorrect!");
+            setSeverity("warning");
             setOpen(true);
         }
     }
@@ -237,6 +223,8 @@ export default function GameView(){
     }
 
     function handleNextQuestion(){
+        setIsCorrect(null)
+        setChoice('');
         getNewQuestion();
     }
 
@@ -266,7 +254,7 @@ export default function GameView(){
                     </Grid>
                     <Grid item xs={12}>
                         <div className={classes.timerWrap}>
-                            <Timer timeUp={timeUp} setTimeUp={setTimeUp} />
+                            <Timer timeUp={timeUp} setTimeUp={setTimeUp} isNextQuestion={isNextQuestion} />
                         </div>
                     </Grid>
                     <Grid item xs={12} className={classes.infoContainer}>
@@ -294,7 +282,7 @@ export default function GameView(){
                                         <FormControlLabel key="Loading" value="Loading" control={<Radio />} label="Loading" />
                                     }
                                 </RadioGroup>
-                                <Button className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
+                                <Button sx={{ height: 75}} className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
                             </FormControl>
                         </form>
                     </Grid>
@@ -305,7 +293,7 @@ export default function GameView(){
                     </Grid>
                 </Grid>
             </Container>
-            <Snackbar open={open} autoHideDuration={2500} onClose={handleClose} key={questionsSeen}>
+            <Snackbar sx={{mt: 7}} open={open} anchorOrigin={{ horizontal: 'center', vertical: 'top' }} autoHideDuration={2500} onClose={handleClose} key={questionsSeen}>
                 <Alert onClose={handleClose} severity={severity}>{snackMessage}</Alert>
             </Snackbar>
         </React.Fragment>
