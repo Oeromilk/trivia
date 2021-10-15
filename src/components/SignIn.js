@@ -1,6 +1,6 @@
 import React from 'react';
 import { auth } from './firebase/firebaseConfig';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { useHistory } from "react-router-dom";
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -73,14 +73,26 @@ export default function SignIn() {
 
   function handleSignInWithGoogle(){
     var provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-    .then((result) => {
-      if(result.user){
-        history.push("/");
-      }
-    }).catch((error) => {
-      console.log(error)
-    });
+    // if(isMobile){
+    //   signInWithRedirect(auth, provider)
+    //   getRedirectResult(auth)
+    //     .then((result) => {
+    //       if(result.user){
+    //         history.push("/");
+    //       }
+    //     }).catch((error) => {
+    //       console.log(error);
+    //     })
+    // } else {
+      signInWithPopup(auth, provider)
+      .then((result) => {
+        if(result.user){
+          history.push("/");
+        }
+      }).catch((error) => {
+        console.log(error)
+      });
+    // }
   }
 
   return (

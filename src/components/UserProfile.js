@@ -104,6 +104,7 @@ function CreateProfile(props){
             username: username,
             avatar: avatar,
             achievementPoints: 0,
+            friendRequests: [],
             friendsList: [],
             questionsAnswered: []
         }).then(() => {
@@ -129,7 +130,7 @@ function CreateProfile(props){
             <Avatar className={classes.avatar}>
                 <AvatarContainer avatar={avatar.toLowerCase()} />
             </Avatar>
-            <Typography variant="h2">Create Profile</Typography>
+            <Typography align="center" variant="h2">Create Profile</Typography>
             <form className={classes.form}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
@@ -223,10 +224,10 @@ function UpdateProfile(props){
 
     return (
         <div className={classes.root}>
+            <Typography gutterBottom={true} align="center" variant="h2">Update Profile</Typography>
             <Avatar className={classes.updateAvatar}>
                 {userInfo != null ? <AvatarContainer avatar={userInfo.avatar.toLowerCase()} /> : null}
             </Avatar>
-            <Typography variant="h2">Update Profile</Typography>
             <form className={classes.form}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>

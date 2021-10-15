@@ -1,4 +1,5 @@
 import React from 'react';
+import { isMobile } from 'react-device-detect';
 import Timer from './Timer';
 import { auth } from './firebase/firebaseConfig';
 import { collection, query, where, doc, updateDoc, getDoc, getDocs, arrayUnion, documentId } from "firebase/firestore";
@@ -10,12 +11,12 @@ import MuiAlert from '@mui/material/Alert';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        marginTop: theme.spacing(10),
+        marginTop: (isMobile ? theme.spacing(3) : theme.spacing(10)),
         [theme.breakpoints.up('md')]: {
             maxWidth: '50%'
         },
         [theme.breakpoints.down('md')]: {
-            maxWidth: '90%',
+            maxWidth: '100%',
         }
     },
     timerWrap: {
@@ -26,12 +27,12 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 5
     },
     chanceContainer: {
-        width: 300,
+        width: (isMobile ? 150 : 300),
         margin: '0 auto'
     },
     chance: {
-        width: 100,
-        height: 100
+        width: (isMobile ? 50 : 100),
+        height: (isMobile ? 50 : 100)
     },
     lostChance: {
         filter: 'brightness(20%) saturate(20%)'
@@ -77,13 +78,12 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 function StartScreen(props){
     return (
         <Container style={(props.isShown ? {} : {display: 'none'})}>
-            <Grid style={{paddingTop: '25em'}} container spacing={10}>
+            <Grid style={(isMobile ? {paddingTop: '5em'} : {paddingTop: '20em'})} container spacing={10}>
                 <Grid item xs={12}>
                     <Typography align="center" variant="h1">Ready to go?</Typography>
                 </Grid>
                 <Grid item style={{display: 'flex', justifyContent: 'center'}} xs={12}>
                     <Button style={{margin: '0 auto'}} size="large" variant="contained" color="primary" onClick={props.startGame}>Start Game</Button>
-
                 </Grid>
             </Grid>
         </Container>
@@ -106,6 +106,13 @@ export default function GameView(){
     const [isCorrect, setIsCorrect] = React.useState(null);
     const [timeUp, setTimeUp] = React.useState(false);
     const [currentQuestion, setCurrentQuestion] = React.useState(null);
+    const choiceStyle = {
+        borderRadius: '0.5em',
+        border: '1px solid #484848',
+        boxShadow: '0px 0px 6px 1px rgba(0,0,0,0.75)',
+        paddingTop: '0.25em',
+        paddingBottom: '0.25em'
+    };
 
     //React.useEffect(() => {
         // testing purposes
@@ -130,7 +137,7 @@ export default function GameView(){
 
     React.useEffect(() => {
         if(currentQuestion !== null){
-            if(!timeUp && currentQuestionId !== '' && isCorrect === false){
+            if(!timeUp && currentQuestionId !== '' && isCorrect !== true){
                 setIsNextQuestion(true);
                 setChances((newChances) => newChances - 1);
                 setSnackMessage("Ran out of time!")
@@ -165,10 +172,10 @@ export default function GameView(){
         
     }, [isCorrect]);
 
-    async function updateIfCorrect() {
+    async function updateIfCorrect(){
         const userRef = doc(db, "users", currentUser.uid);
         await updateDoc(userRef, {
-            questionsAnswered: arrayUnion(currentQuestionId)
+            questionsAnswered: arrayUnion(currentQuestion.id)
         })
     }
 
@@ -195,6 +202,44 @@ export default function GameView(){
         }
     }
 
+    async function getRandomQuestion(){
+        setQuestionsSeen((nextQuestion) => nextQuestion + 1);
+        setIsQuestionLoading(true);
+        setIsNextQuestion(false);
+        if(open){
+            setOpen(false);
+        }
+        
+        if(currentUser !== null){
+            const userRef = doc(db, "users", currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            if(userSnap.exists()){
+                let arr = userSnap.data().questionsAnswered;
+                var randomNumber = await getRandomNumber(arr);
+                
+                const q = query(collection(db, "theOfficeTriviaQuestions"), where("id", "==", randomNumber));
+                const querySnap = await getDocs(q);
+                querySnap.forEach((doc) => {
+                    setCurrentQuestionId(doc.id);
+                    setCurrentQuestion(doc.data());
+                    setIsQuestionLoading(false);
+                    setTimeUp(true);
+                })
+            }
+        }
+    }
+
+    async function getRandomNumber(arr){
+        const countDoc = doc(db, "theOfficeTriviaQuestions", "count");
+        const countSnap = await getDoc(countDoc);
+        
+        var random = Math.floor((Math.random() * countSnap.data().numberOfQuestions));
+        if(arr.includes(random)){
+            random = Math.floor((Math.random() * countSnap.data().numberOfQuestions));
+        }
+        return random;
+    }
+
     function handleUserChoice(event){
         setChoice(event.target.value);
     }
@@ -219,13 +264,15 @@ export default function GameView(){
 
     function startGame(){
         setIsShown(false);
-        getNewQuestion();
+        //getNewQuestion();
+        getRandomQuestion();
     }
 
     function handleNextQuestion(){
         setIsCorrect(null)
         setChoice('');
-        getNewQuestion();
+        //getNewQuestion();
+        getRandomQuestion();
     }
 
     const handleClose = (event, reason) => {
@@ -241,9 +288,9 @@ export default function GameView(){
             <CssBaseline />
             <StartScreen isShown={isShown} startGame={startGame}/>
             <Container style={(isShown ? {display: 'none'} : {})} className={classes.root}>
-                <Grid display={isShown ? 'none' : ''} container spacing={3}>
+                <Grid display={isShown ? 'none' : ''} container rowSpacing={2}>
                     <Grid item xs={12}>
-                        <Typography align="center" variant="h3">Chances Remaining:</Typography>
+                        <Typography align="center" variant={(isMobile ? "h5" : "h3")}>Chances Remaining:</Typography>
                     </Grid>
                     <Grid item xs={12}>
                         <div className={classes.chanceContainer}>
@@ -263,7 +310,7 @@ export default function GameView(){
                             <Chip variant="outlined" size="small" label={isQuestionLoading === true ? "loading" : "episode: " + currentQuestion.questionInfo.episode} />
                             <Chip variant="outlined" size="small" label={isQuestionLoading === true ? "loading" : "difficulty: " + currentQuestion.questionInfo.difficulty} />
                         </div>
-                        <Chip label={`Current Run: ${questionsSeen}`} />
+                        <Chip color="secondary" variant="outlined" label={`Current Run: ${questionsSeen}`} />
                     </Grid>
                     <Grid item xs={12}>
                         <Typography style={{fontSize: '24px'}} align="center">{isQuestionLoading === true ? "Question Loading" : currentQuestion.questionInfo.question}</Typography>
@@ -276,18 +323,18 @@ export default function GameView(){
                                         isQuestionLoading === false ?
                                         currentQuestion.questionInfo.choices.map((option) => {
                                             return (
-                                                <FormControlLabel className={classes.radioStyle} key={option} value={option} control={<Radio/>} label={option} />
+                                                <FormControlLabel sx={choiceStyle} className={classes.radioStyle} key={option} value={option} control={<Radio/>} label={option} />
                                             )
                                         }) :
                                         <FormControlLabel key="Loading" value="Loading" control={<Radio />} label="Loading" />
                                     }
                                 </RadioGroup>
-                                <Button sx={{ height: 75}} className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
+                                <Button sx={{ height: 50}} className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
                             </FormControl>
                         </form>
                     </Grid>
                     <Grid container justifyContent="center" item xs={12}>
-                        <Box display={isNextQuestion ? '' : 'none'}>
+                        <Box sx={{marginBottom: 12}} display={isNextQuestion ? '' : 'none'}>
                             <Button variant="contained" color="primary" size="large" onClick={handleNextQuestion}>Next Question</Button>
                         </Box>
                     </Grid>
