@@ -329,14 +329,14 @@ export default function GameView(){
                                         <FormControlLabel key="Loading" value="Loading" control={<Radio />} label="Loading" />
                                     }
                                 </RadioGroup>
-                                <Button sx={{ height: 50}} className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
+                                {
+                                    isNextQuestion ? 
+                                    <Button variant="contained" color="primary" size="large" onClick={handleNextQuestion}>Next Question</Button>
+                                    :
+                                    <Button sx={{ height: 50}} className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
+                                }
                             </FormControl>
                         </form>
-                    </Grid>
-                    <Grid container justifyContent="center" item xs={12}>
-                        <Box sx={{marginBottom: 12}} display={isNextQuestion ? '' : 'none'}>
-                            <Button variant="contained" color="primary" size="large" onClick={handleNextQuestion}>Next Question</Button>
-                        </Box>
                     </Grid>
                 </Grid>
             </Container>
