@@ -6,7 +6,7 @@ import { collection, query, where, doc, updateDoc, getDoc, getDocs, arrayUnion, 
 import { db } from './firebase/firebaseConfig';
 import { ReactComponent as ChanceElement } from '../images/chance.svg';
 import makeStyles from '@mui/styles/makeStyles';
-import { Container, CssBaseline, Grid, Button, Typography, FormControl, FormControlLabel, Radio, RadioGroup, Chip, Snackbar, Box } from '@mui/material';
+import { Container, CssBaseline, Grid, Button, Typography, FormControl, FormControlLabel, Radio, RadioGroup, Chip, Snackbar, Box, Divider } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 
 const useStyles = makeStyles((theme) => ({
@@ -90,6 +90,33 @@ function StartScreen(props){
     )
 }
 
+function GameOver(props){
+    return (
+        <Container>
+            <Grid container rowGap={3}>
+                <Grid sx={{marginBottom: 8, marginTop: 4}} item xs={12}>
+                    <Typography align="center" variant="h1">Game Over</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography align="center" variant="h3">Questions Seen</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography sx={{color: "#FF6D1F"}} align="center" variant="h2">{props.seen}</Typography>
+                </Grid>
+                <Grid sx={{marginBottom: 4, marginTop: 4}} item xs={12}>
+                    <Divider light={true} variant="middle"/>
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography align="center" variant="h3">Questions Correct</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography sx={{color: "#52A5FF"}} align="center" variant="h2">{props.correct}</Typography>
+                </Grid>
+            </Grid>
+        </Container>
+    )
+}
+
 export default function GameView(){
     const classes = useStyles();
     const currentUser = auth.currentUser;
@@ -100,6 +127,7 @@ export default function GameView(){
     const [isShown, setIsShown] = React.useState(true);
     const [isNextQuestion, setIsNextQuestion] = React.useState(false);
     const [chances, setChances] = React.useState(3);
+    const [questionsCorrect, setQuestionsCorrect] = React.useState(0);
     const [questionsSeen, setQuestionsSeen] = React.useState(0);
     const [currentQuestionId, setCurrentQuestionId] = React.useState('');
     const [isQuestionLoading, setIsQuestionLoading] = React.useState(true);
@@ -132,7 +160,6 @@ export default function GameView(){
 
         // possible area for hardcore mode
         // setIsQuestionLoading(false);
-        // getNewQuestion();
     //}, [])
 
     React.useEffect(() => {
@@ -145,19 +172,24 @@ export default function GameView(){
                 setOpen(true);
 
                 // possible hardcore mode
-                // getNewQuestion();
             }
         }
     }, [timeUp]);
 
     React.useEffect(() => {
         if(chances < 1){
-            console.log('done son');
+            let newStats = {
+                percentageRight: Math.round((questionsCorrect / questionsSeen + Number.EPSILON) * 100) / 100,
+                questionsCorrect: questionsCorrect,
+                questionsSeen: questionsSeen
+            }
+            updateWhenGameOver(newStats);
         }
     }, [chances]);
 
     React.useEffect(() => {
         if(isCorrect){
+            setQuestionsCorrect((correct) => correct + 1);
             updateIfCorrect();
             
             // possible hardcore mode
@@ -172,34 +204,18 @@ export default function GameView(){
         
     }, [isCorrect]);
 
+    async function updateWhenGameOver(stats){
+        const userRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userRef, {
+            gameStats: arrayUnion(stats)
+        })
+    }
+
     async function updateIfCorrect(){
         const userRef = doc(db, "users", currentUser.uid);
         await updateDoc(userRef, {
             questionsAnswered: arrayUnion(currentQuestion.id)
         })
-    }
-
-    async function getNewQuestion(){
-        setQuestionsSeen((nextQuestion) => nextQuestion + 1);
-        setIsQuestionLoading(true);
-        setIsNextQuestion(false);
-        if(open){
-            setOpen(false);
-        } 
-        if(currentUser !== null){
-            const userRef = doc(db, "users", currentUser.uid);
-            const userSnap = await getDoc(userRef);
-            if(userSnap.exists()) {
-                const q = query(collection(db, "theOfficeTriviaQuestions"), where(documentId(), "not-in", userSnap.data().questionsAnswered));
-                const querySnap = await getDocs(q);
-                querySnap.forEach((doc) => {
-                    setCurrentQuestionId(doc.id);
-                    setCurrentQuestion(doc.data());
-                    setIsQuestionLoading(false);
-                    setTimeUp(true);
-                })
-            }
-        }
     }
 
     async function getRandomQuestion(){
@@ -264,14 +280,12 @@ export default function GameView(){
 
     function startGame(){
         setIsShown(false);
-        //getNewQuestion();
         getRandomQuestion();
     }
 
     function handleNextQuestion(){
         setIsCorrect(null)
         setChoice('');
-        //getNewQuestion();
         getRandomQuestion();
     }
 
@@ -286,6 +300,9 @@ export default function GameView(){
     return (
         <React.Fragment>
             <CssBaseline />
+            {
+                chances < 1 ? <GameOver seen={questionsSeen} correct={questionsCorrect}/> :
+            <React.Fragment>
             <StartScreen isShown={isShown} startGame={startGame}/>
             <Container style={(isShown ? {display: 'none'} : {})} className={classes.root}>
                 <Grid display={isShown ? 'none' : ''} container rowSpacing={2}>
@@ -340,6 +357,8 @@ export default function GameView(){
                     </Grid>
                 </Grid>
             </Container>
+            </React.Fragment>
+            }
             <Snackbar sx={{mt: 7}} open={open} anchorOrigin={{ horizontal: 'center', vertical: 'top' }} autoHideDuration={2500} onClose={handleClose} key={questionsSeen}>
                 <Alert onClose={handleClose} severity={severity}>{snackMessage}</Alert>
             </Snackbar>
@@ -381,3 +400,25 @@ export default function GameView(){
             //         }  
             //     })
             // })
+            // async function getNewQuestion(){
+            //     setQuestionsSeen((nextQuestion) => nextQuestion + 1);
+            //     setIsQuestionLoading(true);
+            //     setIsNextQuestion(false);
+            //     if(open){
+            //         setOpen(false);
+            //     } 
+            //     if(currentUser !== null){
+            //         const userRef = doc(db, "users", currentUser.uid);
+            //         const userSnap = await getDoc(userRef);
+            //         if(userSnap.exists()) {
+            //             const q = query(collection(db, "theOfficeTriviaQuestions"), where(documentId(), "not-in", userSnap.data().questionsAnswered));
+            //             const querySnap = await getDocs(q);
+            //             querySnap.forEach((doc) => {
+            //                 setCurrentQuestionId(doc.id);
+            //                 setCurrentQuestion(doc.data());
+            //                 setIsQuestionLoading(false);
+            //                 setTimeUp(true);
+            //             })
+            //         }
+            //     }
+            // }
