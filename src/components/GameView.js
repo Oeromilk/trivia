@@ -98,19 +98,19 @@ function GameOver(props){
                     <Typography align="center" variant="h1">Game Over</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography align="center" variant="h3">Questions Seen</Typography>
+                    <Typography align="center" variant="h2">Questions Seen</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography sx={{color: "#FF6D1F"}} align="center" variant="h2">{props.seen}</Typography>
+                    <Typography sx={{color: "#FF6D1F", fontSize: '5rem', fontWeight: 600}} align="center">{props.seen}</Typography>
                 </Grid>
                 <Grid sx={{marginBottom: 4, marginTop: 4}} item xs={12}>
                     <Divider light={true} variant="middle"/>
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography align="center" variant="h3">Questions Correct</Typography>
+                    <Typography align="center" variant="h2">Questions Correct</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography sx={{color: "#52A5FF"}} align="center" variant="h2">{props.correct}</Typography>
+                    <Typography sx={{color: "#52A5FF", fontSize: '5rem', fontWeight: 600}} align="center">{props.correct}</Typography>
                 </Grid>
             </Grid>
         </Container>
@@ -348,7 +348,7 @@ export default function GameView(){
                                 </RadioGroup>
                                 {
                                     isNextQuestion ? 
-                                    <Button variant="contained" color="primary" size="large" onClick={handleNextQuestion}>Next Question</Button>
+                                    <Button variant="contained" color="secondary" size="large" onClick={handleNextQuestion}>Next Question</Button>
                                     :
                                     <Button sx={{ height: 50}} className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
                                 }
