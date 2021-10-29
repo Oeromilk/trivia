@@ -363,7 +363,7 @@ export default function GameView(){
                                 </RadioGroup>
                                 {
                                     isNextQuestion ? 
-                                    <Button variant="contained" color="secondary" size="large" onClick={handleNextQuestion}>Next Question</Button>
+                                    <Button variant="contained" color={(isCorrect ? "success" : "secondary")} size="large" onClick={handleNextQuestion}>Next Question</Button>
                                     :
                                     <Button sx={{ height: 50}} className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
                                 }
