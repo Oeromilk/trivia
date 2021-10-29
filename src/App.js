@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { ReactComponent as MovieWatching } from './images/movie-watching.svg';
+import { ReactComponent as TrivibleLogo} from "./images/trivible-logo.svg";
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import { CssBaseline } from '@mui/material';
@@ -251,6 +252,7 @@ function TopBar(props){
     <div className={classes.root}>
           <AppBar position="static">
             <ToolBar>
+              <TrivibleLogo style={{height: 32, width: 32, marginRight: 12}} />
               <Typography className={classes.title} variant="h6" onClick={handleHome}>Trivible</Typography>
               <div className={classes.desktopSection}>
                 {((props.currentUser !== null) ? <SignedInLinks /> : null)}

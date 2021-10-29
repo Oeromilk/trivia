@@ -110,7 +110,7 @@ export default function Dashboard(){
                                 <FriendsList />
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
-                                <Button color="secondary" variant="outlined" className={classes.cardAction}>See All</Button>
+                                <Button color="primary" variant="outlined" className={classes.cardAction}>Manage Friends</Button>
                             </CardActions>
                         </Card>
                     </Grid>
