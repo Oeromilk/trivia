@@ -263,10 +263,11 @@ export default function GameView(){
     async function getRandomNumber(arr){
         const countDoc = doc(db, "theOfficeTriviaQuestions", "count");
         const countSnap = await getDoc(countDoc);
+        let count = countSnap.data().numberOfQuestions + 1;
         
-        var random = Math.floor((Math.random() * countSnap.data().numberOfQuestions));
-        if(arr.includes(random)){
-            random = Math.floor((Math.random() * countSnap.data().numberOfQuestions));
+        var random = Math.floor((Math.random() * count));
+        while(arr.includes(random)){
+            random = Math.floor((Math.random() * count));
         }
         return random;
     }
