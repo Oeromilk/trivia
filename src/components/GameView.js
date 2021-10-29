@@ -121,6 +121,7 @@ export default function GameView(){
     const classes = useStyles();
     const currentUser = auth.currentUser;
     const [choice, setChoice] = React.useState('');
+    const [choices, setChoices] = React.useState(null);
     const [open, setOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState('');
     const [severity, setSeverity] = React.useState('warning');
@@ -134,6 +135,7 @@ export default function GameView(){
     const [isCorrect, setIsCorrect] = React.useState(null);
     const [timeUp, setTimeUp] = React.useState(false);
     const [currentQuestion, setCurrentQuestion] = React.useState(null);
+    const [characterCount, setCharacterCount] = React.useState(0);
     const choiceStyle = {
         borderRadius: '0.5em',
         border: '1px solid #484848',
@@ -188,6 +190,18 @@ export default function GameView(){
     }, [chances]);
 
     React.useEffect(() => {
+        if(currentQuestion !== null){
+            let questionCount = currentQuestion.questionInfo.question.length;
+            let choicesCount = 0;
+            currentQuestion.questionInfo.choices.forEach((option) => {
+                choicesCount += option.length;
+            })
+            console.log("Character Count: ", questionCount + choicesCount);
+            setCharacterCount(questionCount + choicesCount);
+        }
+    }, [currentQuestion])
+
+    React.useEffect(() => {
         if(isCorrect){
             setQuestionsCorrect((correct) => correct + 1);
             updateIfCorrect();
@@ -238,6 +252,7 @@ export default function GameView(){
                 querySnap.forEach((doc) => {
                     setCurrentQuestionId(doc.id);
                     setCurrentQuestion(doc.data());
+                    setChoices(doc.data().questionInfo.choices.sort(() => Math.random() - 0.5));
                     setIsQuestionLoading(false);
                     setTimeUp(true);
                 })
@@ -318,7 +333,7 @@ export default function GameView(){
                     </Grid>
                     <Grid item xs={12}>
                         <div className={classes.timerWrap}>
-                            <Timer timeUp={timeUp} setTimeUp={setTimeUp} isNextQuestion={isNextQuestion} />
+                            {currentQuestion !== null ? <Timer count={characterCount} timeUp={timeUp} setTimeUp={setTimeUp} isNextQuestion={isNextQuestion} /> : null}
                         </div>
                     </Grid>
                     <Grid item xs={12} className={classes.infoContainer}>
@@ -338,7 +353,7 @@ export default function GameView(){
                                 <RadioGroup aria-label="trivia" name="trivia" value={choice} onChange={handleUserChoice}>
                                     {
                                         isQuestionLoading === false ?
-                                        currentQuestion.questionInfo.choices.map((option) => {
+                                        choices.map((option) => {
                                             return (
                                                 <FormControlLabel sx={choiceStyle} className={classes.radioStyle} key={option} value={option} control={<Radio/>} label={option} />
                                             )

@@ -20,7 +20,7 @@ export default function Timer(props){
             setTimeout(() => {
                 timer = setInterval(() => {
                     setTimeLeft((newTimeLeft) => (newTimeLeft <= 0 ? 0 : newTimeLeft - 1));
-                }, 60);
+                }, props.count);
             }, 750)
 
             if(props.isNextQuestion){
