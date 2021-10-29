@@ -2,7 +2,7 @@ import React from 'react';
 import { isMobile } from 'react-device-detect';
 import Timer from './Timer';
 import { auth } from './firebase/firebaseConfig';
-import { collection, query, where, doc, updateDoc, getDoc, getDocs, arrayUnion, documentId } from "firebase/firestore";
+import { collection, query, where, doc, updateDoc, get, getDoc, getDocs, arrayUnion, limit, documentId } from "firebase/firestore";
 import { db } from './firebase/firebaseConfig';
 import { ReactComponent as ChanceElement } from '../images/chance.svg';
 import makeStyles from '@mui/styles/makeStyles';
@@ -247,15 +247,20 @@ export default function GameView(){
                 let arr = userSnap.data().questionsAnswered;
                 var randomNumber = await getRandomNumber(arr);
                 
-                const q = query(collection(db, "theOfficeTriviaQuestions"), where("id", "==", randomNumber));
+                const q = query(collection(db, "theOfficeTriviaQuestions"), where("id", "==", randomNumber), limit(1));
                 const querySnap = await getDocs(q);
-                querySnap.forEach((doc) => {
-                    setCurrentQuestionId(doc.id);
-                    setCurrentQuestion(doc.data());
-                    setChoices(doc.data().questionInfo.choices.sort(() => Math.random() - 0.5));
-                    setIsQuestionLoading(false);
-                    setTimeUp(true);
-                })
+                
+                if(querySnap.size > 0){
+                    querySnap.forEach((doc) => {
+                        setCurrentQuestionId(doc.id);
+                        setCurrentQuestion(doc.data());
+                        setChoices(doc.data().questionInfo.choices.sort(() => Math.random() - 0.5));
+                        setIsQuestionLoading(false);
+                        setTimeUp(true);
+                    })
+                } else {
+                    console.log("no more questions")
+                }
             }
         }
     }
