@@ -27,6 +27,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import Dashboard from './components/Dashboard';
 import GameView from './components/GameView';
+import GameEnding from './components/GameEnding';
 import LeaderBoard from './components/Leaderboard';
 import UserProfile from './components/UserProfile';
 import SignUp from './components/SignUp';
@@ -436,6 +437,9 @@ export default function App(){
             </Route>
             <Route path="/leaderboard">
               <LeaderBoard />
+            </Route>
+            <Route path="/game/ending">
+              <GameEnding />
             </Route>
             <Route path="/game">
               <GameView />

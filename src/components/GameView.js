@@ -1,8 +1,9 @@
 import React from 'react';
+import { useHistory } from "react-router-dom";
 import { isMobile } from 'react-device-detect';
 import Timer from './Timer';
 import { auth } from './firebase/firebaseConfig';
-import { collection, query, where, doc, updateDoc, get, getDoc, getDocs, arrayUnion, limit, documentId } from "firebase/firestore";
+import { collection, query, where, doc, updateDoc, getDoc, getDocs, arrayUnion, limit } from "firebase/firestore";
 import { db } from './firebase/firebaseConfig';
 import { ReactComponent as ChanceElement } from '../images/chance.svg';
 import makeStyles from '@mui/styles/makeStyles';
@@ -78,12 +79,14 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 function StartScreen(props){
     return (
         <Container style={(props.isShown ? {} : {display: 'none'})}>
-            <Grid style={(isMobile ? {paddingTop: '5em'} : {paddingTop: '20em'})} container spacing={10}>
+            <Grid style={(isMobile ? {paddingTop: '5em'} : {paddingTop: '15em'})} container spacing={10}>
                 <Grid item xs={12}>
                     <Typography align="center" variant="h1">Ready to go?</Typography>
                 </Grid>
                 <Grid item style={{display: 'flex', justifyContent: 'center'}} xs={12}>
-                    <Button style={{margin: '0 auto'}} size="large" variant="contained" color="primary" onClick={props.startGame}>Start Game</Button>
+                    <Button style={{margin: '0 auto', height: 72, width: 144}} variant="contained" color="primary" onClick={props.startGame}>
+                        <Typography variant="body1">Start Game</Typography>
+                    </Button>
                 </Grid>
             </Grid>
         </Container>
@@ -119,6 +122,7 @@ function GameOver(props){
 
 export default function GameView(){
     const classes = useStyles();
+    const history = useHistory();
     const currentUser = auth.currentUser;
     const [choice, setChoice] = React.useState('');
     const [choices, setChoices] = React.useState(null);
@@ -259,7 +263,7 @@ export default function GameView(){
                         setTimeUp(true);
                     })
                 } else {
-                    console.log("no more questions")
+                    history.push("/game/ending");
                 }
             }
         }
@@ -356,7 +360,7 @@ export default function GameView(){
                     <Grid item xs={12}>
                         <form className={classes.formStyle}>
                             <FormControl className={classes.formControlStyle}>
-                                <RadioGroup aria-label="trivia" name="trivia" value={choice} onChange={handleUserChoice}>
+                                <RadioGroup sx={{ marginBottom: 6 }} aria-label="trivia" name="trivia" value={choice} onChange={handleUserChoice}>
                                     {
                                         isQuestionLoading === false ?
                                         choices.map((option) => {
@@ -371,7 +375,7 @@ export default function GameView(){
                                     isNextQuestion ? 
                                     <Button variant="contained" color={(isCorrect ? "success" : "secondary")} size="large" onClick={handleNextQuestion}>Next Question</Button>
                                     :
-                                    <Button sx={{ height: 50}} className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
+                                    <Button sx={{ height: 50 }} className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
                                 }
                             </FormControl>
                         </form>
