@@ -8,27 +8,16 @@ import 'fontsource-roboto';
 import { auth } from "./components/firebase/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import AppBar from '@mui/material/AppBar';
-import ToolBar from '@mui/material/Toolbar';
-import Button from '@mui/material/Button';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import Typography from '@mui/material/Typography';
+import { Container, Grid, AppBar, Button, Drawer, List, ListItem, Typography, Divider, Paper, Accordion, AccordionDetails, AccordionSummary} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import Divider from '@mui/material/Divider';
-import Paper from '@mui/material/Paper';
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ToolBar from '@mui/material/Toolbar';
 
 import Dashboard from './components/Dashboard';
 import GameView from './components/GameView';
 import GameEnding from './components/GameEnding';
 import LeaderBoard from './components/Leaderboard';
+import FriendsView from './components/FriendsView';
 import UserProfile from './components/UserProfile';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
@@ -163,7 +152,7 @@ function SignOut(){
   }
   return (
     <Link to="/" style={noTextDecoration}>
-      <Button className={classes.linkStyle} color="inherit" variant="outlined" onClick={handleSignOut}>Sign Out</Button>
+      <Button className={classes.linkStyle} color="inherit" variant="text" onClick={handleSignOut}>Sign Out</Button>
     </Link>
   )
 }
@@ -434,6 +423,9 @@ export default function App(){
           <Switch>
             <Route path="/profile">
               <UserProfile currentUser={currentUser} />
+            </Route>
+            <Route path="/friends">
+              <FriendsView currentUser={currentUser} />
             </Route>
             <Route path="/leaderboard">
               <LeaderBoard />

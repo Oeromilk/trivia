@@ -12,6 +12,11 @@ import ListItem from '@mui/material/ListItem';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import AvatarContainer from './Avatar';
+import Avatar from '@mui/material/Avatar';
+import Badge from '@mui/material/Badge';
+import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -35,6 +40,9 @@ const useStyles = makeStyles((theme) => ({
             height: '300px'
         }
     },
+    friendCard: {
+        height: '400px'
+    },
     paper: {
         display: 'flex',
         flexDirection: 'column',
@@ -46,22 +54,24 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 function FriendsList(){
-    const [friends, setFriends] = React.useState(['id1', 'id2', 'id3'])
+    const [friends, setFriends] = React.useState([{avatar: 'andy', username: 'test'}, {avatar: 'andy', username: 'test1'}, {avatar: 'andy', username: 'test2'}])
 
-    const friendsList = friends.map((friend)=> {
-        return <ListItem key={friend}>{friend}</ListItem>;
+    const friendsList = friends.slice(0,3).map((friend) => {
+        return (
+        <ListItem key={friend.username}>
+            <Grid container>
+                <Grid item xs={3}>
+                    <Avatar sx={{width: 48, height: 48}}><AvatarContainer avatar={friend.avatar.toLowerCase()} /></Avatar>
+                </Grid>
+                <Grid item xs={9}>
+                    <Typography sx={{fontSize: 32}}>{friend.username}</Typography>
+                </Grid>
+            </Grid>
+        </ListItem>)
     })
 
     useEffect(() => {
         getUserFriends();
-        // const usersRef = fireStore.collection('users');
-        // if(user !== null){
-        //     usersRef.doc(user.uid).get().then((doc) => {
-        //         if(doc.exists){
-        //             setFriends(doc.data().friendsList)
-        //         }
-        //     })
-        // }
     }, [])
 
     async function getUserFriends(){
@@ -86,6 +96,12 @@ export default function Dashboard(){
         event.preventDefault();
         history.push("/game");
     }
+
+    function manageFriends(event){
+        event.preventDefault();
+
+        history.push("/friends");
+    }
     return (
         <React.Fragment>
             <Container className={classes.root}>
@@ -93,7 +109,7 @@ export default function Dashboard(){
                     <Grid item xs={12} >
                         <Typography variant="h3">Dashboard</Typography>
                     </Grid>
-                    <Grid item lg={4} sm={5} xs={12} className={classes.card}>
+                    <Grid item lg={4} md={5} xs={12} className={classes.card}>
                         <Card className={classes.paper} elevation={3}>
                             <CardContent>
                                 <Typography variant="h5" color="primary">Ready to test your knowledge?</Typography>
@@ -103,27 +119,28 @@ export default function Dashboard(){
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item lg={4} sm={7} xs={12} className={classes.card}>
+                    <Grid item lg={4} md={7} xs={12} className={classes.friendCard}>
                         <Card className={classes.paper} elevation={3}>
+                            <CardHeader title="Friends">
+                            </CardHeader>
                             <CardContent>
-                                <Typography variant="h6">Friends</Typography>
                                 <FriendsList />
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
-                                <Button color="primary" variant="outlined" className={classes.cardAction}>Manage Friends</Button>
+                                <Button color="primary" variant="outlined" className={classes.cardAction} onClick={manageFriends}>Manage Friends</Button>
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item lg={4} sm={12} xs={12} className={classes.card}>
+                    <Grid item lg={4} md={12} xs={12} className={classes.card}>
                         <Card className={classes.paper} elevation={3}>
                             <CardContent>
                                 <Typography variant="h6">Achievments</Typography>
                                 <List>
-                                    <ListItem>Acievment Title</ListItem>
+                                    <ListItem>Acievments Coming Soon</ListItem>
                                 </List>
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
-                                <Button color="secondary" variant="outlined" className={classes.cardAction}>See All</Button>
+                                <Button disabled color="secondary" variant="outlined" className={classes.cardAction}>See All</Button>
                             </CardActions>
                         </Card>
                     </Grid>

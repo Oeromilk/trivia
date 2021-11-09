@@ -5,7 +5,7 @@ import Timer from './Timer';
 import { auth } from './firebase/firebaseConfig';
 import { collection, query, where, doc, updateDoc, getDoc, getDocs, arrayUnion, limit } from "firebase/firestore";
 import { db } from './firebase/firebaseConfig';
-import { ReactComponent as ChanceElement } from '../images/chance.svg';
+import chance from '../images/chance.svg';
 import makeStyles from '@mui/styles/makeStyles';
 import { Container, CssBaseline, Grid, Button, Typography, FormControl, FormControlLabel, Radio, RadioGroup, Chip, Snackbar, Box, Divider } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
@@ -13,6 +13,7 @@ import MuiAlert from '@mui/material/Alert';
 const useStyles = makeStyles((theme) => ({
     root: {
         marginTop: (isMobile ? theme.spacing(3) : theme.spacing(10)),
+        marginBottom: (isMobile ? theme.spacing(3) : theme.spacing(5)),
         [theme.breakpoints.up('md')]: {
             maxWidth: '50%'
         },
@@ -336,9 +337,9 @@ export default function GameView(){
                     </Grid>
                     <Grid item xs={12}>
                         <div className={classes.chanceContainer}>
-                            <ChanceElement className={`${classes.chance} ${chances < 1 ? classes.lostChance : ''}`} />
-                            <ChanceElement className={`${classes.chance} ${chances < 2 ? classes.lostChance : ''}`} />
-                            <ChanceElement className={`${classes.chance} ${chances < 3 ? classes.lostChance : ''}`} />
+                            <img className={`${classes.chance} ${chances < 1 ? classes.lostChance : ''}`} src={chance} alt="chances remaining 1" />
+                            <img className={`${classes.chance} ${chances < 2 ? classes.lostChance : ''}`} src={chance} alt="chances remaining 2" />
+                            <img className={`${classes.chance} ${chances < 3 ? classes.lostChance : ''}`} src={chance} alt="chances remaining 3" />
                         </div>
                     </Grid>
                     <Grid item xs={12}>
