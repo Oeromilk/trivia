@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AvatarContainer from './Avatar';
 import { db, auth } from './firebase/firebaseConfig';
 import { onAuthStateChanged } from '@firebase/auth';
-import { doc, getDoc, getDocs, updateDoc, collection, query, where } from '@firebase/firestore';
+import { doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where } from '@firebase/firestore';
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
 import Avatar from '@mui/material/Avatar';
@@ -19,6 +19,27 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+
+function useDebounce(value, delay) {
+    // State and setters for debounced value
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(
+      () => {
+        // Update debounced value after delay
+        const handler = setTimeout(() => {
+          setDebouncedValue(value);
+        }, delay);
+        // Cancel the timeout if value changes (also on delay change or unmount)
+        // This is how we prevent debounced value from updating if value is changed ...
+        // .. within the delay period. Timeout gets cleared and restarted.
+        return () => {
+          clearTimeout(handler);
+        };
+      },
+      [value, delay] // Only re-call effect if value or delay changes
+    );
+    return debouncedValue;
+  }
 
 const createProfileStyles = makeStyles((theme) => ({
     root: {
@@ -76,38 +97,36 @@ function CreateProfile(props){
     const [usernameHelperText, setUsernameHelperText] = React.useState('');
     const [isValid, setIsValid] = React.useState(true);
     const [avatar, setAvatar] = React.useState('Michael');
+    const debouncedSearchUsername = useDebounce(username, 500);
 
     useEffect(() => {
-        getUsers()
+        if(debouncedSearchUsername){
+            getUsers(debouncedSearchUsername);
+        }
+    }, [debouncedSearchUsername])
 
-    }, [username])
-
-    async function getUsers(){
+    async function getUsers(querySearch){
         const usersRef = collection(db, "users");
-        const q = query(usersRef, where("username", "==", username));
+        const q = query(usersRef, where("username", "==", querySearch));
         const querySnap = await getDocs(q);
-        querySnap.forEach((doc) => {
-            if(doc.exists()){
-                setUsernameHelperText("Username is taken, please select another.");
-                setIsValid(true);
-            }
-        })
-        if(username !== ""){
-            setUsernameHelperText("Username is available!")
-            setIsValid(false)
+        if(querySnap.size === 0){
+            setUsernameHelperText("Username is available!");
+            setIsValid(false);
+        } else {
+            setUsernameHelperText("Username is taken, please select another.");
+            setIsValid(true);
         }
     }
 
     async function updateUser(){
-        const userRef = doc(db, "users", props.user.uid);
-        await updateDoc(userRef, {
+        await setDoc(doc(db, "users", props.user.uid), {
             username: username,
             avatar: avatar,
             achievementPoints: 0,
             friendRequests: [],
             friendsList: [],
             questionsAnswered: []
-        }).then(() => {
+        }).then(function(){
             history.push("/");
         })
     }
