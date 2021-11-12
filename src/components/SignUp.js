@@ -47,8 +47,11 @@ export default function SignUp() {
     const [passwordLength, setPasswordLength] = React.useState('');
 
     useEffect(() => {
+        if(email === '' && password === ''){
+            return;
+        }
         validatePassword();
-    }, [confirmPassword, password])
+    }, [confirmPassword])
 
     function handleEmail(event){
         setEmail(event.target.value);
@@ -70,7 +73,7 @@ export default function SignUp() {
     }
     
     function validatePassword(){
-        if(password !== '' && password === confirmPassword){
+        if(password !== '' && password === confirmPassword && password.length > 5){
             setValidPassword(true);
         }
 
