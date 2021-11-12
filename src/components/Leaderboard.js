@@ -47,41 +47,7 @@ const leaderboardStyles = makeStyles((theme) => ({
 
 export default function LeaderBoard(){
     const classes = leaderboardStyles();
-    const [topTenUsers, setTopTenUsers] = useState([
-        {
-            username: 'hello', avatar: 'jim', achievementPoints: 100
-        },
-        {
-            username: 'hello1', avatar: 'jim', achievementPoints: 100
-        },
-        {
-            username: 'hello2', avatar: 'jim', achievementPoints: 100
-        },
-        {
-            username: 'hello3', avatar: 'jim', achievementPoints: 100
-        },
-        {
-            username: 'hello4', avatar: 'jim', achievementPoints: 100
-        },
-        {
-            username: 'hello5', avatar: 'jim', achievementPoints: 100
-        },
-        {
-            username: 'hello6', avatar: 'jim', achievementPoints: 100
-        },
-        {
-            username: 'hello7', avatar: 'jim', achievementPoints: 100
-        },
-        {
-            username: 'hello8', avatar: 'jim', achievementPoints: 100
-        },
-        {
-            username: 'hello9', avatar: 'jim', achievementPoints: 100
-        },
-        {
-            username: 'hello10', avatar: 'jim', achievementPoints: 100
-        },
-    ]);
+    const [topTenUsers, setTopTenUsers] = useState([]);
 
     const topTenUsersList = topTenUsers.map((user, index) => {
         let bgColor;

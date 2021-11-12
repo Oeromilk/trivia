@@ -53,8 +53,8 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-function FriendsList(){
-    const [friends, setFriends] = React.useState([{avatar: 'andy', username: 'test'}, {avatar: 'andy', username: 'test1'}, {avatar: 'andy', username: 'test2'}])
+function FriendsList(props){
+    const [friends, setFriends] = React.useState([]);
 
     const friendsList = friends.slice(0,3).map((friend) => {
         return (
@@ -75,7 +75,7 @@ function FriendsList(){
     }, [])
 
     async function getUserFriends(){
-        const user = auth.currentUser;
+        const user = props.user;
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
         if(userSnap.exists()){
@@ -88,7 +88,7 @@ function FriendsList(){
     )
 }
 
-export default function Dashboard(){
+export default function Dashboard(props){
     const history = useHistory();
     const classes = useStyles();
 
@@ -124,7 +124,7 @@ export default function Dashboard(){
                             <CardHeader title="Friends">
                             </CardHeader>
                             <CardContent>
-                                <FriendsList />
+                                <FriendsList user={props.user} />
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
                                 <Button color="primary" variant="outlined" className={classes.cardAction} onClick={manageFriends}>Manage Friends</Button>

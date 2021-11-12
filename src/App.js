@@ -146,9 +146,15 @@ const noTextDecoration = {
 
 function SignOut(){
   const classes = useStyles();
+  const history = useHistory();
 
   function handleSignOut(){
-    signOut(auth);
+    signOut(auth).then(() =>{
+      localStorage.setItem("uid", null);
+      history.push("/");
+    }).catch((error) => {
+      console.log(error);
+    });
   }
   return (
     <Link to="/" style={noTextDecoration}>
@@ -400,12 +406,16 @@ function LandingNoUser(){
 
 export default function App(){
   const [currentUser, setCurrentUser] = React.useState(null);
+  const userStatus = localStorage.getItem("uid");
 
   useEffect(() => {
+    console.log("local storage uid: ", localStorage.getItem("uid"))
     onAuthStateChanged(auth, function(user){
       if(user !== null){
+        localStorage.setItem("uid", user.uid);
         setCurrentUser(user);
       } else {
+        localStorage.setItem("uid", null)
         setCurrentUser(null)
       }
     })
@@ -446,7 +456,7 @@ export default function App(){
               <ForgotPassword />
             </Route>
             <Route exact path="/">
-              {((currentUser !== null) ? <Dashboard /> : <LandingNoUser/>)}
+              {(userStatus !== "null" ? <Dashboard user={currentUser} /> : <LandingNoUser/>)}
             </Route>
           </Switch>
         </Router>
