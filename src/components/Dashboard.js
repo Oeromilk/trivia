@@ -75,8 +75,9 @@ function FriendsList(props){
     }, [])
 
     async function getUserFriends(){
+        const uid = localStorage.getItem("uid");
         const user = props.user;
-        const userRef = doc(db, "users", user.uid);
+        const userRef = doc(db, "users", uid);
         const userSnap = await getDoc(userRef);
         if(userSnap.exists()){
             setFriends(userSnap.data().friendsList);
@@ -142,6 +143,13 @@ export default function Dashboard(props){
                             <CardActions style={{justifyContent: "end"}}>
                                 <Button disabled color="secondary" variant="outlined" className={classes.cardAction}>See All</Button>
                             </CardActions>
+                        </Card>
+                    </Grid>
+                    <Grid item lg={4} md={12} xs={12} className={classes.card}>
+                        <Card elevation={3}>
+                            <CardContent>
+                                <div>Ads Go Here</div>
+                            </CardContent>
                         </Card>
                     </Grid>
                 </Grid>

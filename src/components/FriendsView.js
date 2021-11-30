@@ -26,6 +26,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function FriendsView(props){
     const classes = useStyles();
+    const uid = localStorage.getItem("uid");
     const [userInfo, setUserInfo] = useState(null);
     const [isFriendRequests, setIsFriendRequests] = useState(false);
     const [activeRequests, setActiveRequests] = useState(null);
@@ -41,6 +42,7 @@ export default function FriendsView(props){
     }, [])
 
     useEffect(() => {
+        console.log(userInfo);
         if(userInfo !== null){
             setFriends(userInfo.friendsList);
             if(userInfo.friendRequests.length >= 1){
@@ -55,27 +57,38 @@ export default function FriendsView(props){
     }, [userInfo])
 
     async function getUserInfo(){
-        const userRef = doc(db, "users", props.currentUser.uid);
+        
+        const userRef = doc(db, "users", uid);
         const userSnap = await getDoc(userRef);
         if(userSnap.exists()){
             setUserInfo(userSnap.data())
         }
     }
 
+    async function updateRequestorsFriendList(request){
+        const userRef = doc(db, "users", request.requestorUid);
+        await updateDoc(userRef, {
+            friendsList: arrayUnion({avatar: userInfo.avatar, username: userInfo.username})
+        }).then(function(){
+            console.log("requestor's friends list updated")
+        })
+    }
+
     async function updateFriendsList(request){
-        const userRef = doc(db, "users", props.currentUser.uid);
+        const userRef = doc(db, "users", uid);
         await updateDoc(userRef, {
             friendsList: arrayUnion({avatar: request.avatar, username: request.username}),
             friendRequests: arrayRemove(request)
         }).then(function(){
-            console.log("Approved.")
+            console.log("Approved.");
+            updateRequestorsFriendList(request);
             getUserInfo();
         })
     }
 
     async function removeRequest(request){
         console.log("Request info: ", request)
-        const userRef = doc(db, "users", props.currentUser.uid);
+        const userRef = doc(db, "users", uid);
         await updateDoc(userRef, {
             friendRequests: arrayRemove(request)
         }).then(function(){
@@ -145,7 +158,8 @@ export default function FriendsView(props){
             avatar: userInfo.avatar,
             date: Date.now().toString(),
             message: requestMessage,
-            username: requsetUsername
+            username: requsetUsername,
+            requestorUid: uid
         }
         checkForUsername(requset);
     }
@@ -180,7 +194,7 @@ export default function FriendsView(props){
                             let date = new Date(Number(request.date));
                             
                             return (
-                                <Grid key={request.username} item xs={12}>
+                                <Grid key={request.date} item xs={12}>
                                     <Grid sx={{boxShadow: 3, maxWidth: 550, borderRadius: 3, backgroundColor: '#363636'}} container spacing={2}>
                                         <Grid item xs={2}>
                                             <Avatar sx={{width: 48, height: 48}}><AvatarContainer avatar={request.avatar.toLowerCase()}/></Avatar>
