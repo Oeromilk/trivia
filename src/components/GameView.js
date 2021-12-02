@@ -264,6 +264,12 @@ export default function GameView(){
                         setTimeUp(true);
                     })
                 } else {
+                    let newStats = {
+                        percentageRight: Math.round((questionsCorrect / questionsSeen + Number.EPSILON) * 100) / 100,
+                        questionsCorrect: questionsCorrect,
+                        questionsSeen: questionsSeen
+                    }
+                    updateWhenGameOver(newStats);
                     history.push("/game/ending");
                 }
             }
@@ -331,7 +337,7 @@ export default function GameView(){
             <React.Fragment>
             <StartScreen isShown={isShown} startGame={startGame}/>
             <Container style={(isShown ? {display: 'none'} : {})} className={classes.root}>
-                <Grid display={isShown ? 'none' : ''} container rowSpacing={2}>
+                <Grid sx={{maxWidth: 500, margin: '0 auto'}} display={isShown ? 'none' : ''} container rowSpacing={2}>
                     <Grid item xs={12}>
                         <Typography align="center" variant={(isMobile ? "h5" : "h3")}>Chances Remaining:</Typography>
                     </Grid>
