@@ -24,6 +24,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # firbase
+.firebase
 .firebaserc
 firebase.json
 firestore.indexes.json

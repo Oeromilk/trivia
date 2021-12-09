@@ -123,6 +123,12 @@ export default function Dashboard(props){
         history.push("/contribute");
     }
 
+    const handleReview = (event) => {
+        event.preventDefault();
+
+        history.push("/review");
+    }
+
     return (
         <React.Fragment>
             <Container className={classes.root}>
@@ -175,14 +181,14 @@ export default function Dashboard(props){
                     <Grid item lg={4} md={6} xs={12} className={classes.card}>
                         <Card sx={{padding: 1}}  elevation={3}>
                             <CardContent>
-                                <Typography variant="h6">Contribute</Typography>
-                                <Typography sx={{paddingTop: 2}} variant="subtitle1">Submit your own trivia questions and they will get reviewed by other pro users to be approved!</Typography>
+                                <Typography variant="h6">Contributions</Typography>
+                                <Typography sx={{paddingTop: 2}} variant="subtitle1">Create and submit your own <Typography sx={{display: "inline"}} variant="subtitle1" color="primary">trivia</Typography> questions and the community can review and rate to be approved.</Typography>
                             </CardContent>
                             <CardActions style={(activeContributions > 0) ? {justifyContent: "space-between"} : {justifyContent: "end"}}>
                                 {(activeContributions > 0) ? <Badge badgeContent={activeContributions} color="success">
-                                    <Button variant="outlined">Review Contributions</Button>
+                                    <Button variant="outlined" onClick={handleReview}>Review</Button>
                                 </Badge> : null}
-                                <Button variant="contained" onClick={handleContribute}>Contribute</Button>
+                                <Button variant="contained" onClick={handleContribute}>Create</Button>
                             </CardActions>
                         </Card>
                     </Grid>

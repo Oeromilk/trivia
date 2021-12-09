@@ -19,6 +19,7 @@ import GameEnding from './components/GameEnding';
 import LeaderBoard from './components/Leaderboard';
 import FriendsView from './components/FriendsView';
 import UserProfile from './components/UserProfile';
+import Review from './components/Review';
 import Contribute from './components/Contribute';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
@@ -447,6 +448,9 @@ export default function App(){
             </Route>
             <Route path="/game">
               <GameView />
+            </Route>
+            <Route path="/review">
+              <Review />
             </Route>
             <Route path="/contribute">
               <Contribute />

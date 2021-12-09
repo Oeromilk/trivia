@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { db } from './firebase/firebaseConfig'
-import { collection, addDoc } from "firebase/firestore";
+import { db } from './firebase/firebaseConfig';
+import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import { Container, Grid, Typography, Button, TextField, Tooltip, InputLabel, Select, MenuItem, FormControl, CircularProgress, Snackbar } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 
@@ -20,6 +20,7 @@ export default function Contribute(){
         8: 24,
         9: 25
     }
+    const [userInfo, setUserInfo] = useState(null);
     const [question, setQuestion] = useState("");
     const [questionValidation, setQuestionValidation] = useState({error: false, text: null});
     const [answer, setAnswer] = useState("");
@@ -38,6 +39,10 @@ export default function Contribute(){
     const questionToolTip = "Remember, questions are timed.";
     const answerToolTip = "Keep it simple stupid.";
     const difficultyToolTip = "Rank it 1, 2, 3, 4, 5. 1 being easist and 5 being hardest. Think your question is almost impossible, then rank it 6.";
+
+    useEffect(() => {
+        getUserInfo();
+    }, [])
 
     useEffect(() => {
         if(question !== ""){
@@ -60,6 +65,13 @@ export default function Contribute(){
     useEffect(() => {
         setEpisodeCount(numberOfEpisodes[season])
     }, [season])
+    
+    async function getUserInfo(){
+        const userSnap = await getDoc(doc(db, "users", localStorage.getItem("uid")));
+        if(userSnap.exists()){
+            setUserInfo(userSnap.data());
+        }
+    }
 
     async function sendNewContribution(data){
         const docRef = await addDoc(collection(db, "theOfficeTriviaContributions"), data);
@@ -115,7 +127,8 @@ export default function Contribute(){
                 setIsAnswerIncluded(false);
                 setIsSending(true);
                 contribution = {
-                    creator: localStorage.getItem("uid"),
+                    creator: userInfo.username,
+                    avatar: userInfo.avatar,
                     question: question,
                     answer: answer,
                     choices: choicesField.map(field => field.value),
