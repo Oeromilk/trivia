@@ -19,6 +19,7 @@ import GameEnding from './components/GameEnding';
 import LeaderBoard from './components/Leaderboard';
 import FriendsView from './components/FriendsView';
 import UserProfile from './components/UserProfile';
+import Contribute from './components/Contribute';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
 import ForgotPassword from './components/ForgotPassword';
@@ -45,7 +46,8 @@ const theme = createTheme({
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    flexGrow: 1
+    flexGrow: 1,
+    marginBottom: theme.spacing(8)
   },
   accordionSize: {
     width: '100%',
@@ -246,7 +248,7 @@ function TopBar(props){
 
   return (
     <div className={classes.root}>
-          <AppBar position="static">
+          <AppBar position="fixed" sx={{top: 0, left: 0}}>
             <ToolBar>
               <TrivibleLogo style={{height: 32, width: 32, marginRight: 12}} />
               <Typography className={classes.title} variant="h6" onClick={handleHome}>Trivible</Typography>
@@ -445,6 +447,9 @@ export default function App(){
             </Route>
             <Route path="/game">
               <GameView />
+            </Route>
+            <Route path="/contribute">
+              <Contribute />
             </Route>
             <Route path="/sign-up">
               <SignUp />

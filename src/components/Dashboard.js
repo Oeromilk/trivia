@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { db, auth } from './firebase/firebaseConfig';
-import { doc, getDoc } from "firebase/firestore";
+import React, { useState, useEffect } from 'react';
+import { db } from './firebase/firebaseConfig';
+import { doc, getDoc, getDocs, collection } from "firebase/firestore";
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
 import Container from '@mui/material/Container';
@@ -16,7 +16,6 @@ import CardHeader from '@mui/material/CardHeader';
 import AvatarContainer from './Avatar';
 import Avatar from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
-import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -76,7 +75,6 @@ function FriendsList(props){
 
     async function getUserFriends(){
         const uid = localStorage.getItem("uid");
-        const user = props.user;
         const userRef = doc(db, "users", uid);
         const userSnap = await getDoc(userRef);
         if(userSnap.exists()){
@@ -92,6 +90,21 @@ function FriendsList(props){
 export default function Dashboard(props){
     const history = useHistory();
     const classes = useStyles();
+    const [activeContributions, setActiveContributions] = useState(0);
+
+    useEffect(() => {
+        checkContributions();
+    }, [])
+
+    async function checkContributions(){
+        const contributionsRef = collection(db, "theOfficeTriviaContributions");
+
+        const snapShot = await getDocs(contributionsRef);
+
+        if(snapShot.size > 1){
+            setActiveContributions(snapShot.size - 1);
+        }
+    }
 
     function handleNewGame(event){
         event.preventDefault();
@@ -103,6 +116,13 @@ export default function Dashboard(props){
 
         history.push("/friends");
     }
+
+    const handleContribute = (event) => {
+        event.preventDefault();
+
+        history.push("/contribute");
+    }
+
     return (
         <React.Fragment>
             <Container className={classes.root}>
@@ -145,11 +165,25 @@ export default function Dashboard(props){
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item lg={4} md={12} xs={12} className={classes.card}>
+                    <Grid item lg={4} md={6} xs={12}>
                         <Card elevation={3}>
                             <CardContent>
-                                <div>Ads Go Here</div>
+                                <Typography>Ads Go Here</Typography>
                             </CardContent>
+                        </Card>
+                    </Grid>
+                    <Grid item lg={4} md={6} xs={12} className={classes.card}>
+                        <Card sx={{padding: 1}}  elevation={3}>
+                            <CardContent>
+                                <Typography variant="h6">Contribute</Typography>
+                                <Typography sx={{paddingTop: 2}} variant="subtitle1">Submit your own trivia questions and they will get reviewed by other pro users to be approved!</Typography>
+                            </CardContent>
+                            <CardActions style={(activeContributions > 0) ? {justifyContent: "space-between"} : {justifyContent: "end"}}>
+                                {(activeContributions > 0) ? <Badge badgeContent={activeContributions} color="success">
+                                    <Button variant="outlined">Review Contributions</Button>
+                                </Badge> : null}
+                                <Button variant="contained" onClick={handleContribute}>Contribute</Button>
+                            </CardActions>
                         </Card>
                     </Grid>
                 </Grid>
