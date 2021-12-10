@@ -7,14 +7,26 @@ import AvatarContainer from "./Avatar";
 
 export default function Review(){
     const [userInfo, setUserInfo] = useState(null);
+    const [votes, setVotes] = useState([]);
     const [contributions, setContributions] = useState([]);
-    const [thumbUpColor, setThumbUpColor] = useState("inherit");
-    const [thumbDownColor, setThumbDownColor] = useState("inherit");
 
     useEffect(() => {
         getUserInfo();
         checkContributions();
     }, [])
+
+    useEffect(() => {
+        const promises = [];
+        contributions.forEach((contribution) => {
+            promises.push(getVotes(contribution.id));
+        })
+
+        Promise.all(promises).then((responses) => {
+            const votes = responses.map((vote) => vote);
+            setVotes(votes);
+        })
+
+    }, [contributions]);
 
     async function vote(docId, ballot){
         const subColRef = collection(db, "theOfficeTriviaContributions", docId, "votes");
@@ -23,6 +35,25 @@ export default function Review(){
             approve: ballot,
             username: userInfo.username
         })
+    }
+
+    async function getVotes(docId){
+        var votes = {total: 0, approve: 0, voters: []};
+        
+        const subColRef = collection(db, "theOfficeTriviaContributions", docId, "votes");
+        const snapShot = await getDocs(subColRef);
+        votes.total = snapShot.size;
+
+        snapShot.forEach((vote) => {
+            votes.voters.push(vote.data());
+            if(vote.data().approve){
+                votes.approve++;
+            }
+        })
+
+        if(snapShot){
+            return votes;
+        }
     }
 
     async function getUserInfo(){
@@ -40,32 +71,49 @@ export default function Review(){
         var arr = [];
         if(snapShot.size > 0){
             snapShot.forEach((doc) => {
-                arr.push({id: doc.id, data: doc.data()})
+                arr.push({id: doc.id, data: doc.data(), thumbUpColor: "inherit", thumbDownColor: "inherit"})
             });
 
             setContributions(arr);
         }
     }
 
-    const handleThumbUp = (docId) => {
-        setThumbUpColor("success");
+    const handleThumbUp = (docId, index) => {
+        let current = [...contributions];
+        let obj = {...current[index]};
+        obj.thumbUpColor = "success";
+        
+        if(obj.thumbDownColor === "error"){
+            obj.thumbDownColor = "inherit";
+        }
+
+        current[index] = obj;
+        setContributions(current);
         vote(docId, true);
-        if(thumbDownColor === "error"){
-            setThumbDownColor("inherit");
-        }
     }
 
-    const handleThumbDown = (docId) => {
-        setThumbDownColor("error");
+    const handleThumbDown = (docId, index) => {
+        let current = [...contributions];
+        let obj = {...current[index]};
+        obj.thumbDownColor = "error";
+
+        if(obj.thumbUpColor === "success"){
+            obj.thumbUpColor = "inherit";
+        }
+
+        current[index] = obj;
+        setContributions(current);
         vote(docId, false);
-        if(thumbUpColor === "success"){
-            setThumbUpColor("inherit");
-        }
     }
 
-    const contributionList = contributions.map((item) => {
+    const contributionList = contributions.map((item, index) => {
         let choices = item.data.choices;
-        console.log(item)
+        var ballot;
+
+        if(votes[index] !== undefined){
+            ballot = votes[index].voters.find(x => x.username === userInfo.username);
+        }
+        
         return (
             <Grid item xs={12} key={item.id}>
                 <Paper sx={{padding: 2}} elevation={3}>
@@ -80,7 +128,7 @@ export default function Review(){
                             <Divider flexItem/>
                             <Typography>{item.data.question}</Typography>
                         </Grid>
-                        <Grid item xs={10} md={4}>
+                        <Grid item xs={9} md={4}>
                             <Typography color="secondary">Choices</Typography>
                             <List>
                                 {choices.map((choice, index, choices) => {
@@ -90,11 +138,12 @@ export default function Review(){
                                 })}
                             </List>
                         </Grid>
-                        <Grid sx={{display: "flex", flexDirection: "column", justifyContent: "flex-end"}} item xs={2} md={1}>
-                            <Button sx={{marginBottom: 1}} color={thumbUpColor} variant="outlined" onClick={() => handleThumbUp(item.id)}>
+                        <Grid sx={{display: "flex", flexDirection: "column", justifyContent: "flex-end"}} item xs={3} md={1}>
+                            <Button color={(ballot) ? (ballot.approve) ? "success" : "inherit" : item.thumbUpColor} variant="outlined" onClick={() => handleThumbUp(item.id, index)}>
                                 <ThumbUp />
                             </Button>
-                            <Button color={thumbDownColor} variant="outlined" onClick={() => handleThumbDown(item.id)}>
+                            <Typography align="center" variant="subtitle2">{(votes[index] === undefined) ? 0 : votes[index].total + " / " + votes[index].approve}</Typography>
+                            <Button color={(ballot) ? (!ballot.approve) ? "error" : "inherit" : item.thumbDownColor} variant="outlined" onClick={() => handleThumbDown(item.id, index)}>
                                 <ThumbDown />
                             </Button>
                         </Grid>
@@ -111,7 +160,9 @@ export default function Review(){
                     <Typography variant="h2" color="primary">Community Contributions</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                    {(contributions.size === 0) ? <Typography variant="caption">No new contributions, check back later!</Typography> : contributionList}
+                    <Grid container rowSpacing={2}>
+                        {(contributions.size === 0) ? <Typography variant="caption">No new contributions, check back later!</Typography> : contributionList}
+                    </Grid>
                 </Grid>
             </Grid>
         </Container>
