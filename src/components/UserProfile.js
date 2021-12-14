@@ -1,24 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import AvatarContainer from './Avatar';
 import { db, auth } from './firebase/firebaseConfig';
-import { onAuthStateChanged } from '@firebase/auth';
+import { onAuthStateChanged, sendEmailVerification } from '@firebase/auth';
 import { doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where } from '@firebase/firestore';
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
-import Avatar from '@mui/material/Avatar';
-import Container from '@mui/material/Container';
-import CssBaseline from '@mui/material/CssBaseline';
-import Button from '@mui/material/Button';
-import Input from '@mui/material/Input';
-import InputLabel from '@mui/material/InputLabel';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormHelperText from '@mui/material/FormHelperText';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
+import { Avatar, Container, CssBaseline, Button, Input, InputLabel, Grid, Typography, FormHelperText, FormControl, Select, MenuItem } from '@mui/material';
 
 function useDebounce(value, delay) {
     // State and setters for debounced value
@@ -43,8 +30,8 @@ function useDebounce(value, delay) {
 
 const createProfileStyles = makeStyles((theme) => ({
     root: {
-        marginTop: theme.spacing(6),
-        marginBottom: theme.spacing(6),
+        marginTop: theme.spacing(12),
+        marginBottom: theme.spacing(12),
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -55,7 +42,8 @@ const createProfileStyles = makeStyles((theme) => ({
     },
     createAvatar: {
         width: 64,
-        height: 64
+        height: 64,
+        margin: '1em auto 1em auto'
     },
     updateAvatar: {
         width: 64,
@@ -73,7 +61,28 @@ const createProfileStyles = makeStyles((theme) => ({
     }
 }));
 
+function Verify(){
+    const classes = createProfileStyles();
+    const history = useHistory();
+
+    const handleVerify = () => {
+        const auth = auth.getAuth();
+        sendEmailVerification(auth.currentUser).then(() => {
+            history.push("/");
+        })
+    }
+
+    return (
+        <div className={classes.root}>
+            <Typography variant="h3" gutterBottom>Verify your email address.</Typography>
+            <Typography gutterBottom>Didn't receive a verification email? Click below to send a new one.</Typography>
+            <Button sx={{marginTop: 4}} variant="outlined" onClick={handleVerify}>Send Verification Email</Button>
+        </div>
+    )
+}
+
 function CreateProfile(props){
+    const user = auth.currentUser;
     const classes = createProfileStyles();
     const avatars = [
         "Andy",
@@ -91,13 +100,26 @@ function CreateProfile(props){
         "Ryan",
         "Stanley",
         "Toby"
-    ]
+    ];
     const history = useHistory();
     const [username, setUsername] = React.useState('');
     const [usernameHelperText, setUsernameHelperText] = React.useState('');
     const [isValid, setIsValid] = React.useState(true);
     const [avatar, setAvatar] = React.useState('Michael');
+    const [verified, setVerified] = React.useState(false);
     const debouncedSearchUsername = useDebounce(username, 500);
+
+    useEffect(() => {
+        if(!user){
+            history.push('/sign-in');
+        } else {
+            if(user.emailVerified){
+                setVerified(true);
+            } else {
+                setVerified(false);
+            }
+        }
+    }, [])
 
     useEffect(() => {
         if(debouncedSearchUsername){
@@ -146,37 +168,45 @@ function CreateProfile(props){
 
     return (
         <div className={classes.root}>
-            <Avatar className={classes.avatar}>
-                <AvatarContainer avatar={avatar.toLowerCase()} />
-            </Avatar>
-            <Typography align="center" variant="h2">Create Profile</Typography>
-            <form className={classes.form}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <InputLabel color="primary" htmlFor="username">Choose a Username:</InputLabel>
-                        <Input required fullWidth color="primary" name="username" value={username} onChange={handleUsername} />
-                        <FormHelperText error={isValid}>{usernameHelperText}</FormHelperText>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Typography variant="h5" align="center">{avatar}</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <FormControl component="fieldset">
-                            <FormLabel component="legend">Select an Avatar:</FormLabel>
-                            <RadioGroup aria-label="Avatar" name="avatar" value={avatar} onChange={handleAvatar}>
-                                {
-                                    avatars.map((avatar) => {
+            {(verified) ? 
+            <React.Fragment>
+                <Typography align="center" variant="h2">Create Profile</Typography>
+                <form className={classes.form}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <InputLabel color="primary" htmlFor="username">Choose a Username:</InputLabel>
+                            <Input required fullWidth color="primary" name="username" value={username} onChange={handleUsername} />
+                            <FormHelperText error={isValid}>{usernameHelperText}</FormHelperText>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Typography variant="h5" align="center">{avatar}</Typography>
+                            <Avatar className={classes.createAvatar}>
+                                <AvatarContainer avatar={avatar.toLowerCase()} />
+                            </Avatar>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControl fullWidth>
+                                <InputLabel id="avatar-select-label">Choose an Avatar</InputLabel>
+                                <Select
+                                labelId="avatar-select-label"
+                                id="avatar-select"
+                                value={avatar}
+                                label="Choose an Avatar"
+                                onChange={handleAvatar}
+                                >
+                                    {avatars.map((avatar) => {
                                         return (
-                                            <FormControlLabel key={avatar} value={avatar} control={<Radio />} label={avatar} />
+                                            <MenuItem key={avatar} value={avatar}>{avatar}</MenuItem>
                                         )
-                                    })
-                                }
-                            </RadioGroup>
-                        </FormControl>
+                                    })}
+                                </Select>
+                            </FormControl>
+                        </Grid>
                     </Grid>
-                </Grid>
-                <Button disabled={isValid} fullWidth variant="contained" color="primary" className={classes.createProfile} onClick={handleUserInfo}>Create Profile</Button>
-            </form>
+                    <Button disabled={isValid} fullWidth variant="contained" color="primary" className={classes.createProfile} onClick={handleUserInfo}>Create Profile</Button>
+                </form>
+            </React.Fragment>
+            : <Verify />}
         </div>
     )
 }
@@ -262,17 +292,21 @@ function UpdateProfile(props){
                         </Avatar> 
                     </Grid>
                     <Grid item xs={12}>
-                        <FormControl component="fieldset">
-                            <FormLabel component="legend">Select an Avatar:</FormLabel>
-                            <RadioGroup aria-label="Avatar" name="avatar" value={avatar} onChange={handleAvatar}>
-                                {
-                                    avatars.map((avatar) => {
-                                        return (
-                                            <FormControlLabel key={avatar} value={avatar} control={<Radio />} label={avatar} />
-                                        )
-                                    })
-                                }
-                            </RadioGroup>
+                        <FormControl fullWidth>
+                            <InputLabel id="avatar-select-label">Choose an Avatar</InputLabel>
+                            <Select
+                            labelId="avatar-select-label"
+                            id="avatar-select"
+                            value={avatar}
+                            label="Choose an Avatar"
+                            onChange={handleAvatar}
+                            >
+                                {avatars.map((avatar) => {
+                                    return (
+                                        <MenuItem key={avatar} value={avatar}>{avatar}</MenuItem>
+                                    )
+                                })}
+                            </Select>
                         </FormControl>
                     </Grid>
                 </Grid>

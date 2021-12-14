@@ -233,7 +233,7 @@ export default function GameView(){
     async function updateIfCorrect(){
         const userRef = doc(db, "users", currentUser.uid);
         await updateDoc(userRef, {
-            questionsAnswered: arrayUnion(currentQuestion.id)
+            questionsAnswered: arrayUnion({id: currentQuestion.id, difficulty: currentQuestion.difficulty})
         })
     }
 

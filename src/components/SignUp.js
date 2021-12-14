@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { auth } from './firebase/firebaseConfig';
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { useHistory } from "react-router-dom";
 
 import Avatar from '@mui/material/Avatar';
@@ -36,8 +36,23 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SignUp() {
+function Verify(){
     const history = useHistory();
+
+    const handleContinue = () => {
+        history.push("/profile");
+    }
+
+    return (
+        <Container maxWidth="sm">
+            <Typography variant="h2" align="center" gutterBottom>Verify Email</Typography>
+            <Typography variant="subtitle1" align="center" gutterBottom>An email has been sent to the address you provided. Please verify your email before proceeding.</Typography>
+            <Button sx={{margin: '16px 0px', height: '4em'}} fullWidth variant="outlined" onClick={handleContinue}>Continue</Button>
+        </Container>
+    )
+}
+
+export default function SignUp() {
     const classes = useStyles();
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
@@ -45,6 +60,7 @@ export default function SignUp() {
     const [validPassword, setValidPassword] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState('');
     const [passwordLength, setPasswordLength] = React.useState('');
+    const [verfiy, setVerify] = React.useState(true);
 
     useEffect(() => {
         if(email === '' && password === ''){
@@ -68,7 +84,11 @@ export default function SignUp() {
     function handleSignUp(event){
         event.preventDefault();
         createUserWithEmailAndPassword(auth, email, password).then((userCred) => {
-            history.push("/profile");
+            if(userCred){
+                sendEmailVerification(userCred.user).then(() => {
+                    setVerify(true);
+                })
+            }
         })
     }
     
@@ -83,7 +103,7 @@ export default function SignUp() {
             setErrorMessage("Passwords must match!");
         }
 
-        if(password.length !== 6 && confirmPassword.length !== 6){
+        if(password.length < 6 || confirmPassword.length < 6){
             setPasswordLength('Password must be at lest 6 characters!')
         } else {
             setPasswordLength('Valid Password!')
@@ -93,6 +113,7 @@ export default function SignUp() {
   return (
       <Container component="main" maxWidth="xs">
           <CssBaseline />
+          {(verfiy) ? <Verify /> : 
           <div className={classes.paper}>
               <Avatar className={classes.avatar}>
               <LockOutlinedIcon />
@@ -166,7 +187,7 @@ export default function SignUp() {
                   </Grid>
               </Grid>
               </form>
-          </div>
+          </div>}
       </Container>
   );
 }
