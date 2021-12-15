@@ -3,11 +3,11 @@ import { useHistory } from "react-router-dom";
 import { isMobile } from 'react-device-detect';
 import Timer from './Timer';
 import { auth } from './firebase/firebaseConfig';
-import { collection, query, where, doc, updateDoc, getDoc, getDocs, arrayUnion, limit } from "firebase/firestore";
+import { collection, query, where, doc, getDoc, addDoc, getDocs, limit } from "firebase/firestore";
 import { db } from './firebase/firebaseConfig';
 import chance from '../images/chance.svg';
 import makeStyles from '@mui/styles/makeStyles';
-import { Container, CssBaseline, Grid, Button, Typography, FormControl, FormControlLabel, Radio, RadioGroup, Chip, Snackbar, Box, Divider } from '@mui/material';
+import { Container, CssBaseline, Grid, Button, Typography, FormControl, FormControlLabel, Radio, RadioGroup, Chip, Snackbar, Divider } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 
 const useStyles = makeStyles((theme) => ({
@@ -224,16 +224,14 @@ export default function GameView(){
     }, [isCorrect]);
 
     async function updateWhenGameOver(stats){
-        const userRef = doc(db, "users", currentUser.uid);
-        await updateDoc(userRef, {
-            gameStats: arrayUnion(stats)
-        })
+        await addDoc(collection(db, `users/${currentUser.uid}/game-stats`), stats);
     }
 
     async function updateIfCorrect(){
-        const userRef = doc(db, "users", currentUser.uid);
-        await updateDoc(userRef, {
-            questionsAnswered: arrayUnion({id: currentQuestion.id, difficulty: currentQuestion.difficulty})
+        console.log(currentQuestion)
+        await addDoc(collection(db, `users/${currentUser.uid}/questions-answered`), {
+            id: currentQuestion.id,
+            difficulty: currentQuestion.questionInfo.difficulty
         })
     }
 
@@ -246,32 +244,34 @@ export default function GameView(){
         }
         
         if(currentUser !== null){
-            const userRef = doc(db, "users", currentUser.uid);
-            const userSnap = await getDoc(userRef);
-            if(userSnap.exists()){
-                let arr = userSnap.data().questionsAnswered;
-                var randomNumber = await getRandomNumber(arr);
-                
-                const q = query(collection(db, "theOfficeTriviaQuestions"), where("id", "==", randomNumber), limit(1));
-                const querySnap = await getDocs(q);
-                
-                if(querySnap.size > 0){
-                    querySnap.forEach((doc) => {
-                        setCurrentQuestionId(doc.id);
-                        setCurrentQuestion(doc.data());
-                        setChoices(doc.data().questionInfo.choices.sort(() => Math.random() - 0.5));
-                        setIsQuestionLoading(false);
-                        setTimeUp(true);
-                    })
-                } else {
-                    let newStats = {
-                        percentageRight: Math.round((questionsCorrect / questionsSeen + Number.EPSILON) * 100) / 100,
-                        questionsCorrect: questionsCorrect,
-                        questionsSeen: questionsSeen
-                    }
-                    updateWhenGameOver(newStats);
-                    history.push("/game/ending");
+            const questionsAnsweredRef = collection(db, `users/${currentUser.uid}/questions-answered`);
+            const questionsAnsweredSnap = await getDocs(questionsAnsweredRef);
+            let arr = [];
+            if(questionsAnsweredSnap){
+                questionsAnsweredSnap.forEach(doc => {
+                    arr.push(doc.data().questionId)
+                })
+            }
+            var randomNumber = await getRandomNumber(arr);
+            const q = query(collection(db, "theOfficeTriviaQuestions"), where("id", "==", randomNumber), limit(1));
+            const querySnap = await getDocs(q);
+
+            if(querySnap.size > 0){
+                querySnap.forEach((doc) => {
+                    setCurrentQuestionId(doc.id);
+                    setCurrentQuestion(doc.data());
+                    setChoices(doc.data().questionInfo.choices.sort(() => Math.random() - 0.5));
+                    setIsQuestionLoading(false);
+                    setTimeUp(true);
+                })
+            } else {
+                let newStats = {
+                    percentageRight: Math.round((questionsCorrect / questionsSeen + Number.EPSILON) * 100) / 100,
+                    questionsCorrect: questionsCorrect,
+                    questionsSeen: questionsSeen
                 }
+                updateWhenGameOver(newStats);
+                history.push("/game/ending");
             }
         }
     }
@@ -397,60 +397,3 @@ export default function GameView(){
         </React.Fragment>
     );
 };
-
-// let userRef = fireStore.collection('users').doc(currentUser.uid);
-            // userRef.get().then((doc) => {
-            //     if(doc.exists){
-            //         fireStore.collection("theOfficeTriviaQuestions")
-            //         .where(firebaseApp.firestore.FieldPath.documentId(), "not-in", doc.data().questionsAnswered).limit(1)
-            //         .get().then((querySnapshot) => {
-            //             querySnapshot.forEach((nextDoc) => {
-            //                 if(nextDoc.exists){
-            //                     setCurrentQuestionId(nextDoc.id);
-            //                     setCurrentQuestion(nextDoc.data());
-            //                     setIsQuestionLoading(false);
-            //                     setTimeUp(true);
-            //                 } else {
-            //                     console.log("No more questions!")
-            //                 }
-            //             })
-            //         })
-            // fireStore.collection("theOfficeTriviaQuestions").orderBy("questionInfo").limit(1).get().then((querySnapshot) => {
-            //     querySnapshot.forEach((nextDoc) => {
-            //         if(nextDoc.exists){
-            //             console.log("hello 4")
-            //             if(!doc.data().questionsAnswered.includes(nextDoc.id)){
-            //                 console.log("hello 5")
-            //                 console.log(nextDoc.data())
-            //                 setCurrentQuestionId(nextDoc.id);
-            //                 setCurrentQuestion(nextDoc.data());
-            //                 setIsQuestionLoading(false);
-            //                 setTimeUp(true);
-            //             }
-            //         } else {
-            //             // no more questions end game?
-            //         }  
-            //     })
-            // })
-            // async function getNewQuestion(){
-            //     setQuestionsSeen((nextQuestion) => nextQuestion + 1);
-            //     setIsQuestionLoading(true);
-            //     setIsNextQuestion(false);
-            //     if(open){
-            //         setOpen(false);
-            //     } 
-            //     if(currentUser !== null){
-            //         const userRef = doc(db, "users", currentUser.uid);
-            //         const userSnap = await getDoc(userRef);
-            //         if(userSnap.exists()) {
-            //             const q = query(collection(db, "theOfficeTriviaQuestions"), where(documentId(), "not-in", userSnap.data().questionsAnswered));
-            //             const querySnap = await getDocs(q);
-            //             querySnap.forEach((doc) => {
-            //                 setCurrentQuestionId(doc.id);
-            //                 setCurrentQuestion(doc.data());
-            //                 setIsQuestionLoading(false);
-            //                 setTimeUp(true);
-            //             })
-            //         }
-            //     }
-            // }

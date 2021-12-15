@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { db } from './firebase/firebaseConfig';
 import AvatarContainer from './Avatar';
-import { doc, getDoc, getDocs, query, where, collection, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { doc, getDoc, getDocs, query, where, collection, Timestamp, addDoc, deleteDoc } from "firebase/firestore";
 import { Grid, Typography, Avatar, Button, Fab, Drawer, TextField, TextareaAutosize, CircularProgress } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -34,30 +34,55 @@ export default function FriendsView(props){
     const [isDrawer, setIsDrawer] = useState(false);
     const [messageCharacterCount, setMessageCharacterCount] = useState(0);
     const [requestMessage, setRequestMessage] = useState('');
-    const [requsetUsername, setRequestUsername] = useState('');
+    const [requestUsername, setRequestUsername] = useState('');
     const [isRequestSending, setIsRequestSending] = useState(false);
+    const [usernameValidation, setUsernameValidation] = useState('');
 
     useEffect(() => {
         getUserInfo();
     }, [])
 
     useEffect(() => {
-        console.log(userInfo);
-        if(userInfo !== null){
-            setFriends(userInfo.friendsList);
-            if(userInfo.friendRequests.length >= 1){
-                setIsFriendRequests(true);
-                setActiveRequests(userInfo.friendRequests);
-            }
-            if(userInfo.friendRequests.length < 1){
-                setIsFriendRequests(false);
-                setActiveRequests(null);
-            }
-        }
+        getFriends();
+        getFriendRequests();
     }, [userInfo])
 
+    async function getFriendRequests(){
+        const requestsPath = `users/${localStorage.getItem("uid")}/friend-requests`;
+        const requestsRef = collection(db, requestsPath);
+        const snapShot = await getDocs(requestsRef);
+        var requests = [];
+
+        if(snapShot.size > 0){
+            setIsFriendRequests(true);
+            snapShot.forEach(doc => {
+                requests.push({id: doc.id, data: doc.data()})
+                console.log(doc.data())
+            })
+            setActiveRequests(requests);
+        } else {
+            setIsFriendRequests(false);
+            setActiveRequests(null);
+        }
+    }
+
+    async function getFriends(){
+        const friendsPath = `users/${uid}/friends`;
+        const friendsRef = collection(db, friendsPath);
+        const snapShot = await getDocs(friendsRef);
+        var friends = [];
+
+        if(snapShot.size === 0){
+            return;
+        }
+        snapShot.forEach(doc => {
+            friends.push(doc.data())
+        })
+
+        setFriends(friends);
+    }
+
     async function getUserInfo(){
-        
         const userRef = doc(db, "users", uid);
         const userSnap = await getDoc(userRef);
         if(userSnap.exists()){
@@ -66,61 +91,73 @@ export default function FriendsView(props){
     }
 
     async function updateRequestorsFriendList(request){
-        const userRef = doc(db, "users", request.requestorUid);
-        await updateDoc(userRef, {
-            friendsList: arrayUnion({avatar: userInfo.avatar, username: userInfo.username})
-        }).then(function(){
-            console.log("requestor's friends list updated")
+        const friendsPath = `users/${request.data.requestorId}/friends`;
+        const friendsRef = collection(db, friendsPath);
+        await addDoc(friendsRef, {
+            avatar: userInfo.avatar,
+            username: userInfo.username,
+            since: Timestamp.now()
         })
     }
 
     async function updateFriendsList(request){
-        const userRef = doc(db, "users", uid);
-        await updateDoc(userRef, {
-            friendsList: arrayUnion({avatar: request.avatar, username: request.username}),
-            friendRequests: arrayRemove(request)
-        }).then(function(){
-            console.log("Approved.");
-            updateRequestorsFriendList(request);
-            getUserInfo();
+        const friendsPath = `users/${uid}/friends`;
+        const friendsRef = collection(db, friendsPath);
+        const docRef = await addDoc(friendsRef, {
+            avatar: request.data.requestorAvatar,
+            username: request.data.requestorUsername,
+            since: Timestamp.now()
         })
+
+        if(docRef.id){
+            updateRequestorsFriendList(request);
+            removeRequest(request);
+        }
     }
 
     async function removeRequest(request){
-        console.log("Request info: ", request)
-        const userRef = doc(db, "users", uid);
-        await updateDoc(userRef, {
-            friendRequests: arrayRemove(request)
-        }).then(function(){
-            console.log("Denied.")
+        console.log(request);
+        const requestsPath = `users/${uid}/friend-requests`; 
+        const requestRef = doc(db, requestsPath, request.id);
+
+        await deleteDoc(requestRef).then(() => {
             getUserInfo();
         })
     }
 
     async function updateUsersRequests(userId, request){
-        const userRef = doc(db, "users", userId);
-        await updateDoc(userRef, {
-            friendRequests: arrayUnion(request)
-        }).then(function(){
+        const requestsPath = `users/${userId}/friend-requests`;
+        const requestsRef = collection(db, requestsPath);
+        const docRef = await addDoc(requestsRef, request);
+
+        if(docRef){
             setIsRequestSending(false);
             setRequestMessage('');
             setRequestUsername('');
             setIsDrawer(false);
-            console.log("sending requset")
-        })
+        }
     }
 
     async function checkForUsername(requestObj){
+        if(userInfo.username === requestUsername){
+            setIsRequestSending(false);
+            setUsernameValidation("You are always your own bestfried, sorry though, can't send requests to yourself.");
+            return;
+        }
         const usersRef = collection(db, "users");
-        const q = query(usersRef, where("username", "==", requestObj.username));
+        const q = query(usersRef, where("username", "==", requestUsername));
         const querySnap = await getDocs(q);
-        querySnap.forEach((doc) => {
-            if(doc.exists()){
-                updateUsersRequests(doc.id, requestObj);
-            } else {
-                console.log('username doesnt exist')
-            }
-        })
+        if(querySnap.size > 0){
+            querySnap.forEach((doc) => {
+                if(doc.exists()){
+                    updateUsersRequests(doc.id, requestObj);
+                }
+            })
+        } else {
+            setIsRequestSending(false);
+            setUsernameValidation("Username not found, check spelling or confirm with the user.");
+            return;
+        }
     }
 
     function approveRequest(data){
@@ -154,14 +191,15 @@ export default function FriendsView(props){
 
     function sendRequest(){
         setIsRequestSending(true);
-        let requset = {
-            avatar: userInfo.avatar,
-            date: Date.now().toString(),
-            message: requestMessage,
-            username: requsetUsername,
-            requestorUid: uid
+        let request = {
+            requestDate: Timestamp.now(),
+            requestorAvatar: userInfo.avatar,
+            requestorId: uid,
+            requestorMessage: requestMessage,
+            requestorUsername: userInfo.username
         }
-        checkForUsername(requset);
+        
+        checkForUsername(request);
     }
     
     return (
@@ -190,27 +228,28 @@ export default function FriendsView(props){
                         <Grid sx={{paddingTop: 2, paddingBottom: 2}} item xs={12}>
                             <Typography variant="h4">Requests</Typography>
                         </Grid>
-                        {activeRequests !== null ? activeRequests.map((request) => {
-                            let date = new Date(Number(request.date));
+                        {activeRequests !== null ? activeRequests.map((r) => {
+                            let request = r.data
+                            let date = new Date(request.requestDate.seconds * 1000).toLocaleDateString("en-US");
                             
                             return (
                                 <Grid key={request.date} item xs={12}>
                                     <Grid sx={{boxShadow: 3, maxWidth: 550, borderRadius: 3, backgroundColor: '#363636'}} container spacing={2}>
                                         <Grid item xs={2}>
-                                            <Avatar sx={{width: 48, height: 48}}><AvatarContainer avatar={request.avatar.toLowerCase()}/></Avatar>
+                                            <Avatar sx={{width: 48, height: 48}}><AvatarContainer avatar={request.requestorAvatar.toLowerCase()}/></Avatar>
                                         </Grid>
                                         <Grid item xs={10}>
-                                            <Typography sx={{fontSize: 36, fontWieght: 800}}>{request.username}</Typography>
+                                            <Typography sx={{fontSize: 36, fontWieght: 800}}>{request.requestorUsername}</Typography>
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <Typography variant="body1">{request.message}</Typography>
+                                            <Typography variant="body1">{request.requestorMessage}</Typography>
                                         </Grid>
                                         <Grid sx={{display: 'flex'}} item xs={6}>
-                                            <Typography sx={{display: 'flex', alignItems: 'center', color: "#9aa0a6"}} variant="caption">{date.toLocaleString()}</Typography>
+                                            <Typography sx={{display: 'flex', alignItems: 'center', color: "#9aa0a6"}} variant="caption">{date}</Typography>
                                         </Grid>
                                         <Grid sx={{display: 'flex', paddingBottom: 2, paddingRight: 2, justifyContent: 'flex-end'}} item xs={6}>
-                                            <Button color="success" onClick={() => approveRequest(request)}>Approve</Button>
-                                            <Button color="error" onClick={() => denyRequest(request)}>Deny</Button>
+                                            <Button color="success" onClick={() => approveRequest(r)}>Approve</Button>
+                                            <Button color="error" onClick={() => denyRequest(r)}>Deny</Button>
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -226,7 +265,7 @@ export default function FriendsView(props){
                        <Typography>User Name:</Typography>
                    </Grid>
                    <Grid item xs={9}>
-                       <TextField fullWidth value={requestMessage.username} onChange={updateRequestUsername} />
+                       <TextField fullWidth value={requestMessage.username} helperText={usernameValidation} onChange={updateRequestUsername} />
                    </Grid>
                    <Grid item xs={3}>
                        <Typography>Message:</Typography>

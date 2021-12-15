@@ -4,23 +4,13 @@ admin.initializeApp();
 
 const db = admin.firestore();
 
-exports.calculatePoints = functions.firestore.document('/users/{docId}')
-    .onUpdate((snap, context) => {
-        var beforeAnswered = snap.before.data().questionsAnswered;
-        var afterAnswered = snap.after.data().questionsAnswered;
-        var currentTotal = snap.before.data().achievementPoints;
-        var diff = afterAnswered.filter((x) => !beforeAnswered.find(y => x.id === y.id ));
-
-        if(diff.length > 0){
-            diff.forEach(question => {
-            currentTotal += (question.difficulty * 10);
+exports.calculatePoints = functions.firestore.document('/users/{docId}/questions-answered/{docId}')
+    .onCreate((snap, context) => {
+        var userRef = db.collection('users').doc(context.params.docId);
+        var newPoints;
+        userRef.get().then(doc => {
+            newPoints = doc.data().achievementPoints + (snap.data().difficulty * 10);
+            functions.logger.log(newPoints);
+            return userRef.update({achievementPoints: newPoints});
         })
-
-            functions.logger.log("updated total", currentTotal);
-            return db.collection('users').doc(snap.after.id).update({
-            achievementPoints: currentTotal
-            })
-        } else {
-            return currentTotal
-        }    
     })

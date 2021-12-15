@@ -74,12 +74,16 @@ function FriendsList(props){
     }, [])
 
     async function getUserFriends(){
-        const uid = localStorage.getItem("uid");
-        const userRef = doc(db, "users", uid);
-        const userSnap = await getDoc(userRef);
-        if(userSnap.exists()){
-            setFriends(userSnap.data().friendsList);
-        }
+        const friendsPath = `users/${localStorage.getItem("uid")}/friends`;
+        const friendsRef = collection(db, friendsPath);
+        const friendsSnap = await getDocs(friendsRef);
+
+        var friends = [];
+        friendsSnap.forEach(doc => {
+            friends.push(doc.data())
+        })
+
+        setFriends(friends);
     }
 
     return (
@@ -91,10 +95,22 @@ export default function Dashboard(props){
     const history = useHistory();
     const classes = useStyles();
     const [activeContributions, setActiveContributions] = useState(0);
+    const [activeFriendRequests, setActiveFriendRequests] = useState(0);
 
     useEffect(() => {
         checkContributions();
+        checkFriendRequests();
     }, [])
+
+    async function checkFriendRequests(){
+        const requestsPath = `users/${localStorage.getItem("uid")}/friend-requests`;
+        const requestsRef = collection(db, requestsPath);
+        const snapShot = await getDocs(requestsRef);
+
+        if(snapShot.size > 0){
+            setActiveFriendRequests(snapShot.size);
+        }
+    }
 
     async function checkContributions(){
         const contributionsRef = collection(db, "theOfficeTriviaContributions");
@@ -154,7 +170,9 @@ export default function Dashboard(props){
                                 <FriendsList user={props.user} />
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
-                                <Button color="primary" variant="outlined" className={classes.cardAction} onClick={manageFriends}>Manage Friends</Button>
+                                <Badge badgeContent={activeFriendRequests} color="success">
+                                    <Button color="primary" variant="outlined" className={classes.cardAction} onClick={manageFriends}>Manage Friends</Button>
+                                </Badge>
                             </CardActions>
                         </Card>
                     </Grid>
