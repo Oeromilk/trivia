@@ -30,3 +30,7 @@ firebase.json
 firestore.indexes.json
 firestore.rules
 storage.rules
+database-debug.log
+firestore-debug.log
+pubsub-debug.log
+ui-debug.log
