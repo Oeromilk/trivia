@@ -14,13 +14,19 @@ export default function Timer(props){
     const [timeLeft, setTimeLeft] = React.useState(100);
 
     React.useEffect(() => {
+        var count;
+        if(props.count === 0){
+            count = 50;
+        } else {
+            count = props.count;
+        }
         if(props.timeUp && !props.isNextQuestion){
             setTimeLeft(100);
             var timer;
             setTimeout(() => {
                 timer = setInterval(() => {
                     setTimeLeft((newTimeLeft) => (newTimeLeft <= 0 ? 0 : newTimeLeft - 1));
-                }, props.count);
+                }, count + 5);
             }, 750)
 
             if(props.isNextQuestion){

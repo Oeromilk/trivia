@@ -8,10 +8,13 @@ import 'fontsource-roboto';
 import { auth } from "./components/firebase/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-import { Container, Grid, AppBar, Button, Drawer, List, ListItem, Typography, Divider, Paper, Accordion, AccordionDetails, AccordionSummary} from '@mui/material';
+import { Container, Grid, AppBar, Button, Drawer, List, ListItem, Typography, Divider, Paper, Accordion, AccordionDetails, AccordionSummary, Stack} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ToolBar from '@mui/material/Toolbar';
+import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
+import LeaderboardRoundedIcon from '@mui/icons-material/LeaderboardRounded';
+import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 
 import Dashboard from './components/Dashboard';
 import GameView from './components/GameView';
@@ -24,7 +27,11 @@ import Contribute from './components/Contribute';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
 import ForgotPassword from './components/ForgotPassword';
+// 3b82f6 - new
+// 52A5FF
 
+// f97316 - new
+// FF6D1F
 import {
   BrowserRouter as Router,
   Switch,
@@ -37,10 +44,10 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#52A5FF'
+      main: '#3b82f6'
     },
     secondary: {
-      main: '#FF6D1F'
+      main: '#f97316'
     }
   }
 })
@@ -147,7 +154,7 @@ const noTextDecoration = {
   link: 'none'
 };
 
-function SignOut(){
+function SignOut(props){
   const classes = useStyles();
   const history = useHistory();
 
@@ -161,7 +168,7 @@ function SignOut(){
   }
   return (
     <Link to="/" style={noTextDecoration}>
-      <Button className={classes.linkStyle} color="inherit" variant="text" onClick={handleSignOut}>Sign Out</Button>
+      <Button className={classes.linkStyle} color="inherit" variant={props.variant} onClick={handleSignOut}>Sign Out</Button>
     </Link>
   )
 }
@@ -215,22 +222,31 @@ function MobileDrawer(props){
           <List>
             <ListItem>
               <Link to="/" style={noTextDecoration}>
-                <Button className={classes.linkStyle} color="inherit">Dashboard</Button>
+                <Stack direction="row" justifyContent="space-around" alignItems="center" spacing={2}>
+                  <DashboardRoundedIcon />
+                  <Button color="inherit">Dashboard</Button>
+                </Stack> 
               </Link>
             </ListItem>
             <ListItem>
               <Link to="/leaderboard" style={noTextDecoration}>
-                <Button className={classes.linkStyle} color="inherit">Leader Board</Button>
+                <Stack direction="row" justifyContent="space-around" alignItems="center" spacing={2}>
+                  <LeaderboardRoundedIcon />
+                  <Button color="inherit">Leader Board</Button>
+                </Stack>
               </Link>
             </ListItem>
             <ListItem>
               <Link to="/profile" style={noTextDecoration}>
-                <Button className={classes.linkStyle} color="inherit">Profile</Button>
+                <Stack direction="row" justifyContent="space-around" alignItems="center" spacing={2}>
+                  <AccountCircleRoundedIcon />
+                  <Button color="inherit">Profile</Button>
+                </Stack>
               </Link>
             </ListItem>
             <Divider />
             <ListItem sx={{ paddingTop: 3}}>
-            {((props.currentUser !== null) ? <SignOut /> : <SignInButton />)}
+            {((props.currentUser !== null) ? <SignOut variant={"outlined"} /> : <SignInButton />)}
             </ListItem>
           </List>
         </div>
@@ -255,7 +271,7 @@ function TopBar(props){
               <Typography className={classes.title} variant="h6" onClick={handleHome}>Trivible</Typography>
               <div className={classes.desktopSection}>
                 {((props.currentUser !== null) ? <SignedInLinks /> : null)}
-                {((props.currentUser !== null) ? <SignOut /> : <SignInButton />)}
+                {((props.currentUser !== null) ? <SignOut variant={"text"} /> : <SignInButton />)}
               </div>
               <div className={classes.mobileSection}>
                 <MobileDrawer currentUser={props.currentUser}/>

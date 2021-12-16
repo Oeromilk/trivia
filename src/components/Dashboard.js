@@ -1,21 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { db } from './firebase/firebaseConfig';
-import { doc, getDoc, getDocs, collection } from "firebase/firestore";
+import { getDocs, collection, query, orderBy, limit } from "firebase/firestore";
 import { useHistory } from "react-router-dom";
+import { Container, Grid, Button, Typography, List, ListItem, Card, CardActions, CardContent, CardHeader, Avatar, Badge, Stack, Divider } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
 import AvatarContainer from './Avatar';
-import Avatar from '@mui/material/Avatar';
-import Badge from '@mui/material/Badge';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -52,13 +41,12 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-function FriendsList(props){
+function FriendsList(){
     const [friends, setFriends] = React.useState([]);
 
-    const friendsList = friends.slice(0,3).map((friend) => {
-        return (
-        <ListItem key={friend.username}>
-            <Grid container>
+    const friendsList = friends.map((friend) => {
+        return (    
+            <Grid container key={friend.username}>
                 <Grid item xs={3}>
                     <Avatar sx={{width: 48, height: 48}}><AvatarContainer avatar={friend.avatar.toLowerCase()} /></Avatar>
                 </Grid>
@@ -66,7 +54,7 @@ function FriendsList(props){
                     <Typography sx={{fontSize: 32}}>{friend.username}</Typography>
                 </Grid>
             </Grid>
-        </ListItem>)
+        )
     })
 
     useEffect(() => {
@@ -75,8 +63,8 @@ function FriendsList(props){
 
     async function getUserFriends(){
         const friendsPath = `users/${localStorage.getItem("uid")}/friends`;
-        const friendsRef = collection(db, friendsPath);
-        const friendsSnap = await getDocs(friendsRef);
+        const q = query(collection(db, friendsPath), orderBy("username"), limit(3));
+        const friendsSnap = await getDocs(q);
 
         var friends = [];
         friendsSnap.forEach(doc => {
@@ -87,7 +75,7 @@ function FriendsList(props){
     }
 
     return (
-        <List>{friendsList}</List>
+        <Stack spacing={2} divider={<Divider />}>{friendsList}</Stack>
     )
 }
 
@@ -167,7 +155,7 @@ export default function Dashboard(props){
                             <CardHeader title="Friends">
                             </CardHeader>
                             <CardContent>
-                                <FriendsList user={props.user} />
+                                <FriendsList />
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
                                 <Badge badgeContent={activeFriendRequests} color="success">

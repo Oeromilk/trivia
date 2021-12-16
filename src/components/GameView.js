@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import { isMobile } from 'react-device-detect';
 import Timer from './Timer';
 import { auth } from './firebase/firebaseConfig';
-import { collection, query, where, doc, getDoc, addDoc, getDocs, limit } from "firebase/firestore";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 import { db } from './firebase/firebaseConfig';
 import chance from '../images/chance.svg';
 import makeStyles from '@mui/styles/makeStyles';
@@ -125,6 +125,10 @@ export default function GameView(){
     const classes = useStyles();
     const history = useHistory();
     const currentUser = auth.currentUser;
+    const [availableQuestions, setAvailableQuestions] = React.useState([]);
+    const [questionIdsSeen, setQuestionIdsSeen] = React.useState([]);
+    const [questionsAnswered, setQuestionsAnswered] = React.useState([]);
+
     const [choice, setChoice] = React.useState('');
     const [choices, setChoices] = React.useState(null);
     const [open, setOpen] = React.useState(false);
@@ -146,8 +150,81 @@ export default function GameView(){
         border: '1px solid #484848',
         boxShadow: '0px 0px 6px 1px rgba(0,0,0,0.75)',
         paddingTop: '0.25em',
-        paddingBottom: '0.25em'
+        paddingBottom: '0.25em',
+        textAlign: 'center'
     };
+
+    React.useEffect(() => {
+        getQuestions();
+        getQuestionsSeen();
+    }, [])
+
+    React.useEffect(() => {
+        console.log(currentQuestionId);
+    }, [currentQuestionId])
+
+    async function getQuestions(){
+        const collectionRef = collection(db, "theOfficeTriviaQuestions");
+        const collectionSnap = await getDocs(collectionRef);
+        var newQuestions = [];
+        collectionSnap.forEach(doc => {
+            newQuestions.push(doc.data())
+        })
+        setAvailableQuestions(newQuestions);
+    }
+
+    async function getQuestionsSeen(){
+        const questionsAnsweredRef = collection(db, `users/${currentUser.uid}/questions-answered`);
+        const questionsAnsweredSnap = await getDocs(questionsAnsweredRef);
+        var qsAnswered = [];
+        questionsAnsweredSnap.forEach(doc => {
+            qsAnswered.push(doc.data().id)
+        })
+        setQuestionsAnswered(qsAnswered);
+    }
+
+    const setNextQuestion = () => {
+        if(questionIdsSeen.length === availableQuestions.length || questionsAnswered.length === availableQuestions.length){
+            let newStats = {
+                percentageRight: Math.round((questionsCorrect / questionsSeen + Number.EPSILON) * 100) / 100,
+                questionsCorrect: questionsCorrect,
+                questionsSeen: questionsSeen
+            }
+            updateWhenGameOver(newStats);
+            history.push("/game/ending");
+            return;
+        }
+        setQuestionsSeen((nextQuestion) => nextQuestion + 1);
+        setIsQuestionLoading(true);
+        setIsNextQuestion(false);
+        if(open){
+            setOpen(false);
+        }
+        const nextId = getRandomIndex();
+        setQuestionIdsSeen(seen => [...seen, nextId]);
+        const nextQuestion = availableQuestions.find(q => q.id === nextId);
+        setCurrentQuestionId(nextQuestion.id);
+        setCurrentQuestion(nextQuestion);
+        setChoices(nextQuestion.questionInfo.choices.sort(() => Math.random() - 0.5));
+        countCharacters();
+        setIsQuestionLoading(false);
+        setTimeUp(true);
+    }
+
+    const getRandomIndex = () => {
+        var random = Math.floor((Math.random() * availableQuestions.length));
+        for(const q of questionsAnswered){
+            if(q.id === random){
+                random = Math.floor((Math.random() * availableQuestions.length));
+            }
+          }
+        for(const s of questionIdsSeen){
+            if(s === random){
+                random = Math.floor((Math.random() * availableQuestions.length));
+            }
+        }
+        return random;
+    }
 
     //React.useEffect(() => {
         // testing purposes
@@ -195,15 +272,7 @@ export default function GameView(){
     }, [chances]);
 
     React.useEffect(() => {
-        if(currentQuestion !== null){
-            let questionCount = currentQuestion.questionInfo.question.length;
-            let choicesCount = 0;
-            currentQuestion.questionInfo.choices.forEach((option) => {
-                choicesCount += option.length;
-            })
-            console.log("Character Count: ", questionCount + choicesCount);
-            setCharacterCount(questionCount + choicesCount);
-        }
+        countCharacters();
     }, [currentQuestion])
 
     React.useEffect(() => {
@@ -235,57 +304,16 @@ export default function GameView(){
         })
     }
 
-    async function getRandomQuestion(){
-        setQuestionsSeen((nextQuestion) => nextQuestion + 1);
-        setIsQuestionLoading(true);
-        setIsNextQuestion(false);
-        if(open){
-            setOpen(false);
+    const countCharacters = () => {
+        if(currentQuestion !== null){
+            let questionCount = currentQuestion.questionInfo.question.length;
+            let choicesCount = 0;
+            currentQuestion.questionInfo.choices.forEach((option) => {
+                choicesCount += option.length;
+            })
+            console.log("Character Count: ", questionCount + choicesCount);
+            setCharacterCount(questionCount + choicesCount);
         }
-        
-        if(currentUser !== null){
-            const questionsAnsweredRef = collection(db, `users/${currentUser.uid}/questions-answered`);
-            const questionsAnsweredSnap = await getDocs(questionsAnsweredRef);
-            let arr = [];
-            if(questionsAnsweredSnap){
-                questionsAnsweredSnap.forEach(doc => {
-                    arr.push(doc.data().questionId)
-                })
-            }
-            var randomNumber = await getRandomNumber(arr);
-            const q = query(collection(db, "theOfficeTriviaQuestions"), where("id", "==", randomNumber), limit(1));
-            const querySnap = await getDocs(q);
-
-            if(querySnap.size > 0){
-                querySnap.forEach((doc) => {
-                    setCurrentQuestionId(doc.id);
-                    setCurrentQuestion(doc.data());
-                    setChoices(doc.data().questionInfo.choices.sort(() => Math.random() - 0.5));
-                    setIsQuestionLoading(false);
-                    setTimeUp(true);
-                })
-            } else {
-                let newStats = {
-                    percentageRight: Math.round((questionsCorrect / questionsSeen + Number.EPSILON) * 100) / 100,
-                    questionsCorrect: questionsCorrect,
-                    questionsSeen: questionsSeen
-                }
-                updateWhenGameOver(newStats);
-                history.push("/game/ending");
-            }
-        }
-    }
-
-    async function getRandomNumber(arr){
-        const countDoc = doc(db, "theOfficeTriviaQuestions", "count");
-        const countSnap = await getDoc(countDoc);
-        let count = countSnap.data().numberOfQuestions + 1;
-        
-        var random = Math.floor((Math.random() * count));
-        while(arr.includes(random)){
-            random = Math.floor((Math.random() * count));
-        }
-        return random;
     }
 
     function handleUserChoice(event){
@@ -312,13 +340,13 @@ export default function GameView(){
 
     function startGame(){
         setIsShown(false);
-        getRandomQuestion();
+        setNextQuestion();
     }
 
     function handleNextQuestion(){
         setIsCorrect(null)
         setChoice('');
-        getRandomQuestion();
+        setNextQuestion();
     }
 
     const handleClose = (event, reason) => {
@@ -359,7 +387,7 @@ export default function GameView(){
                             <Chip variant="outlined" size="small" label={isQuestionLoading === true ? "loading" : "episode: " + currentQuestion.questionInfo.episode} />
                             <Chip variant="outlined" size="small" label={isQuestionLoading === true ? "loading" : "difficulty: " + currentQuestion.questionInfo.difficulty} />
                         </div>
-                        <Chip color="secondary" variant="outlined" label={`Current Run: ${questionsSeen}`} />
+                        <Chip color="success" variant="outlined" label={`Current Run: ${questionsSeen}`} />
                     </Grid>
                     <Grid item xs={12}>
                         <Typography style={{fontSize: '24px'}} align="center">{isQuestionLoading === true ? "Question Loading" : currentQuestion.questionInfo.question}</Typography>
@@ -367,12 +395,12 @@ export default function GameView(){
                     <Grid item xs={12}>
                         <form className={classes.formStyle}>
                             <FormControl className={classes.formControlStyle}>
-                                <RadioGroup sx={{ marginBottom: 6 }} aria-label="trivia" name="trivia" value={choice} onChange={handleUserChoice}>
+                                <RadioGroup sx={{ marginBottom: 2 }} aria-label="trivia" name="trivia" value={choice} onChange={handleUserChoice}>
                                     {
                                         isQuestionLoading === false ?
                                         choices.map((option) => {
                                             return (
-                                                <FormControlLabel sx={choiceStyle} className={classes.radioStyle} key={option} value={option} control={<Radio/>} label={option} />
+                                                <FormControlLabel sx={choiceStyle} className={classes.radioStyle} key={option} value={option} control={<Radio />} label={option} />
                                             )
                                         }) :
                                         <FormControlLabel key="Loading" value="Loading" control={<Radio />} label="Loading" />
@@ -380,9 +408,9 @@ export default function GameView(){
                                 </RadioGroup>
                                 {
                                     isNextQuestion ? 
-                                    <Button variant="contained" color={(isCorrect ? "success" : "secondary")} size="large" onClick={handleNextQuestion}>Next Question</Button>
+                                    <Button sx={{paddingTop: 2, paddingBottom: 2}} variant="contained" color={(isCorrect ? "success" : "secondary")} size="large" onClick={handleNextQuestion}>Next Question</Button>
                                     :
-                                    <Button sx={{ height: 50 }} className={classes.buttonStyle} disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
+                                    <Button sx={{paddingTop: 2, paddingBottom: 2}} fullWidth disabled={!timeUp} variant="contained" color="primary" size="large" onClick={checkAnswer}>Check Choice</Button>
                                 }
                             </FormControl>
                         </form>

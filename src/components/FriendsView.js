@@ -57,7 +57,6 @@ export default function FriendsView(props){
             setIsFriendRequests(true);
             snapShot.forEach(doc => {
                 requests.push({id: doc.id, data: doc.data()})
-                console.log(doc.data())
             })
             setActiveRequests(requests);
         } else {
@@ -116,7 +115,6 @@ export default function FriendsView(props){
     }
 
     async function removeRequest(request){
-        console.log(request);
         const requestsPath = `users/${uid}/friend-requests`; 
         const requestRef = doc(db, requestsPath, request.id);
 
@@ -233,7 +231,7 @@ export default function FriendsView(props){
                             let date = new Date(request.requestDate.seconds * 1000).toLocaleDateString("en-US");
                             
                             return (
-                                <Grid key={request.date} item xs={12}>
+                                <Grid key={`${request.date}${request.requestorUsername}`} item xs={12}>
                                     <Grid sx={{boxShadow: 3, maxWidth: 550, borderRadius: 3, backgroundColor: '#363636'}} container spacing={2}>
                                         <Grid item xs={2}>
                                             <Avatar sx={{width: 48, height: 48}}><AvatarContainer avatar={request.requestorAvatar.toLowerCase()}/></Avatar>
