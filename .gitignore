@@ -23,7 +23,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# firbase
+# firebase
 .firebase
 .firebaserc
 firebase.json
@@ -34,3 +34,5 @@ database-debug.log
 firestore-debug.log
 pubsub-debug.log
 ui-debug.log
+
+/functions
