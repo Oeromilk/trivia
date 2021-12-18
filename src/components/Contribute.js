@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { db } from './firebase/firebaseConfig';
+import { db, analytics } from './firebase/firebaseConfig';
+import { logEvent } from "firebase/analytics";
 import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import { Container, Grid, Typography, Button, TextField, Tooltip, InputLabel, Select, MenuItem, FormControl, CircularProgress, Snackbar } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
@@ -77,6 +78,7 @@ export default function Contribute(){
         const docRef = await addDoc(collection(db, "theOfficeTriviaContributions"), data);
 
         if(docRef.id){
+            logEvent(analytics, 'contribution_added');
             setIsSending(false);
             setOpen(true);
             setSnackMessage(`Contribution saved as #${docRef.id}`);

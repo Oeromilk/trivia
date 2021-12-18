@@ -1,6 +1,7 @@
 import React from 'react';
-import { auth } from './firebase/firebaseConfig';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
+import { auth, analytics } from './firebase/firebaseConfig';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { logEvent } from "firebase/analytics";
 import { useHistory } from "react-router-dom";
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -61,6 +62,7 @@ export default function SignIn() {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         if(userCredential){
+          logEvent(analytics, 'login', { email: "email"});
           history.push("/");
         }
       });
@@ -73,26 +75,16 @@ export default function SignIn() {
 
   function handleSignInWithGoogle(){
     var provider = new GoogleAuthProvider();
-    // if(isMobile){
-    //   signInWithRedirect(auth, provider)
-    //   getRedirectResult(auth)
-    //     .then((result) => {
-    //       if(result.user){
-    //         history.push("/");
-    //       }
-    //     }).catch((error) => {
-    //       console.log(error);
-    //     })
-    // } else {
-      signInWithPopup(auth, provider)
-      .then((result) => {
-        if(result.user){
-          history.push("/");
-        }
-      }).catch((error) => {
-        console.log(error)
-      });
-    // }
+    
+    signInWithPopup(auth, provider)
+    .then((result) => {
+      if(result.user){
+        logEvent(analytics, 'login', { email: "googleAuthProvider"});
+        history.push("/");
+      }
+    }).catch((error) => {
+      console.log(error)
+    });
   }
 
   return (

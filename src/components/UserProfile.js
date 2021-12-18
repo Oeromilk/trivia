@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import AvatarContainer from './Avatar';
-import { db, auth } from './firebase/firebaseConfig';
+import { db, auth, analytics } from './firebase/firebaseConfig';
 import { onAuthStateChanged, sendEmailVerification } from '@firebase/auth';
+import { logEvent } from "firebase/analytics";
 import { doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where } from '@firebase/firestore';
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
-import { Avatar, Container, CssBaseline, Button, Input, InputLabel, Grid, Typography, FormHelperText, FormControl, Select, MenuItem } from '@mui/material';
+import { Avatar, Container, CssBaseline, Button, Input, InputLabel, Grid, Typography, FormHelperText, FormControl, Select, MenuItem, Stack } from '@mui/material';
 
 function useDebounce(value, delay) {
     // State and setters for debounced value
@@ -64,9 +65,9 @@ const createProfileStyles = makeStyles((theme) => ({
 function Verify(){
     const classes = createProfileStyles();
     const history = useHistory();
+    const auth = auth.getAuth();
 
     const handleVerify = () => {
-        const auth = auth.getAuth();
         sendEmailVerification(auth.currentUser).then(() => {
             history.push("/");
         })
@@ -149,6 +150,7 @@ function CreateProfile(props){
             friendsList: [],
             questionsAnswered: []
         }).then(function(){
+            logEvent(analytics, 'profile_created');
             history.push("/");
         })
     }
@@ -179,10 +181,12 @@ function CreateProfile(props){
                             <FormHelperText error={isValid}>{usernameHelperText}</FormHelperText>
                         </Grid>
                         <Grid item xs={12}>
-                            <Typography variant="h5" align="center">{avatar}</Typography>
-                            <Avatar className={classes.createAvatar}>
-                                <AvatarContainer avatar={avatar.toLowerCase()} />
-                            </Avatar>
+                            <Stack direction="column" justifyContent="space-evenly" alignItems="center" spacing={1}>
+                                <Typography variant="h5" align="center">{avatar}</Typography>
+                                <Avatar className={classes.createAvatar}>
+                                    <AvatarContainer avatar={avatar.toLowerCase()} />
+                                </Avatar>
+                            </Stack>
                         </Grid>
                         <Grid item xs={12}>
                             <FormControl fullWidth>
@@ -250,6 +254,7 @@ function UpdateProfile(props){
         await updateDoc(userRef, {
             avatar: avatar
         }).then(() => {
+            logEvent(analytics, 'profile_updated');
             history.push("/")
         }).catch((error) => {
             console.error(error);
@@ -286,10 +291,12 @@ function UpdateProfile(props){
                         <Typography variant="h5" align="center">Avatar: {userInfo != null ? userInfo.avatar : "loading"}</Typography>
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography variant="subtitle1">Selected Avatar</Typography>
-                        <Avatar style={{width: 48, height: 48}} >
-                            <AvatarContainer avatar={avatar.toLowerCase()} />
-                        </Avatar> 
+                        <Stack direction="column" justifyContent="space-evenly" alignItems="center" spacing={1}>
+                            <Typography variant="subtitle1">Selected Avatar</Typography>
+                            <Avatar style={{width: 48, height: 48}} >
+                                <AvatarContainer avatar={avatar.toLowerCase()} />
+                            </Avatar>
+                        </Stack>
                     </Grid>
                     <Grid item xs={12}>
                         <FormControl fullWidth>

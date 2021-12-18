@@ -5,8 +5,9 @@ import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/
 import makeStyles from '@mui/styles/makeStyles';
 import { CssBaseline } from '@mui/material';
 import 'fontsource-roboto';
-import { auth } from "./components/firebase/firebaseConfig";
+import { auth, analytics } from "./components/firebase/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { logEvent } from "firebase/analytics";
 
 import { Container, Grid, AppBar, Button, Drawer, List, ListItem, Typography, Divider, Paper, Accordion, AccordionDetails, AccordionSummary, Stack} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -42,12 +43,12 @@ import {
 
 const theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
     primary: {
       main: '#3b82f6'
     },
     secondary: {
-      main: '#f97316'
+      main: '#10b981'
     }
   }
 })
@@ -134,7 +135,9 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: '12px'
   },
   list: {
-    width: 300
+    width: 300,
+    height: '100%',
+    background: theme.palette.primary.main
   },
   fullList: {
     width: 'auto'
@@ -142,6 +145,9 @@ const useStyles = makeStyles((theme) => ({
   accordionDivider: {
     borderTop: '1px solid #53a6ff',
     paddingTop: theme.spacing(3)
+  },
+  drawerColor: {
+    background: theme.palette.primary.main
   }
 }))
 
@@ -160,6 +166,7 @@ function SignOut(props){
 
   function handleSignOut(){
     signOut(auth).then(() =>{
+      logEvent(analytics, 'sign_out');
       localStorage.setItem("uid", null);
       history.push("/");
     }).catch((error) => {
@@ -428,7 +435,7 @@ export default function App(){
   const userStatus = localStorage.getItem("uid");
 
   useEffect(() => {
-    console.log("local storage uid: ", localStorage.getItem("uid"))
+    logEvent(analytics, 'page_view');
     onAuthStateChanged(auth, function(user){
       if(user !== null){
         localStorage.setItem("uid", user.uid);

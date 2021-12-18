@@ -2,8 +2,9 @@ import React from 'react';
 import { useHistory } from "react-router-dom";
 import { isMobile } from 'react-device-detect';
 import Timer from './Timer';
-import { auth } from './firebase/firebaseConfig';
+import { auth, analytics } from './firebase/firebaseConfig';
 import { collection, addDoc, getDocs } from "firebase/firestore";
+import { logEvent } from "firebase/analytics";
 import { db } from './firebase/firebaseConfig';
 import chance from '../images/chance.svg';
 import makeStyles from '@mui/styles/makeStyles';
@@ -294,6 +295,7 @@ export default function GameView(){
 
     async function updateWhenGameOver(stats){
         await addDoc(collection(db, `users/${currentUser.uid}/game-stats`), stats);
+        logEvent(analytics, 'game_ended', stats);
     }
 
     async function updateIfCorrect(){
@@ -340,6 +342,7 @@ export default function GameView(){
 
     function startGame(){
         setIsShown(false);
+        logEvent(analytics, 'game_started');
         setNextQuestion();
     }
 

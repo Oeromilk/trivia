@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { auth } from './firebase/firebaseConfig';
+import { auth, analytics } from './firebase/firebaseConfig';
+import { logEvent } from "firebase/analytics";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { useHistory } from "react-router-dom";
 
@@ -86,6 +87,7 @@ export default function SignUp() {
         createUserWithEmailAndPassword(auth, email, password).then((userCred) => {
             if(userCred){
                 sendEmailVerification(userCred.user).then(() => {
+                    logEvent(analytics, 'sign_up');
                     setVerify(true);
                 })
             }

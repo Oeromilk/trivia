@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { db } from './firebase/firebaseConfig';
+import { db, analytics } from './firebase/firebaseConfig';
+import { logEvent } from "firebase/analytics";
 import { collection, getDocs, setDoc, doc, getDoc, query, where } from "firebase/firestore";
 import { Container, Grid, Typography, Paper, Avatar, Button, List, ListItem, Divider } from '@mui/material';
 import { ThumbUp, ThumbDown } from '@mui/icons-material';
@@ -88,6 +89,7 @@ export default function Review(){
         }
 
         current[index] = obj;
+        logEvent(analytics, 'voted_yes')
         setContributions(current);
         vote(docId, true);
     }
@@ -102,6 +104,7 @@ export default function Review(){
         }
 
         current[index] = obj;
+        logEvent(analytics, 'voted_no')
         setContributions(current);
         vote(docId, false);
     }
@@ -115,7 +118,7 @@ export default function Review(){
         }
         
         return (
-            <Grid item xs={12} key={item.id}>
+            <Grid item xs={12} key={index}>
                 <Paper sx={{padding: 2}} elevation={3}>
                     <Grid container spacing={2}>
                         <Grid sx={{display: "flex", flexDirection: "column", justifyContent: "space-around", alignItems: "flex-start"}} item xs={3} md={2}>
@@ -133,7 +136,7 @@ export default function Review(){
                             <List>
                                 {choices.map((choice, index, choices) => {
                                     return (
-                                        <ListItem divider={(index + 1 === choices.length) ? false : true} key={choice}>{choice}</ListItem>
+                                        <ListItem divider={(index + 1 === choices.length) ? false : true} key={index}>{choice}</ListItem>
                                     )
                                 })}
                             </List>
@@ -154,7 +157,7 @@ export default function Review(){
     })
 
     return (
-        <Container sx={{marginTop: 10}} maxWidth="md">
+        <Container sx={{marginTop: 10, marginBottom: 2}} maxWidth="md">
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Typography variant="h2" color="primary">Community Contributions</Typography>

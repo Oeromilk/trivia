@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { db } from './firebase/firebaseConfig';
+import { db, analytics } from './firebase/firebaseConfig';
+import { logEvent } from "firebase/analytics";
 import AvatarContainer from './Avatar';
 import { doc, getDoc, getDocs, query, where, collection, Timestamp, addDoc, deleteDoc } from "firebase/firestore";
 import { Grid, Typography, Avatar, Button, Fab, Drawer, TextField, TextareaAutosize, CircularProgress } from '@mui/material';
@@ -109,6 +110,7 @@ export default function FriendsView(props){
         })
 
         if(docRef.id){
+            logEvent(analytics, 'friend_approved');
             updateRequestorsFriendList(request);
             removeRequest(request);
         }
@@ -119,6 +121,7 @@ export default function FriendsView(props){
         const requestRef = doc(db, requestsPath, request.id);
 
         await deleteDoc(requestRef).then(() => {
+            logEvent(analytics, 'friend_denied');
             getUserInfo();
         })
     }
