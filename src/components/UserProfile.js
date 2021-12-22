@@ -65,7 +65,6 @@ const createProfileStyles = makeStyles((theme) => ({
 function Verify(){
     const classes = createProfileStyles();
     const history = useHistory();
-    const auth = auth.getAuth();
 
     const handleVerify = () => {
         sendEmailVerification(auth.currentUser).then(() => {
@@ -145,10 +144,7 @@ function CreateProfile(props){
         await setDoc(doc(db, "users", props.user.uid), {
             username: username,
             avatar: avatar,
-            achievementPoints: 0,
-            friendRequests: [],
-            friendsList: [],
-            questionsAnswered: []
+            achievementPoints: 0
         }).then(function(){
             logEvent(analytics, 'profile_created');
             history.push("/");

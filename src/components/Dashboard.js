@@ -44,9 +44,9 @@ const useStyles = makeStyles((theme) => ({
 function FriendsList(){
     const [friends, setFriends] = React.useState([]);
 
-    const friendsList = friends.map((friend) => {
+    const friendsList = friends.map((friend, index) => {
         return (    
-            <Grid container key={friend.username}>
+            <Grid container key={index}>
                 <Grid item xs={3}>
                     <Avatar sx={{width: 48, height: 48}}><AvatarContainer avatar={friend.avatar.toLowerCase()} /></Avatar>
                 </Grid>

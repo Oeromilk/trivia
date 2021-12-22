@@ -28,18 +28,9 @@ import Contribute from './components/Contribute';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
 import ForgotPassword from './components/ForgotPassword';
-// 3b82f6 - new
-// 52A5FF
+import leaderboardImage from './images/leaderboard.jpg';
 
-// f97316 - new
-// FF6D1F
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useHistory
-} from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, Link, useHistory } from "react-router-dom";
 
 const theme = createTheme({
   palette: {
@@ -49,6 +40,9 @@ const theme = createTheme({
     },
     secondary: {
       main: '#10b981'
+    },
+    tertiary: {
+      main: '#9A68F8'
     }
   }
 })
@@ -67,10 +61,14 @@ const useStyles = makeStyles((theme) => ({
   },
   h1Banner: {
     marginTop: theme.spacing(6),
-    height: '200px'
+    height: '200px',
+    fontWeight: 'bolder',
+    background: `linear-gradient(to right, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
   },
   landingTitle: {
-    marginTop: theme.spacing(6)
+    marginTop: theme.spacing(9)
   },
   landingSpacing : {
     marginBottom: theme.spacing(9)
@@ -82,8 +80,7 @@ const useStyles = makeStyles((theme) => ({
     height: '341px',
     width: '265px',
     display: 'block',
-    margin: '0 auto',
-    //backgroundColor: theme.palette.secondary.main
+    margin: '0 auto'
   },
   callToAction: {
     [theme.breakpoints.up('md')]: {
@@ -91,20 +88,17 @@ const useStyles = makeStyles((theme) => ({
     },
     display: 'flex',
     justifyContent: 'center',
-    flexDirection: 'column',
-    marginBottom: theme.spacing(9),
-    //backgroundColor: theme.palette.primary.main
+    flexDirection: 'column'
   },
   signUpAction: {
     marginTop: theme.spacing(6),
     marginBottom: theme.spacing(9)
   },
   highlightedOrangeText: {
-    color: '#FF8E53'
+    color: theme.palette.secondary.main
   },
   highlightedBlueText: {
-    color: '#53a6ff',
-    fontSize: '4rem'
+    color: theme.palette.primary.main
   },
   title: {
     marginRight: theme.spacing(2),
@@ -119,12 +113,8 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   ruleStyle: {
-    paddingTop: theme.spacing(1),
-    paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
-    paddingBottom: theme.spacing(3),
-    marginTop: theme.spacing(3),
-    marginBottom: theme.spacing(3)
+    padding: `${theme.spacing(3)} ${theme.spacing(1)}`,
+    maxWidth: '500px'
   },
   mobileSection: {
     [theme.breakpoints.up('md')]: {
@@ -143,11 +133,28 @@ const useStyles = makeStyles((theme) => ({
     width: 'auto'
   },
   accordionDivider: {
-    borderTop: '1px solid #53a6ff',
+    borderTop: `1px solid ${theme.palette.secondary.main}`,
     paddingTop: theme.spacing(3)
   },
   drawerColor: {
     background: theme.palette.primary.main
+  },
+  coloredShadow: {
+    boxShadow: `0 -0.25em 1em 0 ${theme.palette.primary.main},
+                0.25em 0.25em 0.75em 0 ${theme.palette.tertiary.main},
+                -0.25em 0.25em 0.75em 0 ${theme.palette.secondary.main}`
+  },
+  leaderboardText: {
+    paddingLeft: theme.spacing(3),
+    paddingRight: theme.spacing(3)
+  },
+  leaderboardImage: {
+    [theme.breakpoints.up('md')]: {
+      maxWidth: '400px'
+    },
+    display: 'block',
+    margin: '0 auto',
+    width: '500px'
   }
 }))
 
@@ -358,8 +365,8 @@ function LandingNoUser(){
   return (
     <div className={classes.root}>
       <Container>
-        <Grid container>
-          <Grid item xs={12} className={classes.landingSpacing}>
+        <Grid container rowSpacing={10}>
+          <Grid item xs={12} className={classes.landingTitle}>
             <Typography variant="h1" align="center" className={classes.h1Banner}>Trivible</Typography>
           </Grid> 
           <Grid item xs={12} className={classes.landingSpacing}>
@@ -368,57 +375,55 @@ function LandingNoUser(){
             </Typography>
           </Grid>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginBottom: 5 }}>
-            <Button variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
+            <Button sx={{padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
           </Grid>
-          <Grid item xs={12} md={6} className={classes.callToAction}>
-            <Typography variant="h4" align="justify">Are you always trying to stump your friends and family with <span className={classes.highlightedOrangeText}>trivia</span> questions from your favorite shows?</Typography>
+          <Grid item xs={12} sm={6} className={classes.callToAction}>
+            <Typography variant="h4">
+              Do you love asking others questions about your favorite shows testing their knowledge? 
+            </Typography>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={6}>
             <MovieWatching className={classes.movieWatching}/>
           </Grid>
-          <Grid item xs={12} className={classes.landingTitle}>
-            <Typography variant="h5" align="center">Here is how it works!</Typography>
+          <Grid item xs={12}>
+            <Stack sx={{margin: '0 auto'}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={3}>
+              <Typography variant="h5" align="center">Here is how it works!</Typography>
+              <Paper variant="outlined" className={classes.ruleStyle}>
+                <Typography variant="h6" align="center" color="primary">1st</Typography>
+                <Typography variant="subtitle1" align="center">
+                  When a game starts you will be given a random question, excluding questions you have answered before.
+                </Typography>
+              </Paper>
+              <Paper variant="outlined" className={classes.ruleStyle}>
+                <Typography variant="h6" align="center" color="primary">2nd</Typography>
+                <Typography variant="subtitle1" align="center">
+                  You have several seconds to answer the question, if you don't choose in time, you get it wrong.
+                </Typography>
+              </Paper>
+              <Paper variant="outlined" className={classes.ruleStyle}>
+                <Typography variant="h6" align="center" color="primary">3rd</Typography>
+                <Typography variant="subtitle1" align="center">
+                  You can continue to get new questions until your run out of chances.
+                </Typography>
+              </Paper>
+            </Stack> 
           </Grid>
-          <Grid item xs={false} md={3}></Grid>
           <Grid item xs={12} md={6}>
-            <Paper variant="outlined" className={classes.ruleStyle}>
-              <Typography variant="h6" align="center" color="primary">1st</Typography>
-              <Typography variant="subtitle1" align="center">
-                When you start a new game you get 3 chances.
-                <br/>
-                A wrong answer or not answering in time loses you a chance.
-                <br/>
-                After the 3 chances are done, your run is over.
-              </Typography>
-            </Paper>
+            <Typography className={classes.leaderboardText} align="center" sx={{fontSize: '2em'}}>Answer <span className={classes.highlightedOrangeText}>trivia</span> questions and complete <span className={classes.highlightedOrangeText}>acheivements</span> to earn a spot on the leaderboard!</Typography>
           </Grid>
-          <Grid item xs={false} md={3}></Grid>
-          <Grid item xs={false} md={3}></Grid>
           <Grid item xs={12} md={6}>
-            <Paper variant="outlined" className={classes.ruleStyle}>
-              <Typography variant="h6" align="center" color="primary">2nd</Typography>
-              <Typography variant="subtitle1" align="center">
-                You have several seconds to answer the question, if you don't choose in time, you get it wrong.
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={false} md={3}></Grid>
-          <Grid item xs={false} md={3}></Grid>
-          <Grid item xs={12} md={6}>
-            <Paper variant="outlined" className={classes.ruleStyle}>
-              <Typography variant="h6" align="center" color="primary">3rd</Typography>
-              <Typography variant="subtitle1" align="center">
-                You will continue to get new questions until your run out of chances.
-              </Typography>
-            </Paper>
+            <img className={classes.leaderboardImage} src={leaderboardImage} alt="Showing first, second, and third place users on a leaderboard." loading="lazy"/>
           </Grid>
           <Grid item xs={12}>
-            <Typography variant="h6" align="center">Ready to start your <span className={classes.highlightedOrangeText}>trivia</span> adventure and take your place on the leaderboard?</Typography>
+            <Typography sx={{fontSize: '2em'}} align="center">Have an idea for a question? Once you achieve rank of <span className={classes.highlightedBlueText}>Assistant To The Manager</span>, you can contribute and vote on new questions.</Typography>
           </Grid>
           <Grid item xs={12} className={classes.signUpAction}>
-            <Grid container justifyContent="center">
-              <Button variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
-            </Grid>  
+            <Paper sx={{maxWidth: '500px', margin: '0 auto'}} variant="outlined">
+              <Stack sx={{padding: '3em'}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={5}>
+                <Typography variant="h6" align="center">Ready to start your <span className={classes.highlightedOrangeText}>trivia</span> adventure and take your place on the leaderboard?</Typography>
+                <Button sx={{marginTop: '3em', padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
+              </Stack>
+            </Paper>
           </Grid>
           <Grid item md={2}></Grid>
           <Grid item xs={12} md={8}>
