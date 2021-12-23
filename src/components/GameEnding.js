@@ -6,7 +6,8 @@ import { Typography, Grid, Button } from '@mui/material';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        paddingTop: theme.spacing(6)
+        paddingTop: theme.spacing(6),
+        paddingBottom: theme.spacing(6)
     },
     gif: {
         width: '50%',

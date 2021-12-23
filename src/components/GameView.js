@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import { isMobile } from 'react-device-detect';
 import Timer from './Timer';
 import { auth, analytics } from './firebase/firebaseConfig';
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, orderBy } from "firebase/firestore";
 import { logEvent } from "firebase/analytics";
 import { db } from './firebase/firebaseConfig';
 import chance from '../images/chance.svg';
@@ -127,8 +127,7 @@ export default function GameView(){
     const history = useHistory();
     const currentUser = auth.currentUser;
     const [availableQuestions, setAvailableQuestions] = React.useState([]);
-    const [questionIdsSeen, setQuestionIdsSeen] = React.useState([]);
-    const [questionsAnswered, setQuestionsAnswered] = React.useState([]);
+    const [allQuestionsSeen, setAllQuestionsSeen] = React.useState([]);
 
     const [choice, setChoice] = React.useState('');
     const [choices, setChoices] = React.useState(null);
@@ -157,35 +156,38 @@ export default function GameView(){
 
     React.useEffect(() => {
         getQuestions();
-        getQuestionsSeen();
     }, [])
 
     React.useEffect(() => {
-        console.log(currentQuestionId);
-    }, [currentQuestionId])
+        console.log(availableQuestions)
+    }, [availableQuestions])
 
     async function getQuestions(){
-        const collectionRef = collection(db, "theOfficeTriviaQuestions");
+        const collectionRef = query(collection(db, "theOfficeTriviaQuestions"), orderBy("id"));
+        const questionsAnsweredRef = collection(db, `users/${currentUser.uid}/questions-answered`);
         const collectionSnap = await getDocs(collectionRef);
+        const questionsAnsweredSnap = await getDocs(questionsAnsweredRef);
         var newQuestions = [];
+        var qsAnswered = [];
         collectionSnap.forEach(doc => {
             newQuestions.push(doc.data())
         })
-        setAvailableQuestions(newQuestions);
-    }
-
-    async function getQuestionsSeen(){
-        const questionsAnsweredRef = collection(db, `users/${currentUser.uid}/questions-answered`);
-        const questionsAnsweredSnap = await getDocs(questionsAnsweredRef);
-        var qsAnswered = [];
         questionsAnsweredSnap.forEach(doc => {
-            qsAnswered.push(doc.data().id)
+            qsAnswered.push(doc.data())
         })
-        setQuestionsAnswered(qsAnswered);
+
+        const questionsToRemove = new Set(qsAnswered);
+        const updatedQuestions = newQuestions.filter((question) => {
+            // return those elements not in the namesToDeleteSet
+            return !questionsToRemove.has(question);
+          });
+        
+        setAvailableQuestions(updatedQuestions);
+        setAllQuestionsSeen(qsAnswered);
     }
 
     const setNextQuestion = () => {
-        if(questionIdsSeen.length === availableQuestions.length || questionsAnswered.length === availableQuestions.length){
+        if(availableQuestions.length === 0){
             let newStats = {
                 percentageRight: Math.round((questionsCorrect / questionsSeen + Number.EPSILON) * 100) / 100,
                 questionsCorrect: questionsCorrect,
@@ -195,57 +197,36 @@ export default function GameView(){
             history.push("/game/ending");
             return;
         }
+
         setQuestionsSeen((nextQuestion) => nextQuestion + 1);
         setIsQuestionLoading(true);
         setIsNextQuestion(false);
+
         if(open){
             setOpen(false);
         }
-        const nextId = getRandomIndex();
-        setQuestionIdsSeen(seen => [...seen, nextId]);
-        const nextQuestion = availableQuestions.find(q => q.id === nextId);
+
+        const nextQuestion = getRandomQuestion();
+
         setCurrentQuestionId(nextQuestion.id);
         setCurrentQuestion(nextQuestion);
         setChoices(nextQuestion.questionInfo.choices.sort(() => Math.random() - 0.5));
+        setAllQuestionsSeen(seen => [...seen, nextQuestion]);
+        setAvailableQuestions(questions => questions.filter((question) => question !== nextQuestion))
         countCharacters();
         setIsQuestionLoading(false);
         setTimeUp(true);
     }
 
-    const getRandomIndex = () => {
-        var random = Math.floor((Math.random() * availableQuestions.length));
-        for(const q of questionsAnswered){
-            if(q.id === random){
-                random = Math.floor((Math.random() * availableQuestions.length));
-            }
-          }
-        for(const s of questionIdsSeen){
-            if(s === random){
-                random = Math.floor((Math.random() * availableQuestions.length));
-            }
+    const getRandomQuestion = () => {
+        var random = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+
+        if(allQuestionsSeen.includes(random)){
+            random = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
         }
+
         return random;
     }
-
-    //React.useEffect(() => {
-        // testing purposes
-        // setCurrentQuestion({questionInfo:{
-        //     "question": "How many children do Holly and Michael have?",
-        //     "episode": 20,
-        //     "choices": [
-        //         "3",
-        //         "4",
-        //         "5",
-        //         "6"
-        //     ],
-        //     "season": 9,
-        //     "answer": "4",
-        //     "difficulty": 3
-        // }})
-
-        // possible area for hardcore mode
-        // setIsQuestionLoading(false);
-    //}, [])
 
     React.useEffect(() => {
         if(currentQuestion !== null){
@@ -313,7 +294,7 @@ export default function GameView(){
             currentQuestion.questionInfo.choices.forEach((option) => {
                 choicesCount += option.length;
             })
-            console.log("Character Count: ", questionCount + choicesCount);
+            
             setCharacterCount(questionCount + choicesCount);
         }
     }
