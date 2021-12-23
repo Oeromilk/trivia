@@ -158,10 +158,6 @@ export default function GameView(){
         getQuestions();
     }, [])
 
-    React.useEffect(() => {
-        console.log(availableQuestions)
-    }, [availableQuestions])
-
     async function getQuestions(){
         const collectionRef = query(collection(db, "theOfficeTriviaQuestions"), orderBy("id"));
         const questionsAnsweredRef = collection(db, `users/${currentUser.uid}/questions-answered`);
