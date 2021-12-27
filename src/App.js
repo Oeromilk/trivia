@@ -16,6 +16,7 @@ import ToolBar from '@mui/material/Toolbar';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import LeaderboardRoundedIcon from '@mui/icons-material/LeaderboardRounded';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
+import FeedbackRoundedIcon from '@mui/icons-material/FeedbackRounded';
 
 import Dashboard from './components/Dashboard';
 import GameView from './components/GameView';
@@ -28,6 +29,7 @@ import Contribute from './components/Contribute';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
 import ForgotPassword from './components/ForgotPassword';
+import Feedback from './components/Feedback';
 import leaderboardImage from './images/leaderboard.jpg';
 
 import { BrowserRouter as Router, Switch, Route, Link, useHistory } from "react-router-dom";
@@ -211,6 +213,9 @@ function SignedInLinks(){
       <Link to="/profile" style={noTextDecoration}>
         <Button className={classes.linkStyle} color="inherit" variant="outlined">Profile</Button>
       </Link>
+      <Link to="/feedback" style={noTextDecoration}>
+        <Button className={classes.linkStyle} color="inherit" variant="outlined">Feedback</Button>
+      </Link>
     </React.Fragment>
   )
 }
@@ -259,6 +264,15 @@ function MobileDrawer(props){
               </Link>
             </ListItem>
             <Divider />
+            <ListItem>
+              <Link to="/feedback" style={noTextDecoration}>
+              <Stack direction="row" justifyContent="space-around" alignItems="center" spacing={2}>
+                  <FeedbackRoundedIcon />
+                  <Button color="inherit">Feedback</Button>
+                </Stack>
+              </Link>
+            </ListItem>
+            <Divider />
             <ListItem sx={{ paddingTop: 3}}>
             {((props.currentUser !== null) ? <SignOut variant={"outlined"} /> : <SignInButton />)}
             </ListItem>
@@ -281,8 +295,12 @@ function TopBar(props){
     <div className={classes.root}>
           <AppBar position="fixed" sx={{top: 0, left: 0}}>
             <ToolBar>
-              <TrivibleLogo style={{height: 32, width: 32, marginRight: 12}} />
-              <Typography className={classes.title} variant="h6" onClick={handleHome}>Trivible</Typography>
+              <div className={classes.title}  onClick={handleHome}>
+                <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={1}>
+                  <TrivibleLogo style={{height: 32, width: 32, marginRight: 12}} />
+                  <Typography variant="h6" >Trivible</Typography>
+                </Stack>
+              </div>
               <div className={classes.desktopSection}>
                 {((props.currentUser !== null) ? <SignedInLinks /> : null)}
                 {((props.currentUser !== null) ? <SignOut variant={"text"} /> : <SignInButton />)}
@@ -482,6 +500,9 @@ export default function App(){
             </Route>
             <Route path="/contribute">
               <Contribute />
+            </Route>
+            <Route path="/feedback">
+              <Feedback />
             </Route>
             <Route path="/sign-up">
               <SignUp />
