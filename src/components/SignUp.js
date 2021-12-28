@@ -1,195 +1,65 @@
-import React, { useEffect } from 'react';
-import { auth, analytics } from './firebase/firebaseConfig';
+import React, { useState } from 'react';
+import { auth, analytics, db } from './firebase/firebaseConfig';
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { logEvent } from "firebase/analytics";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useHistory } from "react-router-dom";
-
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import Input from '@mui/material/Input';
-import InputLabel from '@mui/material/InputLabel';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import FormHelperText from '@mui/material/FormHelperText';
-import makeStyles from '@mui/styles/makeStyles';
-import Container from '@mui/material/Container';
-
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(3),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-}));
-
-function Verify(){
-    const history = useHistory();
-
-    const handleContinue = () => {
-        history.push("/profile");
-    }
-
-    return (
-        <Container maxWidth="sm">
-            <Typography variant="h2" align="center" gutterBottom>Verify Email</Typography>
-            <Typography variant="subtitle1" align="center" gutterBottom>An email has been sent to the address you provided. Please verify your email before proceeding.</Typography>
-            <Button sx={{margin: '16px 0px', height: '4em'}} fullWidth variant="outlined" onClick={handleContinue}>Continue</Button>
-        </Container>
-    )
-}
+import { Container, Stack, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
 
 export default function SignUp() {
-    const classes = useStyles();
-    const [email, setEmail] = React.useState('');
-    const [password, setPassword] = React.useState('');
-    const [confirmPassword, setConfirmPassword] = React.useState('');
-    const [validPassword, setValidPassword] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState('');
-    const [passwordLength, setPasswordLength] = React.useState('');
-    const [verfiy, setVerify] = React.useState(true);
+    const history = useHistory();
+    const [code, setCode] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
+    const [isTrueCode, setIsTrueCode] = useState(false);
 
-    useEffect(() => {
-        if(email === '' && password === ''){
-            return;
+    async function searchCode(c){
+        const querySnapshot = await getDocs(query(collection(db, "signUpCodes"), where("code", "==", c)));
+        if(querySnapshot.empty){
+            setIsSearching(false);
+            setIsTrueCode(true);
         }
-        validatePassword();
-    }, [confirmPassword])
-
-    function handleEmail(event){
-        setEmail(event.target.value);
-    }
-
-    function handlePassword(event){
-        setPassword(event.target.value);
-    }
-
-    function handleConfrimPassword(event){
-        setConfirmPassword(event.target.value);
-    }
-
-    function handleSignUp(event){
-        event.preventDefault();
-        createUserWithEmailAndPassword(auth, email, password).then((userCred) => {
-            if(userCred){
-                sendEmailVerification(userCred.user).then(() => {
-                    logEvent(analytics, 'sign_up');
-                    setVerify(true);
-                })
+        querySnapshot.forEach((doc) => {
+            if(doc.id){
+                handleSignInWithGoogle();
             }
-        })
+        });
     }
-    
-    function validatePassword(){
-        if(password !== '' && password === confirmPassword && password.length > 5){
-            setValidPassword(true);
-        }
 
-        if(email !== '' && password === confirmPassword){
-            setErrorMessage("Passwords match!");
-        } else {
-            setErrorMessage("Passwords must match!");
-        }
+    const handleSignInWithGoogle = () => {
+        const provider = new GoogleAuthProvider();
+        
+        signInWithPopup(auth, provider)
+        .then((result) => {
+          if(result.user){
+            setIsSearching(false);
+            logEvent(analytics, 'login', { email: "googleAuthProvider"});
+            history.push("/");
+          }
+        }).catch((error) => {
+          console.log(error)
+        });
+      }
 
-        if(password.length < 6 || confirmPassword.length < 6){
-            setPasswordLength('Password must be at lest 6 characters!')
-        } else {
-            setPasswordLength('Valid Password!')
-        }
+    const handleCode = (event) => {
+        setCode(event.target.value);
+    }
+
+    const handleCheckCode = (event) => {
+        event.preventDefault();
+        setIsSearching(true);
+        searchCode(code)
     }
 
   return (
-      <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          {(verfiy) ? <Verify /> : 
-          <div className={classes.paper}>
-              <Avatar className={classes.avatar}>
-              <LockOutlinedIcon />
-              </Avatar>
-              <Typography component="h1" variant="h5">
-              Sign up
-              </Typography>
-              <form className={classes.form} >
-              <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                      <InputLabel htmlFor="email">Email</InputLabel>
-                      <Input
-                          required
-                          fullWidth
-                          id="email"
-                          name="email"
-                          autoComplete="email"
-                          value={email}
-                          onChange={handleEmail}
-                      />
-                  </Grid>
-                  <Grid item xs={12}>
-                      <InputLabel htmlFor="password">Password</InputLabel>
-                      <Input
-                          required
-                          fullWidth
-                          name="password"
-                          type="password"
-                          id="password"
-                          autoComplete="current-password"
-                          value={password}
-                          onChange={handlePassword}
-                      />
-                  </Grid>
-                  <Grid item xs={12}>
-                      <InputLabel htmlFor="confirmPassword">Confirm Password</InputLabel>
-                      <Input
-                          variant="outlined"
-                          required
-                          fullWidth
-                          name="confirmPassword"
-                          type="password"
-                          id="confirmPassword"
-                          autoComplete="current-password"
-                          value={confirmPassword}
-                          onChange={handleConfrimPassword}
-                      />
-                  </Grid>
-                  <Grid item xs={12}>
-                      <FormHelperText error={!validPassword}>{errorMessage}</FormHelperText>
-                  </Grid>
-                  <Grid item xs={12}>
-                      <FormHelperText error={!validPassword}>{passwordLength}</FormHelperText>
-                  </Grid>
-              </Grid>
-              <Button
-                  disabled={!validPassword}
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
-                  onClick={handleSignUp}
-              >
-                  Sign Up
-              </Button>
-              <Grid container justifyContent="flex-end">
-                  <Grid item>
-                  <Link href="/sign-in" variant="body2">
-                      Already have an account? Sign in
-                  </Link>
-                  </Grid>
-              </Grid>
-              </form>
-          </div>}
+      <Container sx={{marginTop: 15}} component="main" maxWidth="xs">
+        <Stack direction="column" justifyContent="center" alignItems="center" spacing={3}>
+            <Typography sx={{fontSize: '2em'}} textAlign="center">Have a code? Use below to sign up!</Typography>
+            <TextField fullWidth id="sign-up-code" label="Sign Up Code" variant="outlined" value={code} onChange={handleCode} />
+            <Button size="large" disabled={isSearching} fullWidth variant="contained" onClick={handleCheckCode}>
+                {isSearching ? <CircularProgress /> : 'Check Code'}
+            </Button>
+            {isTrueCode ? <Alert severity="error">Oops, {code} is not valid. Either your entered incorrectly or that code has been used.</Alert> : null}
+        </Stack>
       </Container>
   );
 }

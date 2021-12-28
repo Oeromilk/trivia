@@ -6,7 +6,8 @@ import { logEvent } from "firebase/analytics";
 import { doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where } from '@firebase/firestore';
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
-import { Avatar, Container, CssBaseline, Button, Input, InputLabel, Grid, Typography, FormHelperText, FormControl, Select, MenuItem, Stack } from '@mui/material';
+import { Avatar, Container, Button, Input, InputLabel, Grid, Typography, FormHelperText, FormControl, Select, MenuItem, Stack, Paper, Tooltip, Collapse, Divider } from '@mui/material';
+import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 
 function useDebounce(value, delay) {
     // State and setters for debounced value
@@ -62,27 +63,7 @@ const createProfileStyles = makeStyles((theme) => ({
     }
 }));
 
-function Verify(){
-    const classes = createProfileStyles();
-    const history = useHistory();
-
-    const handleVerify = () => {
-        sendEmailVerification(auth.currentUser).then(() => {
-            history.push("/");
-        })
-    }
-
-    return (
-        <div className={classes.root}>
-            <Typography variant="h3" gutterBottom>Verify your email address.</Typography>
-            <Typography gutterBottom>Didn't receive a verification email? Click below to send a new one.</Typography>
-            <Button sx={{marginTop: 4}} variant="outlined" onClick={handleVerify}>Send Verification Email</Button>
-        </div>
-    )
-}
-
 function CreateProfile(props){
-    const user = auth.currentUser;
     const classes = createProfileStyles();
     const avatars = [
         "Andy",
@@ -106,20 +87,7 @@ function CreateProfile(props){
     const [usernameHelperText, setUsernameHelperText] = React.useState('');
     const [isValid, setIsValid] = React.useState(true);
     const [avatar, setAvatar] = React.useState('Michael');
-    const [verified, setVerified] = React.useState(false);
     const debouncedSearchUsername = useDebounce(username, 500);
-
-    useEffect(() => {
-        if(!user){
-            history.push('/sign-in');
-        } else {
-            if(user.emailVerified){
-                setVerified(true);
-            } else {
-                setVerified(false);
-            }
-        }
-    }, [])
 
     useEffect(() => {
         if(debouncedSearchUsername){
@@ -141,7 +109,7 @@ function CreateProfile(props){
     }
 
     async function updateUser(){
-        await setDoc(doc(db, "users", props.user.uid), {
+        await setDoc(doc(db, "users", localStorage.getItem("uid")), {
             username: username,
             avatar: avatar,
             achievementPoints: 0
@@ -166,7 +134,6 @@ function CreateProfile(props){
 
     return (
         <div className={classes.root}>
-            {(verified) ? 
             <React.Fragment>
                 <Typography align="center" variant="h2">Create Profile</Typography>
                 <form className={classes.form}>
@@ -206,12 +173,11 @@ function CreateProfile(props){
                     <Button disabled={isValid} fullWidth variant="contained" color="primary" className={classes.createProfile} onClick={handleUserInfo}>Create Profile</Button>
                 </form>
             </React.Fragment>
-            : <Verify />}
         </div>
     )
 }
 
-function UpdateProfile(props){
+function UpdateProfile(){
     const classes = createProfileStyles();
     const history = useHistory();
     const avatars = [
@@ -231,22 +197,10 @@ function UpdateProfile(props){
         "Stanley",
         "Toby"
     ]
-    const userRef = doc(db, "users", props.user.uid);
-    const [userInfo, setUserInfo] = useState(null);
     const [avatar, setAvatar] = React.useState('Andy');
 
-    useEffect(() => {
-        getUserInfo();
-    }, [])
-
-    async function getUserInfo(){
-        const userSnap = await getDoc(userRef);
-        if(userSnap.exists()){
-            setUserInfo(userSnap.data());
-        }
-    }
-
     async function updateAvatar(){
+        const userRef = doc(db, "users", localStorage.getItem("uid"));
         await updateDoc(userRef, {
             avatar: avatar
         }).then(() => {
@@ -263,65 +217,51 @@ function UpdateProfile(props){
 
     function handleUpdate(event){
         event.preventDefault();
-        if(avatar !== ''){
-            if(avatar !== userInfo.avatar){
-                updateAvatar();
-            } else {
-                console.log(`Selected avatar: ${avatar} matches current avatar: ${userInfo.avatar}`)
-            }
-        }
+        updateAvatar();
     }
 
     return (
-        <div className={classes.root}>
-            <Typography gutterBottom={true} align="center" variant="h2">Update Profile</Typography>
-            <Avatar className={classes.updateAvatar}>
-                {userInfo != null ? <AvatarContainer avatar={userInfo.avatar.toLowerCase()} /> : null}
-            </Avatar>
-            <form className={classes.form}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Typography variant="h5" align="center">Username: {userInfo != null ? userInfo.username : "loading"}</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Typography variant="h5" align="center">Avatar: {userInfo != null ? userInfo.avatar : "loading"}</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Stack direction="column" justifyContent="space-evenly" alignItems="center" spacing={1}>
-                            <Typography variant="subtitle1">Selected Avatar</Typography>
-                            <Avatar style={{width: 48, height: 48}} >
-                                <AvatarContainer avatar={avatar.toLowerCase()} />
-                            </Avatar>
-                        </Stack>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <FormControl fullWidth>
-                            <InputLabel id="avatar-select-label">Choose an Avatar</InputLabel>
-                            <Select
-                            labelId="avatar-select-label"
-                            id="avatar-select"
-                            value={avatar}
-                            label="Choose an Avatar"
-                            onChange={handleAvatar}
-                            >
-                                {avatars.map((avatar) => {
-                                    return (
-                                        <MenuItem key={avatar} value={avatar}>{avatar}</MenuItem>
-                                    )
-                                })}
-                            </Select>
-                        </FormControl>
-                    </Grid>
+        <form className={classes.form}>
+            <Grid container spacing={2}>
+                <Grid item xs={12}>
+                    <Stack direction="column" justifyContent="space-evenly" alignItems="center" spacing={1}>
+                        <Typography variant="subtitle1">Selected Avatar</Typography>
+                        <Avatar style={{width: 48, height: 48}} >
+                            <AvatarContainer avatar={avatar.toLowerCase()} />
+                        </Avatar>
+                    </Stack>
                 </Grid>
-                <Button fullWidth variant="contained" color="primary" className={classes.createProfile} onClick={handleUpdate}>Update Profile</Button>
-            </form>
-        </div>
+                <Grid item xs={12}>
+                    <FormControl fullWidth>
+                        <InputLabel id="avatar-select-label">Choose an Avatar</InputLabel>
+                        <Select
+                        labelId="avatar-select-label"
+                        id="avatar-select"
+                        value={avatar}
+                        label="Choose an Avatar"
+                        onChange={handleAvatar}
+                        >
+                            {avatars.map((avatar) => {
+                                return (
+                                    <MenuItem key={avatar} value={avatar}>{avatar}</MenuItem>
+                                )
+                            })}
+                        </Select>
+                    </FormControl>
+                </Grid>
+            </Grid>
+            <Button fullWidth variant="contained" color="primary" className={classes.createProfile} onClick={handleUpdate}>Update Profile</Button>
+        </form>
     )
 }
 
 export default function UserProfile(props){
-    const [profileExists, setProfileExists] = React.useState(false);
-    const [currentUser, setCurrentUser] = React.useState(null);
+    const classes = createProfileStyles();
+    const [profileExists, setProfileExists] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [userInfo, setUserInfo] = useState(null);
+    const [updateAvatar, setUpdateAvatar] = useState(false);
+    const [invitesRemaining, setInvitesRemaining] = useState(0);
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -343,17 +283,58 @@ export default function UserProfile(props){
         const userSnap = await getDoc(userRef);
         if(userSnap.exists()){
             setProfileExists(true);
+            setUserInfo(userSnap.data());
+            setInvitesRemaining(userSnap.data().invitesRemaining);
         } else {
             setProfileExists(false);
         }
     }
 
+    const createInviteCode = () => {
+        var length = 8;
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+          result += characters.charAt(Math.floor(Math.random() * charactersLength));
+       }
+       console.log(result)
+    }
+
     return (
-        <React.Fragment>
-            <CssBaseline />
-            <Container maxWidth="xs">
-                {((profileExists !== false) ? <UpdateProfile user={currentUser} /> : <CreateProfile user={currentUser}/>)}
-            </Container>
-        </React.Fragment>
+        <Container sx={{marginTop: 15}} maxWidth="sm">
+            {profileExists ?
+            <React.Fragment>
+                <Stack spacing={4}>
+                    <Paper sx={{padding: 3}} variant="outlined">
+                        <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
+                            <Tooltip title="Update Avatar">
+                                <Avatar sx={{cursor: 'pointer'}} className={classes.updateAvatar} onClick={() => setUpdateAvatar(true)}>
+                                    {userInfo === null ? 'A' : <AvatarContainer avatar={userInfo.avatar.toLowerCase()} />}
+                                </Avatar>
+                            </Tooltip>
+                            <Collapse in={updateAvatar}>
+                                <Tooltip title="Cancel Update">
+                                    <CancelRoundedIcon sx={{cursor: 'pointer'}} onClick={() => setUpdateAvatar(false)} />
+                                </Tooltip>
+                                <UpdateProfile />
+                            </Collapse>
+                            <Typography variant="h5" align="center">Username: {userInfo != null ? userInfo.username : "loading"}</Typography>
+                            <Typography variant="h5" align="center">Avatar: {userInfo != null ? userInfo.avatar : "loading"}</Typography>
+                        </Stack>
+                    </Paper>
+                    <Paper sx={{padding: 3}} variant="outlined">
+                        <Typography fontSize={'1.5em'}>Your Invites</Typography>
+                        <Divider sx={{marginTop: 2, marginBottom: 2}} />
+                        {invitesRemaining > 0 ? 
+                        <Stack spacing={3}>
+                            <Typography sx={{fontSize: '1.5em'}}>Invites Remaing <span>{invitesRemaining}</span></Typography>
+                            <Button variant="contained" onClick={createInviteCode}>Create Invite</Button>
+                        </Stack> : null}
+                    </Paper>
+                </Stack>
+            </React.Fragment>
+            : <CreateProfile />}
+        </Container>
     )
 };
