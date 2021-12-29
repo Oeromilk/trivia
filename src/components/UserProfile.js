@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import AvatarContainer from './Avatar';
+import generateCode from '../utilites/generateCode';
 import { db, auth, analytics } from './firebase/firebaseConfig';
-import { onAuthStateChanged, sendEmailVerification } from '@firebase/auth';
+import { onAuthStateChanged } from '@firebase/auth';
 import { logEvent } from "firebase/analytics";
-import { doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where } from '@firebase/firestore';
+import { doc, getDoc, addDoc, getDocs, setDoc, updateDoc, collection, query, where, increment } from '@firebase/firestore';
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
-import { Avatar, Container, Button, Input, InputLabel, Grid, Typography, FormHelperText, FormControl, Select, MenuItem, Stack, Paper, Tooltip, Collapse, Divider } from '@mui/material';
+import { Avatar, Container, Button, Input, InputLabel, Grid, Typography, FormHelperText, CircularProgress, TextField, FormControl, Select, MenuItem, Stack, Paper, Tooltip, Collapse, Divider } from '@mui/material';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 
 function useDebounce(value, delay) {
@@ -257,11 +258,14 @@ function UpdateProfile(){
 
 export default function UserProfile(props){
     const classes = createProfileStyles();
+    const history = useHistory();
     const [profileExists, setProfileExists] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
     const [updateAvatar, setUpdateAvatar] = useState(false);
     const [invitesRemaining, setInvitesRemaining] = useState(0);
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [isCodeSending, setIsCodeSending] = useState(false);
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -269,6 +273,7 @@ export default function UserProfile(props){
                 setCurrentUser(user);
                 getUser(user);
             } else {
+                history.push('/');
                 setCurrentUser(null);
             }
         })
@@ -290,15 +295,43 @@ export default function UserProfile(props){
         }
     }
 
+    async function setNewInviteCode(newCode){
+        await addDoc(collection(db, "signUpCodes"), {code: newCode, inviter: userInfo.username});
+        const userRef = doc(db, "users", currentUser.uid)
+        setInvitesRemaining(x => x - 1);
+        await updateDoc(userRef, {
+            invitesRemaining: increment(-1)
+        });
+    }
+
+    async function sendUserInvite(invite){
+        const docRef = await addDoc(collection(db, "mail"), invite);
+        if(docRef.id){
+            setIsCodeSending(false);
+        }
+    }
+
+    const handleInviteEmail = (event) => {
+        setInviteEmail(event.target.value);
+    }
+
     const createInviteCode = () => {
-        var length = 8;
-        var result           = '';
-        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var charactersLength = characters.length;
-        for ( var i = 0; i < length; i++ ) {
-          result += characters.charAt(Math.floor(Math.random() * charactersLength));
-       }
-       console.log(result)
+        setIsCodeSending(true);
+        var inviteCode = generateCode();
+
+        let invite = {
+            to: inviteEmail,
+            template: {
+                name: "invite",
+                data: {
+                  inviterEmail: currentUser.email,
+                  inviteCode: inviteCode
+                }
+              }
+        }
+
+        setNewInviteCode(inviteCode);
+        sendUserInvite(invite);
     }
 
     return (
@@ -329,7 +362,8 @@ export default function UserProfile(props){
                         {invitesRemaining > 0 ? 
                         <Stack spacing={3}>
                             <Typography sx={{fontSize: '1.5em'}}>Invites Remaing <span>{invitesRemaining}</span></Typography>
-                            <Button variant="contained" onClick={createInviteCode}>Create Invite</Button>
+                            <TextField id="invite-email" label="Email" variant="outlined" helperText="Email of who you want to invite, choose wisely." value={inviteEmail} onChange={handleInviteEmail} />
+                            <Button disabled={isCodeSending} size="large" variant="contained" onClick={createInviteCode}>{isCodeSending ? <CircularProgress /> : 'Send Invite'}</Button>
                         </Stack> : null}
                     </Paper>
                 </Stack>

@@ -177,14 +177,7 @@ export default function Dashboard(props){
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item lg={4} md={6} xs={12}>
-                        <Card elevation={3}>
-                            <CardContent>
-                                <Typography>Ads Go Here</Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item lg={4} md={6} xs={12} className={classes.card}>
+                    <Grid item lg={4} md={6} xs={12} >
                         <Card sx={{padding: 1}}  elevation={3}>
                             <CardContent>
                                 <Typography variant="h6">Contributions</Typography>
@@ -196,6 +189,13 @@ export default function Dashboard(props){
                                 </Badge> : null}
                                 <Button variant="contained" onClick={handleContribute}>Create</Button>
                             </CardActions>
+                        </Card>
+                    </Grid>
+                    <Grid item lg={4} md={6} xs={12}>
+                        <Card elevation={3}>
+                            <CardContent>
+                                <Typography>Ads Go Here</Typography>
+                            </CardContent>
                         </Card>
                     </Grid>
                 </Grid>

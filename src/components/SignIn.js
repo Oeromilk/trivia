@@ -5,7 +5,6 @@ import { logEvent } from "firebase/analytics";
 import { useHistory } from "react-router-dom";
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
 import Input from '@mui/material/Input';
 import InputLabel from '@mui/material/InputLabel';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -77,19 +76,18 @@ export default function SignIn() {
     var provider = new GoogleAuthProvider();
     
     signInWithPopup(auth, provider)
-    .then((result) => {
-      if(result.user){
-        logEvent(analytics, 'login', { email: "googleAuthProvider"});
-        history.push("/");
-      }
-    }).catch((error) => {
-      console.log(error)
-    });
+      .then((result) => {
+        if(result.user){
+          logEvent(analytics, 'login', { email: "googleAuthProvider"});
+          history.push("/");
+        }
+      }).catch((error) => {
+        console.log(error)
+      });
   }
 
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
@@ -121,10 +119,6 @@ export default function SignIn() {
                     value={password}
                     onChange={handlePassword}
                 />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
           <Button
             fullWidth
             variant="contained"

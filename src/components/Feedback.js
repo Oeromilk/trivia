@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { db, analytics } from './firebase/firebaseConfig';
+import React, { useEffect, useState } from 'react';
+import { useHistory } from "react-router-dom";
+import { db, analytics, auth } from './firebase/firebaseConfig';
 import { logEvent } from "firebase/analytics";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { Container, Stack, Typography, Paper, Alert, Collapse, IconButton, Button, TextField, CircularProgress, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@mui/material';
@@ -12,6 +13,13 @@ export default function Feedback(){
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertSeverity, setAlertSeverity] = useState('info');
+    const history = useHistory();
+
+    useEffect(() => {
+        if(!auth.currentUser){
+            history.push('/')
+        }
+    }, [])
 
     async function submitFeedback() {
         const feedbackRef = await addDoc(collection(db, 'feedback'), {
