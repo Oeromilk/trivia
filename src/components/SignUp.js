@@ -5,12 +5,37 @@ import { logEvent } from "firebase/analytics";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useHistory } from "react-router-dom";
 import { Container, Stack, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
+import { motion } from 'framer-motion/dist/framer-motion';
 
 export default function SignUp() {
     const history = useHistory();
     const [code, setCode] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [isTrueCode, setIsTrueCode] = useState(false);
+
+    const containerVariants = {
+      initial: {
+        opacity: 0,
+        x: '100vw'
+      },
+      animate: {
+        opacity: 1,
+        x: 0,
+        transition: {
+          duration: 0.5,
+          type: 'spring',
+          bounce: 0.25
+        }
+      },
+      exit: {
+        x: '-100vw',
+        transition: {
+          duration: 0.5,
+          type: 'spring',
+          bounce: 0.25
+        }
+      }
+    }
 
     async function searchCode(c){
         const querySnapshot = await getDocs(query(collection(db, "signUpCodes"), where("code", "==", c)));
@@ -50,7 +75,13 @@ export default function SignUp() {
         searchCode(code)
     }
 
+    const handleSignIn = (event) => {
+      event.preventDefault();
+      history.push('/sign-in');
+    }
+
   return (
+    <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
       <Container sx={{marginTop: 15}} component="main" maxWidth="xs">
         <Stack direction="column" justifyContent="center" alignItems="center" spacing={3}>
             <Typography sx={{fontSize: '2em'}} textAlign="center">Have a code? Use below to sign up!</Typography>
@@ -59,7 +90,9 @@ export default function SignUp() {
                 {isSearching ? <CircularProgress /> : 'Check Code'}
             </Button>
             {isTrueCode ? <Alert severity="error">Oops, {code} is not valid. Either your entered incorrectly or that code has been used.</Alert> : null}
+            <Button size="large" variant="text" onClick={handleSignIn}>Already have an account? Sign In</Button>
         </Stack>
       </Container>
+    </motion.div>
   );
 }

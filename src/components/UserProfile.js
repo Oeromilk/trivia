@@ -4,6 +4,7 @@ import generateCode from '../utilites/generateCode';
 import { db, auth, analytics } from './firebase/firebaseConfig';
 import { onAuthStateChanged } from '@firebase/auth';
 import { logEvent } from "firebase/analytics";
+import { motion } from 'framer-motion/dist/framer-motion';
 import { doc, getDoc, addDoc, getDocs, setDoc, updateDoc, collection, query, where, increment } from '@firebase/firestore';
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
@@ -267,6 +268,30 @@ export default function UserProfile(props){
     const [inviteEmail, setInviteEmail] = useState('');
     const [isCodeSending, setIsCodeSending] = useState(false);
 
+    const containerVariants = {
+        initial: {
+            opacity: 0,
+            x: '100vw'
+        },
+        animate: {
+            opacity: 1,
+            x: 0,
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
+        },
+        exit: {
+            x: '-100vw',
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
+        }
+    }
+
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
             if(user){
@@ -335,40 +360,42 @@ export default function UserProfile(props){
     }
 
     return (
-        <Container sx={{marginTop: 15}} maxWidth="sm">
-            {profileExists ?
-            <React.Fragment>
-                <Stack spacing={4}>
-                    <Paper sx={{padding: 3}} variant="outlined">
-                        <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
-                            <Tooltip title="Update Avatar">
-                                <Avatar sx={{cursor: 'pointer'}} className={classes.updateAvatar} onClick={() => setUpdateAvatar(true)}>
-                                    {userInfo === null ? 'A' : <AvatarContainer avatar={userInfo.avatar.toLowerCase()} />}
-                                </Avatar>
-                            </Tooltip>
-                            <Collapse in={updateAvatar}>
-                                <Tooltip title="Cancel Update">
-                                    <CancelRoundedIcon sx={{cursor: 'pointer'}} onClick={() => setUpdateAvatar(false)} />
+        <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
+            <Container sx={{marginTop: 15}} maxWidth="sm">
+                {profileExists ?
+                <React.Fragment>
+                    <Stack spacing={4}>
+                        <Paper sx={{padding: 3}} variant="outlined">
+                            <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
+                                <Tooltip title="Update Avatar">
+                                    <Avatar sx={{cursor: 'pointer'}} className={classes.updateAvatar} onClick={() => setUpdateAvatar(true)}>
+                                        {userInfo === null ? 'A' : <AvatarContainer avatar={userInfo.avatar.toLowerCase()} />}
+                                    </Avatar>
                                 </Tooltip>
-                                <UpdateProfile />
-                            </Collapse>
-                            <Typography variant="h5" align="center">Username: {userInfo != null ? userInfo.username : "loading"}</Typography>
-                            <Typography variant="h5" align="center">Avatar: {userInfo != null ? userInfo.avatar : "loading"}</Typography>
-                        </Stack>
-                    </Paper>
-                    <Paper sx={{padding: 3}} variant="outlined">
-                        <Typography fontSize={'1.5em'}>Your Invites</Typography>
-                        <Divider sx={{marginTop: 2, marginBottom: 2}} />
-                        {invitesRemaining > 0 ? 
-                        <Stack spacing={3}>
-                            <Typography sx={{fontSize: '1.5em'}}>Invites Remaing <span>{invitesRemaining}</span></Typography>
-                            <TextField id="invite-email" label="Email" variant="outlined" helperText="Email of who you want to invite, choose wisely." value={inviteEmail} onChange={handleInviteEmail} />
-                            <Button disabled={isCodeSending} size="large" variant="contained" onClick={createInviteCode}>{isCodeSending ? <CircularProgress /> : 'Send Invite'}</Button>
-                        </Stack> : null}
-                    </Paper>
-                </Stack>
-            </React.Fragment>
-            : <CreateProfile />}
-        </Container>
+                                <Collapse in={updateAvatar}>
+                                    <Tooltip title="Cancel Update">
+                                        <CancelRoundedIcon sx={{cursor: 'pointer'}} onClick={() => setUpdateAvatar(false)} />
+                                    </Tooltip>
+                                    <UpdateProfile />
+                                </Collapse>
+                                <Typography variant="h5" align="center">Username: {userInfo != null ? userInfo.username : "loading"}</Typography>
+                                <Typography variant="h5" align="center">Avatar: {userInfo != null ? userInfo.avatar : "loading"}</Typography>
+                            </Stack>
+                        </Paper>
+                        <Paper sx={{padding: 3}} variant="outlined">
+                            <Typography fontSize={'1.5em'}>Your Invites</Typography>
+                            <Divider sx={{marginTop: 2, marginBottom: 2}} />
+                            {invitesRemaining > 0 ? 
+                            <Stack spacing={3}>
+                                <Typography sx={{fontSize: '1.5em'}}>Invites Remaing <span>{invitesRemaining}</span></Typography>
+                                <TextField id="invite-email" label="Email" variant="outlined" helperText="Email of who you want to invite, choose wisely." value={inviteEmail} onChange={handleInviteEmail} />
+                                <Button disabled={isCodeSending} size="large" variant="contained" onClick={createInviteCode}>{isCodeSending ? <CircularProgress /> : 'Send Invite'}</Button>
+                            </Stack> : null}
+                        </Paper>
+                    </Stack>
+                </React.Fragment>
+                : <CreateProfile />}
+            </Container>
+        </motion.div>
     )
 };

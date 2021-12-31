@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db, analytics } from './firebase/firebaseConfig';
 import { logEvent } from "firebase/analytics";
+import { motion } from 'framer-motion/dist/framer-motion';
 import { collection, getDocs, setDoc, doc, getDoc, query, where } from "firebase/firestore";
 import { Container, Grid, Typography, Paper, Avatar, Button, List, ListItem, Divider } from '@mui/material';
 import { ThumbUp, ThumbDown } from '@mui/icons-material';
@@ -10,6 +11,30 @@ export default function Review(){
     const [userInfo, setUserInfo] = useState(null);
     const [votes, setVotes] = useState([]);
     const [contributions, setContributions] = useState([]);
+
+    const containerVariants = {
+        initial: {
+            opacity: 0,
+            x: '100vw'
+        },
+        animate: {
+            opacity: 1,
+            x: 0,
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
+        },
+        exit: {
+            x: '-100vw',
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
+        }
+    }
 
     useEffect(() => {
         getUserInfo();
@@ -157,17 +182,19 @@ export default function Review(){
     })
 
     return (
-        <Container sx={{marginTop: 10, marginBottom: 2}} maxWidth="md">
-            <Grid container spacing={2}>
-                <Grid item xs={12}>
-                    <Typography variant="h2" color="primary">Community Contributions</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <Grid container rowSpacing={2}>
-                        {(contributions.size === 0) ? <Typography variant="caption">No new contributions, check back later!</Typography> : contributionList}
+        <motion.div  variants={containerVariants} initial="initial" animate="animate" exit="exit">
+            <Container sx={{marginTop: 10, marginBottom: 2}} maxWidth="md">
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <Typography variant="h2" color="primary">Community Contributions</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Grid container rowSpacing={2}>
+                            {(contributions.size === 0) ? <Typography variant="caption">No new contributions, check back later!</Typography> : contributionList}
+                        </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
-        </Container>
+            </Container>
+        </motion.div>
     )
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from './firebase/firebaseConfig';
 import { getDocs, query, orderBy, collection, limit } from '@firebase/firestore';
+import { motion } from 'framer-motion/dist/framer-motion';
 import AvatarContainer from './Avatar';
 import makeStyles from '@mui/styles/makeStyles';
 import Container from '@mui/material/Container';
@@ -48,6 +49,30 @@ const leaderboardStyles = makeStyles((theme) => ({
 export default function LeaderBoard(){
     const classes = leaderboardStyles();
     const [topTenUsers, setTopTenUsers] = useState([]);
+
+    const containerVariants = {
+        initial: {
+            opacity: 0,
+            x: '100vw'
+        },
+        animate: {
+            opacity: 1,
+            x: 0,
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
+        },
+        exit: {
+            x: '-100vw',
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
+        }
+    }
 
     const topTenUsersList = topTenUsers.map((user, index) => {
         let bgColor;
@@ -98,7 +123,7 @@ export default function LeaderBoard(){
     }
 
     return (
-        <React.Fragment>
+        <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
             <CssBaseline />
             <Container maxWidth="md">
                 <Grid container className={classes.leaderBoardContainer}>
@@ -108,6 +133,6 @@ export default function LeaderBoard(){
                     {topTenUsersList}
                 </Grid>
             </Container>
-        </React.Fragment>
+        </motion.div>
     )
 };

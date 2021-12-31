@@ -4,10 +4,14 @@ import { ReactComponent as TrivibleLogo} from "./images/trivible-logo.svg";
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import { CssBaseline } from '@mui/material';
-import 'fontsource-roboto';
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
 import { auth, analytics } from "./components/firebase/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { logEvent } from "firebase/analytics";
+import { AnimatePresence, motion } from 'framer-motion/dist/framer-motion';
 
 import { Container, Grid, AppBar, Button, Drawer, List, ListItem, Typography, Divider, Paper, Accordion, AccordionDetails, AccordionSummary, Stack} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -31,8 +35,9 @@ import SignIn from './components/SignIn';
 import ForgotPassword from './components/ForgotPassword';
 import Feedback from './components/Feedback';
 import leaderboardImage from './images/leaderboard.jpg';
+import landingImage from './images/landingImage.svg';
+import { Switch, Route, Link, useHistory, useLocation } from "react-router-dom";
 
-import { BrowserRouter as Router, Switch, Route, Link, useHistory } from "react-router-dom";
 
 const theme = createTheme({
   palette: {
@@ -51,8 +56,10 @@ const theme = createTheme({
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    flexGrow: 1,
-    marginBottom: theme.spacing(8)
+    flexGrow: 1
+  },
+  appBar: {
+    marginBottom: theme.spacing(6)
   },
   accordionSize: {
     width: '100%',
@@ -61,10 +68,24 @@ const useStyles = makeStyles((theme) => ({
   faqTitle: {
     marginBottom: theme.spacing(3)
   },
+  landingBackground: {
+    flexGrow: 1,
+    width: '100%',
+    height: '100%',
+    backgroundImage: `url(${landingImage})`,
+    backgroundAttachment: 'fixed',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'cover',
+    // backdropFilter: `blur(5px)`
+    // filter: `blur(2px) grayscale(50%)`
+  },
   h1Banner: {
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '10vh'
+    },
     marginTop: theme.spacing(6),
-    height: '200px',
     fontWeight: 'bolder',
+    fontSize: '15vw',
     background: `linear-gradient(to right, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
@@ -78,6 +99,10 @@ const useStyles = makeStyles((theme) => ({
   toolBarStyle: {
     background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`
   },
+  blueFrostedBackground: {
+    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+    backdropFilter: 'blur(2px)'
+  },
   movieWatching: {
     height: '341px',
     width: '265px',
@@ -88,9 +113,13 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('md')]: {
       paddingLeft: theme.spacing(6)
     },
+    padding: theme.spacing(3),
     display: 'flex',
     justifyContent: 'center',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    borderRadius: '0.5em',
+    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+    backdropFilter: 'blur(2px)'
   },
   signUpAction: {
     marginTop: theme.spacing(6),
@@ -147,16 +176,33 @@ const useStyles = makeStyles((theme) => ({
                 -0.25em 0.25em 0.75em 0 ${theme.palette.secondary.main}`
   },
   leaderboardText: {
-    paddingLeft: theme.spacing(3),
-    paddingRight: theme.spacing(3)
+    [theme.breakpoints.down('md')]: {
+      marginBottom: theme.spacing(5)
+    },
+    padding: theme.spacing(3),
+    borderRadius: '0.5em',
+    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+    backdropFilter: 'blur(2px)'
+  },
+  rankText: {
+    [theme.breakpoints.up('md')]: {
+      maxWidth: '50%',
+      margin: `${theme.spacing(5)} auto`
+    },
+    
+    marginTop: theme.spacing(5),
+    padding: theme.spacing(3),
+    borderRadius: '0.5em',
+    backgroundColor: 'rgba(16, 185, 129, 0.5)',
+    backdropFilter: 'blur(2px)'
   },
   leaderboardImage: {
     [theme.breakpoints.up('md')]: {
-      maxWidth: '400px'
+      maxWidth: '90%'
     },
     display: 'block',
     margin: '0 auto',
-    width: '500px'
+    width: '90%'
   }
 }))
 
@@ -292,25 +338,25 @@ function TopBar(props){
   }
 
   return (
-    <div className={classes.root}>
-          <AppBar position="fixed" sx={{top: 0, left: 0}}>
-            <ToolBar>
-              <div className={classes.title}  onClick={handleHome}>
-                <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={1}>
-                  <TrivibleLogo style={{height: 32, width: 32, marginRight: 12}} />
-                  <Typography variant="h6" >Trivible</Typography>
-                </Stack>
-              </div>
-              <div className={classes.desktopSection}>
-                {((props.currentUser !== null) ? <SignedInLinks /> : null)}
-                {((props.currentUser !== null) ? <SignOut variant={"text"} /> : <SignInButton />)}
-              </div>
-              <div className={classes.mobileSection}>
-                <MobileDrawer currentUser={props.currentUser}/>
-              </div>
-            </ToolBar>
-          </AppBar>
-        </div>
+    <div className={classes.appBar}>
+      <AppBar position="fixed" sx={{top: 0, left: 0}}>
+        <ToolBar>
+          <div className={classes.title}  onClick={handleHome}>
+            <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={1}>
+              <TrivibleLogo style={{height: 32, width: 32, marginRight: 12}} />
+              <Typography variant="h6" >Trivible</Typography>
+            </Stack>
+          </div>
+          <div className={classes.desktopSection}>
+            {((props.currentUser !== null) ? <SignedInLinks /> : null)}
+            {((props.currentUser !== null) ? <SignOut variant={"text"} /> : <SignInButton />)}
+          </div>
+          <div className={classes.mobileSection}>
+            <MobileDrawer currentUser={props.currentUser}/>
+          </div>
+        </ToolBar>
+      </AppBar>
+    </div>
   )
 }
 
@@ -377,85 +423,121 @@ function FAQ(){
   )
 }
 
+const containerVariants = {
+  hidden: {
+    opacity: 0
+  },
+  visible: {
+    opacity: 1,
+    transition: {
+      delay: 0.5, duration: 1
+    }
+  },
+  exit: {
+    x: '-100vw',
+    transition: { 
+      ease: 'easeInOut'
+    }
+  }
+}
+
 function LandingNoUser(){
   const classes = useStyles();
+  const history = useHistory();
+  
+  const handleSignUp = (event) => {
+    event.preventDefault();
+    history.push("/sign-up");
+  }
 
   return (
-    <div className={classes.root}>
-      <Container>
-        <Grid container rowSpacing={10}>
-          <Grid item xs={12} className={classes.landingTitle}>
-            <Typography variant="h1" align="center" className={classes.h1Banner}>Trivible</Typography>
-          </Grid> 
-          <Grid item xs={12} className={classes.landingSpacing}>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" exit="exit">
+      <div className={classes.landingBackground}>
+        <div style={{backdropFilter: 'blur(5px) grayscale(0.5)'}} >
+          <Stack sx={{height: '100vh'}} direction="column" alignItems="center" spacing={10}>
+            <Typography align="center" className={classes.h1Banner}>Trivible</Typography>
             <Typography variant="h3" align="center">
               <span className={classes.highlightedBlueText}>Bingeable</span> TV Show <span className={classes.highlightedOrangeText}>Trivia</span>
             </Typography>
-          </Grid>
-          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginBottom: 5 }}>
-            <Button sx={{padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
-          </Grid>
-          <Grid item xs={12} sm={6} className={classes.callToAction}>
-            <Typography variant="h4">
-              Do you love asking others questions about your favorite shows testing their knowledge? 
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <MovieWatching className={classes.movieWatching}/>
-          </Grid>
-          <Grid item xs={12}>
-            <Stack sx={{margin: '0 auto'}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={3}>
-              <Typography variant="h5" align="center">Here is how it works!</Typography>
-              <Paper variant="outlined" className={classes.ruleStyle}>
-                <Typography variant="h6" align="center" color="primary">1st</Typography>
-                <Typography variant="subtitle1" align="center">
-                  When a game starts you will be given a random question, excluding questions you have answered before.
+            <Button sx={{padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" onClick={handleSignUp}>Sign Up</Button>
+          </Stack>
+          {/* <Container >
+            <Grid container>
+              <Grid item xs={12} className={classes.landingTitle}>
+                <Typography align="center" className={classes.h1Banner}>Trivible</Typography>
+              </Grid> 
+              <Grid item xs={12} className={classes.landingSpacing}>
+                <Typography variant="h3" align="center">
+                  <span className={classes.highlightedBlueText}>Bingeable</span> TV Show <span className={classes.highlightedOrangeText}>Trivia</span>
                 </Typography>
-              </Paper>
-              <Paper variant="outlined" className={classes.ruleStyle}>
-                <Typography variant="h6" align="center" color="primary">2nd</Typography>
-                <Typography variant="subtitle1" align="center">
-                  You have several seconds to answer the question, if you don't choose in time, you get it wrong.
+              </Grid>
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+                <Button sx={{padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
+              </Grid>
+              <Grid item xs={12} sm={6} className={classes.callToAction}>
+                <Typography variant="h4">
+                  Do you love asking others questions about your favorite shows testing their knowledge? 
                 </Typography>
-              </Paper>
-              <Paper variant="outlined" className={classes.ruleStyle}>
-                <Typography variant="h6" align="center" color="primary">3rd</Typography>
-                <Typography variant="subtitle1" align="center">
-                  You can continue to get new questions until your run out of chances.
-                </Typography>
-              </Paper>
-            </Stack> 
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Typography className={classes.leaderboardText} align="center" sx={{fontSize: '2em'}}>Answer <span className={classes.highlightedOrangeText}>trivia</span> questions and complete <span className={classes.highlightedOrangeText}>acheivements</span> to earn a spot on the leaderboard!</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <img className={classes.leaderboardImage} src={leaderboardImage} alt="Showing first, second, and third place users on a leaderboard." loading="lazy"/>
-          </Grid>
-          <Grid item xs={12}>
-            <Typography sx={{fontSize: '2em'}} align="center">Have an idea for a question? Once you achieve rank of <span className={classes.highlightedBlueText}>Assistant To The Manager</span>, you can contribute and vote on new questions.</Typography>
-          </Grid>
-          <Grid item xs={12} className={classes.signUpAction}>
-            <Paper sx={{maxWidth: '500px', margin: '0 auto'}} variant="outlined">
-              <Stack sx={{padding: '3em'}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={5}>
-                <Typography variant="h6" align="center">Ready to start your <span className={classes.highlightedOrangeText}>trivia</span> adventure and take your place on the leaderboard?</Typography>
-                <Button sx={{marginTop: '3em', padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
-              </Stack>
-            </Paper>
-          </Grid>
-          <Grid item md={2}></Grid>
-          <Grid item xs={12} md={8}>
-            <FAQ />
-          </Grid>
-        </Grid>
-      </Container>
-    </div>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <MovieWatching className={classes.movieWatching}/>
+              </Grid>
+              <Grid item xs={12} sx={{marginBottom: 20}}>
+                <Stack sx={{margin: '0 auto'}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={3}>
+                  <Typography variant="h5" align="center">Here is how it works!</Typography>
+                  <Paper variant="outlined" className={classes.ruleStyle}>
+                    <Typography variant="h6" align="center" color="primary">1st</Typography>
+                    <Typography variant="subtitle1" align="center">
+                      When a game starts you will be given a random question, excluding questions you have answered before.
+                    </Typography>
+                  </Paper>
+                  <Paper variant="outlined" className={classes.ruleStyle}>
+                    <Typography variant="h6" align="center" color="primary">2nd</Typography>
+                    <Typography variant="subtitle1" align="center">
+                      You have several seconds to answer the question, if you don't choose in time, you get it wrong.
+                    </Typography>
+                  </Paper>
+                  <Paper variant="outlined" className={classes.ruleStyle}>
+                    <Typography variant="h6" align="center" color="primary">3rd</Typography>
+                    <Typography variant="subtitle1" align="center">
+                      You can continue to get new questions until your run out of chances.
+                    </Typography>
+                  </Paper>
+                </Stack> 
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Typography className={classes.leaderboardText} align="center" sx={{fontSize: '2em'}}>Answer <span className={classes.highlightedOrangeText}>trivia</span> questions and complete <span className={classes.highlightedOrangeText}>acheivements</span> to earn a spot on the leaderboard!</Typography>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <img className={classes.leaderboardImage} src={leaderboardImage} alt="Showing first, second, and third place users on a leaderboard." loading="lazy"/>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography className={classes.rankText} sx={{fontSize: '2em'}} align="center">Have an idea for a question? Once you achieve rank of <span className={classes.highlightedBlueText}>Assistant To The Manager</span>, you can contribute and vote on new questions.</Typography>
+              </Grid>
+              <Grid item xs={12} className={classes.signUpAction}>
+                <Paper sx={{maxWidth: '500px', margin: '0 auto'}} variant="outlined">
+                  <Stack sx={{padding: '3em'}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={5}>
+                    <Typography variant="h6" align="center">Ready to start your <span className={classes.highlightedOrangeText}>trivia</span> adventure and take your place on the leaderboard?</Typography>
+                    <Button sx={{marginTop: '3em', padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
+                  </Stack>
+                </Paper>
+              </Grid>
+              <Grid item md={2}></Grid>
+              <Grid item xs={12} md={8}>
+                <FAQ />
+              </Grid>
+            </Grid>
+          </Container> */}
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
 export default function App(){
   const [currentUser, setCurrentUser] = React.useState(null);
   const userStatus = localStorage.getItem("uid");
+  const location = useLocation();
 
   useEffect(() => {
     logEvent(analytics, 'page_view');
@@ -473,13 +555,13 @@ export default function App(){
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
-        <Router>
-          <CssBaseline />
-          <React.Fragment>
-            <TopBar currentUser={currentUser} />
-          </React.Fragment>
-
-          <Switch>
+        <CssBaseline />
+        <React.Fragment>
+          {userStatus !== "null" ? <TopBar currentUser={currentUser} />:  null}
+        </React.Fragment>
+        
+        <AnimatePresence exitBeforeEnter>
+          <Switch location={location} key={location.key}>
             <Route path="/profile">
               <UserProfile currentUser={currentUser} />
             </Route>
@@ -517,7 +599,7 @@ export default function App(){
               {(userStatus !== "null" ? <Dashboard user={currentUser} /> : <LandingNoUser/>)}
             </Route>
           </Switch>
-        </Router>
+        </AnimatePresence>
       </ThemeProvider>
     </StyledEngineProvider>
   );

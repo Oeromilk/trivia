@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from './firebase/firebaseConfig';
 import { getDocs, collection, query, orderBy, limit } from "firebase/firestore";
 import { useHistory } from "react-router-dom";
+import { motion } from 'framer-motion/dist/framer-motion';
 import { Container, Grid, Button, Typography, List, ListItem, Card, CardActions, CardContent, CardHeader, Avatar, Badge, Stack, Divider } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import AvatarContainer from './Avatar';
@@ -85,6 +86,30 @@ export default function Dashboard(props){
     const [activeContributions, setActiveContributions] = useState(0);
     const [activeFriendRequests, setActiveFriendRequests] = useState(0);
 
+    const containerVariants = {
+        initial: {
+          opacity: 0,
+          x: '100vw'
+        },
+        animate: {
+          opacity: 1,
+          x: 0,
+          transition: {
+            duration: 0.5,
+            type: 'spring',
+            bounce: 0.25
+          }
+        },
+        exit: {
+          x: '-100vw',
+          transition: {
+            duration: 0.5,
+            type: 'spring',
+            bounce: 0.25
+          }
+        }
+      }
+
     useEffect(() => {
         checkContributions();
         checkFriendRequests();
@@ -134,7 +159,7 @@ export default function Dashboard(props){
     }
 
     return (
-        <React.Fragment>
+        <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
             <Container className={classes.root}>
                 <Grid container spacing={3} className={classes.grid}>
                     <Grid item xs={12} >
@@ -200,6 +225,6 @@ export default function Dashboard(props){
                     </Grid>
                 </Grid>
             </Container>
-        </React.Fragment>
+        </motion.div>
     )
 };

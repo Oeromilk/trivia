@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { db, analytics } from './firebase/firebaseConfig';
 import { logEvent } from "firebase/analytics";
 import { collection, addDoc, getDoc, doc } from "firebase/firestore";
-import { Container, Grid, Typography, Button, TextField, Tooltip, InputLabel, Select, MenuItem, FormControl, CircularProgress, Snackbar } from '@mui/material';
+import { motion } from 'framer-motion/dist/framer-motion';
+import { Container, Grid, Typography, Button, TextField, Tooltip, InputLabel, Select, MenuItem, FormControl, Stack, CircularProgress, Snackbar, Chip, Paper } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -37,9 +38,39 @@ export default function Contribute(){
     const [snackMessage, setSnackMessage] = React.useState('');
     const [severity, setSeverity] = React.useState('success');
     const [open, setOpen] = useState(false);
+    const [tagList, setTagList] = useState([{label: "Michael"}]);
     const questionToolTip = "Remember, questions are timed.";
     const answerToolTip = "Keep it simple stupid.";
     const difficultyToolTip = "Rank it 1, 2, 3, 4, 5. 1 being easist and 5 being hardest. Think your question is almost impossible, then rank it 6.";
+    const tagOptions = [
+        {label: "Michael"},
+        {label: "Dwight"},
+        {label: "Jim"},
+        {label: "Pam"},
+    ]
+    const containerVariants = {
+        initial: {
+            opacity: 0,
+            x: '100vw'
+        },
+        animate: {
+            opacity: 1,
+            x: 0,
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
+        },
+        exit: {
+            x: '-100vw',
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
+        }
+    }
 
     useEffect(() => {
         getUserInfo();
@@ -188,6 +219,10 @@ export default function Contribute(){
         setChoicesField(values);
     }
 
+    const handleTagDelete = (data) => {
+        setTagList((tags) => tags.filter((tag) => tag.label !== data.label))
+    }
+
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -196,11 +231,31 @@ export default function Contribute(){
         setOpen(false);
     };
 
+    const tagsChosen = tagList.map((data) => {
+        return (
+            <Chip label={data.label} variant="outlined" onDelete={() => handleTagDelete(data)}/>
+        )
+    })
+
     return (
-        <React.Fragment>
-            <Container sx={{marginTop: 2, marginBottom: 8}} maxWidth="sm">
+        <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
+            <Container sx={{marginTop: 10, marginBottom: 8}} maxWidth="sm">
                 <Typography sx={{marginBottom: 2}} variant="h2" align="center">Create Your Trivia Question</Typography>
                 <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Typography variant="h4">Question Tags</Typography>
+                        <Typography sx={{color: "#808080"}} variant="caption">Tags should include the topic of the question. For Example, if your question is about Michael, the question should at least have a tag for Michael. Questions need at least one tag to be valid.</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Paper sx={{padding: 1}}>
+                            <Stack direction="row" spacing={1}>
+                                {tagsChosen}
+                            </Stack>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12}>
+                        
+                    </Grid>
                     <Grid item xs={12}>
                         <Tooltip title={questionToolTip} placement="bottom-start">
                             <TextField error={questionValidation.error} helperText={questionValidation.text} fullWidth id="question" label="Question" value={question} onChange={handleQuestion} autoComplete="off"/>
@@ -317,6 +372,6 @@ export default function Contribute(){
                     <Alert onClose={handleClose} severity={severity}>{snackMessage}</Alert>
                 </Snackbar>
             </Container>
-        </React.Fragment>
+        </motion.div>
     )
 }

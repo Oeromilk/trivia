@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { db, analytics } from './firebase/firebaseConfig';
 import { logEvent } from "firebase/analytics";
+import { motion } from 'framer-motion/dist/framer-motion';
 import AvatarContainer from './Avatar';
 import { doc, getDoc, getDocs, query, where, collection, Timestamp, addDoc, deleteDoc } from "firebase/firestore";
 import { Grid, Typography, Avatar, Button, Fab, Drawer, TextField, TextareaAutosize, CircularProgress } from '@mui/material';
@@ -38,6 +39,29 @@ export default function FriendsView(props){
     const [requestUsername, setRequestUsername] = useState('');
     const [isRequestSending, setIsRequestSending] = useState(false);
     const [usernameValidation, setUsernameValidation] = useState('');
+    const containerVariants = {
+        initial: {
+          opacity: 0,
+          x: '100vw'
+        },
+        animate: {
+          opacity: 1,
+          x: 0,
+          transition: {
+            duration: 0.5,
+            type: 'spring',
+            bounce: 0.25
+          }
+        },
+        exit: {
+          x: '-100vw',
+          transition: {
+            duration: 0.5,
+            type: 'spring',
+            bounce: 0.25
+          }
+        }
+      }
 
     useEffect(() => {
         getUserInfo();
@@ -204,7 +228,7 @@ export default function FriendsView(props){
     }
     
     return (
-        <React.Fragment>
+        <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
             <Grid className={classes.containerSize} sx={{padding: 3}} container spacing={3}>
                 <Grid item xs={12}>
                     <Typography variant="h3">Your Friends</Typography>
@@ -286,6 +310,6 @@ export default function FriendsView(props){
                    </Grid>
                </Grid>
            </Drawer>
-        </React.Fragment>
+        </motion.div>
     )
 }

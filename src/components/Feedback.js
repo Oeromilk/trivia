@@ -3,6 +3,7 @@ import { useHistory } from "react-router-dom";
 import { db, analytics, auth } from './firebase/firebaseConfig';
 import { logEvent } from "firebase/analytics";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { motion } from 'framer-motion/dist/framer-motion';
 import { Container, Stack, Typography, Paper, Alert, Collapse, IconButton, Button, TextField, CircularProgress, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
@@ -14,6 +15,30 @@ export default function Feedback(){
     const [alertMessage, setAlertMessage] = useState('');
     const [alertSeverity, setAlertSeverity] = useState('info');
     const history = useHistory();
+
+    const containerVariants = {
+        initial: {
+            opacity: 0,
+            x: '100vw'
+        },
+        animate: {
+            opacity: 1,
+            x: 0,
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
+        },
+        exit: {
+            x: '-100vw',
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
+        }
+    }
 
     useEffect(() => {
         if(!auth.currentUser){
@@ -58,32 +83,34 @@ export default function Feedback(){
     }
 
     return (
-        <Container sx={{marginTop: 15}} maxWidth="sm">
-            <Paper sx={{padding: 3}} variant="outlined">
-                <Stack direction="column" justifyContent="space-evenly" alignItems="center" spacing={3}>
-                    <Typography sx={{fontSize: '3em'}}>Share your Feedback</Typography>
-                    <Typography>Have you experienced a bug, want to suggest a new idea, or have just general feedback? Choose an option below and share as much detail as possible.</Typography>
-                    <FormControl component="fieldset">
-                        <FormLabel component="legend">Option</FormLabel>
-                        <RadioGroup row aria-label="opton" name="row-radio-buttons-group" value={option} onChange={handleOption}>
-                            <FormControlLabel value="bug" control={<Radio />} label="Bug" />
-                            <FormControlLabel value="idea" control={<Radio />} label="Idea" />
-                            <FormControlLabel value="feedback" control={<Radio />} label="Feedback" />
-                        </RadioGroup>
-                    </FormControl>
-                    <TextField id="feeback-description" label="Description" fullWidth multiline minRows={5} value={description} onChange={handleDescription} />
-                    <Button size="large" disabled={isSending} fullWidth variant="outlined" onClick={handleFeedback}>
-                        {isSending ? <CircularProgress /> : 'Submit Feedback'}
-                    </Button>
-                    <Collapse in={showAlert}>
-                        <Alert variant="outlined" severity={alertSeverity}
-                            action={<IconButton aria-label="close" color="inherit" size="small" onClick={() => {setShowAlert(false)}}>
-                                <CloseRoundedIcon fontSize="inherit" />
-                            </IconButton>}
-                        >{alertMessage}</Alert>
-                    </Collapse>
-                </Stack>
-            </Paper>
-        </Container>
+        <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
+            <Container sx={{marginTop: 15}} maxWidth="sm">
+                <Paper sx={{padding: 3}} variant="outlined">
+                    <Stack direction="column" justifyContent="space-evenly" alignItems="center" spacing={3}>
+                        <Typography sx={{fontSize: '3em'}}>Share your Feedback</Typography>
+                        <Typography>Have you experienced a bug, want to suggest a new idea, or have just general feedback? Choose an option below and share as much detail as possible.</Typography>
+                        <FormControl component="fieldset">
+                            <FormLabel component="legend">Option</FormLabel>
+                            <RadioGroup row aria-label="opton" name="row-radio-buttons-group" value={option} onChange={handleOption}>
+                                <FormControlLabel value="bug" control={<Radio />} label="Bug" />
+                                <FormControlLabel value="idea" control={<Radio />} label="Idea" />
+                                <FormControlLabel value="feedback" control={<Radio />} label="Feedback" />
+                            </RadioGroup>
+                        </FormControl>
+                        <TextField id="feeback-description" label="Description" fullWidth multiline minRows={5} value={description} onChange={handleDescription} />
+                        <Button size="large" disabled={isSending} fullWidth variant="outlined" onClick={handleFeedback}>
+                            {isSending ? <CircularProgress /> : 'Submit Feedback'}
+                        </Button>
+                        <Collapse in={showAlert}>
+                            <Alert variant="outlined" severity={alertSeverity}
+                                action={<IconButton aria-label="close" color="inherit" size="small" onClick={() => {setShowAlert(false)}}>
+                                    <CloseRoundedIcon fontSize="inherit" />
+                                </IconButton>}
+                            >{alertMessage}</Alert>
+                        </Collapse>
+                    </Stack>
+                </Paper>
+            </Container>
+        </motion.div>
     )
 }

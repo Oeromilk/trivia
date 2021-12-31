@@ -3,6 +3,7 @@ import { auth, analytics } from './firebase/firebaseConfig';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { logEvent } from "firebase/analytics";
 import { useHistory } from "react-router-dom";
+import { motion } from 'framer-motion/dist/framer-motion';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Input from '@mui/material/Input';
@@ -48,6 +49,30 @@ export default function SignIn() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
 
+  const containerVariants = {
+    initial: {
+      opacity: 0,
+      x: '100vw'
+    },
+    animate: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.5,
+        type: 'spring',
+        bounce: 0.25
+      }
+    },
+    exit: {
+      x: '-100vw',
+      transition: {
+        duration: 0.5,
+        type: 'spring',
+        bounce: 0.25
+      }
+    }
+  }
+
   function handleEmail(event){
     setEmail(event.target.value);
   }
@@ -87,70 +112,67 @@ export default function SignIn() {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign in
-        </Typography>
-        <form className={classes.form} noValidate>
-            <InputLabel htmlFor="email">Email</InputLabel>
-            <Input
-                className={classes.input}
-                required
-                fullWidth
-                id="email"
-                name="email"
-                autoComplete="email"
-                value={email}
-                onChange={handleEmail}
-            />
-            <InputLabel htmlFor="password">Password</InputLabel>
-                <Input
-                    className={classes.input}
-                    required
-                    fullWidth
-                    name="password"
-                    type="password"
-                    id="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={handlePassword}
-                />
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={handleSignIn}
-          >
-            Sign In
-          </Button>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={handleSignInWithGoogle}
-          >
-            Sign In With Google
-          </Button>
-          <Grid container>
-            <Grid item xs>
-              <Typography className={classes.forgotPassword} variant="body2">
-                  <Link onClick={handleForgotPassword}>Forgot password?</Link>
-              </Typography>
+    <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
+      <Container component="main" maxWidth="xs">
+        <div className={classes.paper}>
+          <Avatar className={classes.avatar}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign in
+          </Typography>
+          <form className={classes.form} noValidate>
+              <InputLabel htmlFor="email">Email</InputLabel>
+              <Input
+                  className={classes.input}
+                  required
+                  fullWidth
+                  id="email"
+                  name="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={handleEmail}
+              />
+              <InputLabel htmlFor="password">Password</InputLabel>
+                  <Input
+                      className={classes.input}
+                      required
+                      fullWidth
+                      name="password"
+                      type="password"
+                      id="password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={handlePassword}
+                  />
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              onClick={handleSignIn}
+            >
+              Sign In
+            </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              onClick={handleSignInWithGoogle}
+            >
+              Sign In With Google
+            </Button>
+            <Grid container>
+              <Grid item xs>
+                <Typography className={classes.forgotPassword} variant="body2">
+                    <Link onClick={handleForgotPassword}>Forgot password?</Link>
+                </Typography>
+              </Grid>
             </Grid>
-            <Grid item>
-              <Link href="/sign-up" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
-          </Grid>
-        </form>
-      </div>
-    </Container>
+          </form>
+        </div>
+      </Container>
+    </motion.div>
   );
 }
