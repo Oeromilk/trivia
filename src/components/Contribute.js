@@ -3,8 +3,28 @@ import { db, analytics } from './firebase/firebaseConfig';
 import { logEvent } from "firebase/analytics";
 import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import { motion } from 'framer-motion/dist/framer-motion';
-import { Container, Grid, Typography, Button, TextField, Tooltip, InputLabel, Select, MenuItem, FormControl, Stack, CircularProgress, Snackbar, Chip, Paper } from '@mui/material';
+import { Container, Grid, Typography, Button, TextField, Tooltip, InputLabel, Select, MenuItem, FormControl, CircularProgress, Snackbar, Autocomplete } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
+
+function useDebounce(value, delay) {
+    // State and setters for debounced value
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+        // Update debounced value after delay
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+        // Cancel the timeout if value changes (also on delay change or unmount)
+        // This is how we prevent debounced value from updating if value is changed ...
+        // .. within the delay period. Timeout gets cleared and restarted.
+        return () => {
+            clearTimeout(handler);
+        };
+    // Only re-call effect if value or delay changes
+    },[value, delay] );
+
+    return debouncedValue;
+}
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -38,7 +58,10 @@ export default function Contribute(){
     const [snackMessage, setSnackMessage] = React.useState('');
     const [severity, setSeverity] = React.useState('success');
     const [open, setOpen] = useState(false);
-    const [tagList, setTagList] = useState([{label: "Michael"}]);
+    const [tagList, setTagList] = useState([]);
+    const [tagHelperText, setTagHelperText] = useState(null);
+    const debouncedQuestion = useDebounce(question, 1000);
+    const debouncedAnswer = useDebounce(answer, 1000);
     const questionToolTip = "Remember, questions are timed.";
     const answerToolTip = "Keep it simple stupid.";
     const difficultyToolTip = "Rank it 1, 2, 3, 4, 5. 1 being easist and 5 being hardest. Think your question is almost impossible, then rank it 6.";
@@ -47,6 +70,31 @@ export default function Contribute(){
         {label: "Dwight"},
         {label: "Jim"},
         {label: "Pam"},
+        {label: "Andy"},
+        {label: "Angela"},
+        {label: "Creed"},
+        {label: "Stanley"},
+        {label: "Toby"},
+        {label: "Darryl"},
+        {label: "Oscar"},
+        {label: "Kevin"},
+        {label: "Meredith"},
+        {label: "Phyllis"},
+        {label: "Kelly"},
+        {label: "Ryan"},
+        {label: "Erin"},
+        {label: "Packer"},
+        {label: "Gabe"},
+        {label: "Holly"},
+        {label: "Robert"},
+        {label: "Nellie"},
+        {label: "Clark"},
+        {label: "Pete"},
+        {label: "Roy"},
+        {label: "David"},
+        {label: "Jo"},
+        {label: "Charles"},
+        {label: "Karen"}
     ]
     const containerVariants = {
         initial: {
@@ -75,6 +123,34 @@ export default function Contribute(){
     useEffect(() => {
         getUserInfo();
     }, [])
+
+    useEffect(() => {
+        if(tagList !== null && tagList.length === 0 && question !== ""){
+            setTagHelperText("At least one tag needs to be included.")
+        } else {
+            setTagHelperText(null);
+        }
+    }, [tagList])
+
+    useEffect(() => {
+        for(const tag of tagOptions){
+            var search = question.toLowerCase();
+            var label = tag.label.toLowerCase();
+            if(search.includes(label)){
+                setTagList(prev => [...prev, tag]);
+            }
+        }
+    }, [debouncedQuestion])
+
+    useEffect(() => {
+        for(const tag of tagOptions){
+            var search = answer.toLowerCase();
+            var label = tag.label.toLowerCase();
+            if(search.includes(label)){
+                setTagList(prev => [...prev, tag]);
+            }
+        }
+    }, [debouncedAnswer])
 
     useEffect(() => {
         if(question !== ""){
@@ -167,7 +243,8 @@ export default function Contribute(){
                     choices: choicesField.map(field => field.value),
                     season: season,
                     episode: episode,
-                    difficulty: difficulty
+                    difficulty: difficulty,
+                    tags: tagList
                 }
                 sendNewContribution(contribution)
             } else {
@@ -219,9 +296,11 @@ export default function Contribute(){
         setChoicesField(values);
     }
 
-    const handleTagDelete = (data) => {
-        setTagList((tags) => tags.filter((tag) => tag.label !== data.label))
+    const handleTagChange = (event, values) => {
+        console.log(values)
+        setTagList(values);
     }
+
 
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
@@ -230,12 +309,6 @@ export default function Contribute(){
 
         setOpen(false);
     };
-
-    const tagsChosen = tagList.map((data) => {
-        return (
-            <Chip label={data.label} variant="outlined" onDelete={() => handleTagDelete(data)}/>
-        )
-    })
 
     return (
         <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
@@ -247,14 +320,27 @@ export default function Contribute(){
                         <Typography sx={{color: "#808080"}} variant="caption">Tags should include the topic of the question. For Example, if your question is about Michael, the question should at least have a tag for Michael. Questions need at least one tag to be valid.</Typography>
                     </Grid>
                     <Grid item xs={12}>
-                        <Paper sx={{padding: 1}}>
-                            <Stack direction="row" spacing={1}>
-                                {tagsChosen}
-                            </Stack>
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={12}>
-                        
+                        <Tooltip title="When you stop typing for a question or answer, we will search and apply tags automagically." placement="top-start">
+                            <Autocomplete
+                                multiple
+                                id="tags"
+                                options={tagOptions}
+                                getOptionLabel={(option) => option.label}
+                                value={tagList}
+                                onChange={handleTagChange}
+                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        error={tagHelperText !== null}
+                                        helperText={tagHelperText}
+                                        variant="outlined"
+                                        label="Question Tags"
+                                        placeholder="Tags"
+                                    />
+                                )}
+                            />
+                        </Tooltip>
                     </Grid>
                     <Grid item xs={12}>
                         <Tooltip title={questionToolTip} placement="bottom-start">
