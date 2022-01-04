@@ -216,13 +216,13 @@ export default function Dashboard(props){
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item lg={4} md={6} xs={12}>
+                    {/* <Grid item lg={4} md={6} xs={12}>
                         <Card elevation={3}>
                             <CardContent>
                                 <Typography>Ads Go Here</Typography>
                             </CardContent>
                         </Card>
-                    </Grid>
+                    </Grid> */}
                 </Grid>
             </Container>
         </motion.div>

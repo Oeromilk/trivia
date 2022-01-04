@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ReactComponent as MovieWatching } from './images/movie-watching.svg';
 import { ReactComponent as TrivibleLogo} from "./images/trivible-logo.svg";
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
@@ -13,7 +13,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { logEvent } from "firebase/analytics";
 import { AnimatePresence, motion } from 'framer-motion/dist/framer-motion';
 
-import { Container, Grid, AppBar, Button, Drawer, List, ListItem, Typography, Divider, Paper, Accordion, AccordionDetails, AccordionSummary, Stack} from '@mui/material';
+import { AppBar, Button, Drawer, List, ListItem, Typography, Divider, Paper, Accordion, AccordionDetails, AccordionSummary, Stack} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ToolBar from '@mui/material/Toolbar';
@@ -62,8 +62,8 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(6)
   },
   accordionSize: {
-    width: '100%',
-    marginBottom: theme.spacing(6)
+    maxWidth: '500px',
+    padding: theme.spacing(3)
   },
   faqTitle: {
     marginBottom: theme.spacing(3)
@@ -197,9 +197,10 @@ const useStyles = makeStyles((theme) => ({
     backdropFilter: 'blur(2px)'
   },
   leaderboardImage: {
-    [theme.breakpoints.up('md')]: {
-      maxWidth: '90%'
+    [theme.breakpoints.up('sm')]: {
+      maxWidth: '500px'
     },
+    paddingBottom: theme.spacing(3),
     display: 'block',
     margin: '0 auto',
     width: '90%'
@@ -380,7 +381,7 @@ function FAQ(){
           <Typography variant="subtitle1">How much does Trivible cost?</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.accordionDivider}>
-          <Typography variant="subtitle2" >We strive to keep Trivible free to play and don't want to spam you with ads!</Typography>
+          <Typography variant="body2">Trivible is free to play/use/share!</Typography>
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
@@ -392,7 +393,7 @@ function FAQ(){
           <Typography variant="subtitle1">Will The Office be the only category to play?</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.accordionDivider}>
-          <Typography variant="subtitle2" >To start we are only offering trivia about The Office.</Typography>
+          <Typography variant="body2" >We are focusing on The Office to get the base functionality and features developed.</Typography>
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel3'} onChange={handleChange('panel3')}>
@@ -404,7 +405,16 @@ function FAQ(){
           <Typography variant="subtitle1">What other shows will I be able to test my trivia knowledge?</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.accordionDivider}>
-          <Typography variant="subtitle2" >We will introduce modes for Friends and Parks and Recreation. Other shows upon request and popularity will be considered.</Typography>
+          <List>
+            <ListItem>
+              <Typography variant="body2">Parks and Recreation</Typography>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Typography variant="body2">Friends</Typography>
+            </ListItem>
+          </List>
+          <Typography variant="body2" >Other shows will be considered based upon request and popularity.</Typography>
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel4'} onChange={handleChange('panel4')}>
@@ -416,7 +426,31 @@ function FAQ(){
           <Typography variant="subtitle1">Can I contribute to the list of trivia questions?</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.accordionDivider}>
-          <Typography variant="subtitle2" >We would love the community to be able to contribute and are thinking of ways of implementing this feature, stay tuned!</Typography>
+          <Typography variant="body2">Contributions are something we are excited about, once a user reachs a certain rank, they will unlock the ability to contribute trivia questions.</Typography>
+        </AccordionDetails>
+      </Accordion>
+      <Accordion expanded={expanded === 'panel5'} onChange={handleChange('panel5')}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel5bh-content"
+          id="panel1bh-header"
+        >
+          <Typography variant="subtitle1">Why is Trivible invite only?</Typography>
+        </AccordionSummary>
+        <AccordionDetails className={classes.accordionDivider}>
+          <Typography variant="body2">We are limiting users from joining so we can develop and scale at a slower pace to start.</Typography>
+        </AccordionDetails>
+      </Accordion>
+      <Accordion expanded={expanded === 'panel6'} onChange={handleChange('panel6')}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel56h-content"
+          id="panel1bh-header"
+        >
+          <Typography variant="subtitle1">How many invites can I give once I join?</Typography>
+        </AccordionSummary>
+        <AccordionDetails className={classes.accordionDivider}>
+          <Typography variant="body2">Two! So choose wisely on who you invite.</Typography>
         </AccordionDetails>
       </Accordion>
     </div>
@@ -456,10 +490,55 @@ function LandingNoUser(){
         <div style={{backdropFilter: 'blur(5px) grayscale(0.5)'}} >
           <Stack sx={{height: '100vh'}} direction="column" alignItems="center" spacing={10}>
             <Typography align="center" className={classes.h1Banner}>Trivible</Typography>
-            <Typography variant="h3" align="center">
+            <Typography sx={{padding: 2}} variant="h2" align="center">
               <span className={classes.highlightedBlueText}>Bingeable</span> TV Show <span className={classes.highlightedOrangeText}>Trivia</span>
             </Typography>
             <Button sx={{padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" onClick={handleSignUp}>Sign Up</Button>
+          </Stack>
+          <Stack sx={{height: '100vh', paddingTop: 5}} direction="column" alignItems="center" spacing={5}>
+            <Typography sx={{padding: 3, maxWidth: '500px', fontSize: '2.5em'}}>
+              Do you love asking others questions about your favorite shows to test their knowledge? 
+            </Typography>
+            <MovieWatching className={classes.movieWatching}/>
+            <Typography sx={{padding: 3, maxWidth: '500px', fontSize: '2.5em'}}>
+              Trivible is the place where you can prove how much you know about your favorite shows!
+            </Typography>
+          </Stack>
+          <Stack sx={{height: '100vh', margin: '0 auto', paddingTop: 5}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={3}>
+            <Typography sx={{fontSize: '2em'}} align="center">Here is how the game works!</Typography>
+            <Paper variant="outlined" className={classes.ruleStyle}>
+              <Typography sx={{fontSize: '1.5em'}} align="center" color="primary">1st</Typography>
+              <Typography variant="subtitle1" align="center">
+                When a game starts you will be given a random question, excluding questions you have answered before.
+              </Typography>
+            </Paper>
+            <Paper variant="outlined" className={classes.ruleStyle}>
+              <Typography sx={{fontSize: '1.5em'}} align="center" color="primary">2nd</Typography>
+              <Typography variant="subtitle1" align="center">
+                You have several seconds to answer the question, if you don't choose in time, you will get it wrong.
+              </Typography>
+            </Paper>
+            <Paper variant="outlined" className={classes.ruleStyle}>
+              <Typography sx={{fontSize: '1.5em'}} align="center" color="primary">3rd</Typography>
+              <Typography variant="subtitle1" align="center">
+                You will continue to get new questions until your run out of chances. You have 3 to start!
+              </Typography>
+            </Paper>
+          </Stack>
+          <Stack sx={{height: '100vh', paddingTop: 5}} direction="column" alignItems="center" spacing={5}>
+            <Typography sx={{padding: 3, maxWidth: '500px', fontSize: '2.5em'}}>
+              Each question has it's own difficulty, this makes some questions worth more points than others.
+            </Typography>
+            <Typography sx={{padding: 3, maxWidth: '500px', fontSize: '2.5em'}}>
+              The leaderboard will update with the top 10 users after they finish their games, fight for your place to be shown in the top 10!
+            </Typography>
+            <img className={classes.leaderboardImage} src={leaderboardImage} alt="Showing first, second, and third place users on a leaderboard." loading="lazy"/>
+          </Stack>
+          <Stack sx={{height: '100vh', paddingTop: 5}} direction="column" alignItems="center" spacing={5}>
+            <Typography sx={{fontSize: '2em'}} align="center" color="primary">Ready to start your journey?</Typography>
+            <Button sx={{padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" onClick={handleSignUp}>Sign Up</Button>
+            <Typography>Have some questions?</Typography>
+            <FAQ />
           </Stack>
           {/* <Container >
             <Grid container>
