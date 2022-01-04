@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { ReactComponent as MovieWatching } from './images/movie-watching.svg';
 import { ReactComponent as TrivibleLogo} from "./images/trivible-logo.svg";
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
@@ -540,73 +540,6 @@ function LandingNoUser(){
             <Typography>Have some questions?</Typography>
             <FAQ />
           </Stack>
-          {/* <Container >
-            <Grid container>
-              <Grid item xs={12} className={classes.landingTitle}>
-                <Typography align="center" className={classes.h1Banner}>Trivible</Typography>
-              </Grid> 
-              <Grid item xs={12} className={classes.landingSpacing}>
-                <Typography variant="h3" align="center">
-                  <span className={classes.highlightedBlueText}>Bingeable</span> TV Show <span className={classes.highlightedOrangeText}>Trivia</span>
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-                <Button sx={{padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
-              </Grid>
-              <Grid item xs={12} sm={6} className={classes.callToAction}>
-                <Typography variant="h4">
-                  Do you love asking others questions about your favorite shows testing their knowledge? 
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <MovieWatching className={classes.movieWatching}/>
-              </Grid>
-              <Grid item xs={12} sx={{marginBottom: 20}}>
-                <Stack sx={{margin: '0 auto'}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={3}>
-                  <Typography variant="h5" align="center">Here is how it works!</Typography>
-                  <Paper variant="outlined" className={classes.ruleStyle}>
-                    <Typography variant="h6" align="center" color="primary">1st</Typography>
-                    <Typography variant="subtitle1" align="center">
-                      When a game starts you will be given a random question, excluding questions you have answered before.
-                    </Typography>
-                  </Paper>
-                  <Paper variant="outlined" className={classes.ruleStyle}>
-                    <Typography variant="h6" align="center" color="primary">2nd</Typography>
-                    <Typography variant="subtitle1" align="center">
-                      You have several seconds to answer the question, if you don't choose in time, you get it wrong.
-                    </Typography>
-                  </Paper>
-                  <Paper variant="outlined" className={classes.ruleStyle}>
-                    <Typography variant="h6" align="center" color="primary">3rd</Typography>
-                    <Typography variant="subtitle1" align="center">
-                      You can continue to get new questions until your run out of chances.
-                    </Typography>
-                  </Paper>
-                </Stack> 
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Typography className={classes.leaderboardText} align="center" sx={{fontSize: '2em'}}>Answer <span className={classes.highlightedOrangeText}>trivia</span> questions and complete <span className={classes.highlightedOrangeText}>acheivements</span> to earn a spot on the leaderboard!</Typography>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <img className={classes.leaderboardImage} src={leaderboardImage} alt="Showing first, second, and third place users on a leaderboard." loading="lazy"/>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography className={classes.rankText} sx={{fontSize: '2em'}} align="center">Have an idea for a question? Once you achieve rank of <span className={classes.highlightedBlueText}>Assistant To The Manager</span>, you can contribute and vote on new questions.</Typography>
-              </Grid>
-              <Grid item xs={12} className={classes.signUpAction}>
-                <Paper sx={{maxWidth: '500px', margin: '0 auto'}} variant="outlined">
-                  <Stack sx={{padding: '3em'}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={5}>
-                    <Typography variant="h6" align="center">Ready to start your <span className={classes.highlightedOrangeText}>trivia</span> adventure and take your place on the leaderboard?</Typography>
-                    <Button sx={{marginTop: '3em', padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" href="/sign-up">Sign Up</Button>
-                  </Stack>
-                </Paper>
-              </Grid>
-              <Grid item md={2}></Grid>
-              <Grid item xs={12} md={8}>
-                <FAQ />
-              </Grid>
-            </Grid>
-          </Container> */}
         </div>
       </div>
     </motion.div>
