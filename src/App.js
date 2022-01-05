@@ -464,7 +464,7 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      delay: 0.5, duration: 1
+      duration: 0.75
     }
   },
   exit: {
@@ -488,14 +488,14 @@ function LandingNoUser(){
     <motion.div variants={containerVariants} initial="hidden" animate="visible" exit="exit">
       <div className={classes.landingBackground}>
         <div style={{backdropFilter: 'blur(5px) grayscale(0.5)'}} >
-          <Stack sx={{height: '100vh'}} direction="column" alignItems="center" spacing={10}>
+          <Stack sx={{minHeight: '100vh'}} direction="column" alignItems="center" spacing={10}>
             <Typography align="center" className={classes.h1Banner}>Trivible</Typography>
             <Typography sx={{padding: 2}} variant="h2" align="center">
               <span className={classes.highlightedBlueText}>Bingeable</span> TV Show <span className={classes.highlightedOrangeText}>Trivia</span>
             </Typography>
             <Button sx={{padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" onClick={handleSignUp}>Sign Up</Button>
           </Stack>
-          <Stack sx={{height: '100vh', paddingTop: 5}} direction="column" alignItems="center" spacing={5}>
+          <Stack sx={{minHeight: '100vh', paddingTop: 5}} direction="column" alignItems="center" spacing={5}>
             <Typography sx={{padding: 3, maxWidth: '500px', fontSize: '2.5em'}}>
               Do you love asking others questions about your favorite shows to test their knowledge? 
             </Typography>
@@ -504,7 +504,7 @@ function LandingNoUser(){
               Trivible is the place where you can prove how much you know about your favorite shows!
             </Typography>
           </Stack>
-          <Stack sx={{height: '100vh', margin: '0 auto', paddingTop: 5}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={3}>
+          <Stack sx={{minHeight: '100vh', margin: '0 auto', paddingTop: 5}} direction="column" justifyContent="space-evenly" alignItems="center" spacing={3}>
             <Typography sx={{fontSize: '2em'}} align="center">Here is how the game works!</Typography>
             <Paper variant="outlined" className={classes.ruleStyle}>
               <Typography sx={{fontSize: '1.5em'}} align="center" color="primary">1st</Typography>
@@ -525,7 +525,7 @@ function LandingNoUser(){
               </Typography>
             </Paper>
           </Stack>
-          <Stack sx={{height: '100vh', paddingTop: 5}} direction="column" alignItems="center" spacing={5}>
+          <Stack sx={{minHeight: '100vh', paddingTop: 5}} direction="column" alignItems="center" spacing={5}>
             <Typography sx={{padding: 3, maxWidth: '500px', fontSize: '2.5em'}}>
               Each question has it's own difficulty, this makes some questions worth more points than others.
             </Typography>
@@ -534,7 +534,7 @@ function LandingNoUser(){
             </Typography>
             <img className={classes.leaderboardImage} src={leaderboardImage} alt="Showing first, second, and third place users on a leaderboard." loading="lazy"/>
           </Stack>
-          <Stack sx={{height: '100vh', paddingTop: 5}} direction="column" alignItems="center" spacing={5}>
+          <Stack sx={{minHeight: '100vh', paddingTop: 5}} direction="column" alignItems="center" spacing={5}>
             <Typography sx={{fontSize: '2em'}} align="center" color="primary">Ready to start your journey?</Typography>
             <Button sx={{padding: '1em 2em'}} className={classes.coloredShadow} variant="contained" color="primary" size="large" onClick={handleSignUp}>Sign Up</Button>
             <Typography>Have some questions?</Typography>

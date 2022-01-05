@@ -4,7 +4,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { logEvent } from "firebase/analytics";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useHistory } from "react-router-dom";
-import { Container, Stack, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
+import { Container, Stack, TextField, Button, Typography, CircularProgress, Alert, Paper } from '@mui/material';
 import { motion } from 'framer-motion/dist/framer-motion';
 
 export default function SignUp() {
@@ -82,15 +82,15 @@ export default function SignUp() {
 
   return (
     <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
-      <Container sx={{marginTop: 15}} component="main" maxWidth="xs">
-        <Stack direction="column" justifyContent="center" alignItems="center" spacing={3}>
-            <Typography sx={{fontSize: '2em'}} textAlign="center">Have a code? Use below to sign up!</Typography>
-            <TextField fullWidth id="sign-up-code" label="Sign Up Code" variant="outlined" value={code} onChange={handleCode} />
-            <Button size="large" disabled={isSearching} fullWidth variant="contained" onClick={handleCheckCode}>
-                {isSearching ? <CircularProgress /> : 'Check Code'}
-            </Button>
-            {isTrueCode ? <Alert severity="error">Oops, {code} is not valid. Either your entered incorrectly or that code has been used.</Alert> : null}
-            <Button size="large" variant="text" onClick={handleSignIn}>Already have an account? Sign In</Button>
+      <Container maxWidth="xs">
+        <Stack sx={{minHeight: '100vh', paddingTop: 10}} direction="column" justifyContent="flex-start" alignItems="center" spacing={3}>
+          <Typography sx={{fontSize: '2em'}} textAlign="center">Have a code? Use below to sign up!</Typography>
+          <TextField fullWidth id="sign-up-code" label="Sign Up Code" variant="outlined" value={code} onChange={handleCode} />
+          <Button size="large" disabled={isSearching} fullWidth variant="contained" onClick={handleCheckCode}>
+              {isSearching ? <CircularProgress /> : 'Check Code'}
+          </Button>
+          {isTrueCode ? <Alert severity="error">Oops, {code} is not valid. Either your entered incorrectly or that code has been used.</Alert> : null}
+          <Button size="large" variant="text" onClick={handleSignIn}>Already have an account? Sign In</Button>
         </Stack>
       </Container>
     </motion.div>
