@@ -9,14 +9,14 @@ import AvatarContainer from './Avatar';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        marginBottom: theme.spacing(10),
         [theme.breakpoints.up('md')]: {
-            maxWidth: '80%'
+            maxWidth: '80%',
         },
         [theme.breakpoints.down('md')]: {
             maxWidth: '90%',
             marginBottom: theme.spacing(3)
-        }
+        },
+        marginBottom: theme.spacing(10)
     },
     grid: {
         marginTop: theme.spacing(3)
@@ -41,6 +41,43 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(1)
     }
 }))
+
+function DailyCountdown(){
+    const [timeLeft, setTimeLeft] = useState("0:00:00");
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setTimeLeft(countDown());
+          }, 1000);
+
+        return () => clearInterval(intervalId);
+    }, [timeLeft])
+
+    const twoDigits = (number) => {
+        return (number < 10 ? '0' : '') + number;
+    }
+
+    const countDown = () => {
+        var reset = new Date();
+        var now = new Date();
+        reset.setHours(8, 0, 0)
+        if(now > reset){
+            reset.setDate(reset.getDate() + 1);
+        }
+
+        var timeToReset = ((reset - now) / 1000);
+
+        var hours = ~~(timeToReset / 60 / 60) % 60;
+        var minutes = ~~(timeToReset / 60) % 60;
+        var seconds = ~~timeToReset % 60;
+
+        return `${twoDigits(hours)}: ${twoDigits(minutes)}: ${twoDigits(seconds)}`;
+    }
+    
+    return (
+        <Typography variant="body1" color="secondary">Next question ready in: {timeLeft}</Typography>
+    )
+}
 
 function FriendsList(){
     const [friends, setFriends] = React.useState([]);
@@ -83,6 +120,8 @@ function FriendsList(){
 export default function Dashboard(props){
     const history = useHistory();
     const classes = useStyles();
+    const now = new Date();
+    const [hasPlayedToday, setHasPlayeToday] = useState(JSON.parse(localStorage.getItem("user-has-played-today")));
     const [activeContributions, setActiveContributions] = useState(0);
     const [activeFriendRequests, setActiveFriendRequests] = useState(0);
 
@@ -135,6 +174,21 @@ export default function Dashboard(props){
         }
     }
 
+    function checkTimeDifference(){
+        var playedToday = hasPlayedToday;
+        
+        if(playedToday !== null){
+            var now = new Date();
+            if(now < playedToday.expiry){
+                console.log(now, "is greater than", playedToday.expiry)
+                playedToday.haveThey = false
+                setHasPlayeToday(playedToday);
+            } else {
+                console.log(playedToday.expiry, "is greater than", now)
+            }
+        }
+    }
+
     function handleNewGame(event){
         event.preventDefault();
         history.push("/game");
@@ -158,6 +212,22 @@ export default function Dashboard(props){
         history.push("/review");
     }
 
+    const handleDaily = (event) => {
+        event.preventDefault();
+        var now = new Date();
+        var reset = new Date();
+        reset.setHours(7, 59, 59);
+        if(now > reset){
+            reset.setDate(reset.getDate() + 1);
+        }
+        var hasPlayed = {
+            haveThey: true,
+            expiry: reset
+        }
+        localStorage.setItem("user-has-played-today", JSON.stringify(hasPlayed));
+        history.push("/daily");
+    }
+
     return (
         <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
             <Container className={classes.root}>
@@ -165,20 +235,21 @@ export default function Dashboard(props){
                     <Grid item xs={12} >
                         <Typography variant="h3">Dashboard</Typography>
                     </Grid>
-                    <Grid item lg={4} md={5} xs={12} className={classes.card}>
+                    <Grid item lg={4} md={6} xs={12} className={classes.card}>
                         <Card className={classes.paper} elevation={3}>
+                            <CardHeader title="Ready to test your knowledge?"></CardHeader>
                             <CardContent>
-                                <Typography variant="h5" color="primary">Ready to test your knowledge?</Typography>
+                                <Typography color="primary">Start a new game and see how long you can last!</Typography>
+                                <Typography variant="subtitle2">Thats what she said!</Typography>
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
                                 <Button color="secondary" variant="contained" onClick={handleNewGame}>New Game</Button>
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item lg={4} md={7} xs={12} className={classes.friendCard}>
+                    <Grid item lg={4} md={6} xs={12} className={classes.friendCard}>
                         <Card className={classes.paper} elevation={3}>
-                            <CardHeader title="Friends">
-                            </CardHeader>
+                            <CardHeader title="Friends"></CardHeader>
                             <CardContent>
                                 <FriendsList />
                             </CardContent>
@@ -189,10 +260,21 @@ export default function Dashboard(props){
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item lg={4} md={12} xs={12} className={classes.card}>
+                    <Grid item lg={4} md={6} xs={12} className={classes.card}>
                         <Card className={classes.paper} elevation={3}>
+                            <CardHeader title="Daily Question"></CardHeader>
                             <CardContent>
-                                <Typography variant="h6">Achievments</Typography>
+                                {hasPlayedToday.haveThey === false ? <Typography color="secondary" variant="body1">Daily question is ready!</Typography>  : <DailyCountdown />}
+                            </CardContent>
+                            <CardActions style={{justifyContent: "end"}}>
+                                <Button disabled={hasPlayedToday.haveThey} color="secondary" variant="outlined" className={classes.cardAction} onClick={handleDaily}>Play</Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                    <Grid item lg={4} md={6} xs={12} className={classes.card}>
+                        <Card className={classes.paper} elevation={3}>
+                            <CardHeader title="Achievments"></CardHeader>
+                            <CardContent>
                                 <List>
                                     <ListItem>Acievments Coming Soon</ListItem>
                                 </List>
@@ -202,10 +284,10 @@ export default function Dashboard(props){
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item lg={4} md={6} xs={12} >
-                        <Card sx={{padding: 1}}  elevation={3}>
+                    <Grid item lg={4} md={6} xs={12} className={classes.card}>
+                        <Card className={classes.paper} elevation={3}>
+                            <CardHeader title="Contributions"></CardHeader>
                             <CardContent>
-                                <Typography variant="h6">Contributions</Typography>
                                 <Typography sx={{paddingTop: 2}} variant="subtitle1">Create and submit your own <Typography sx={{display: "inline"}} variant="subtitle1" color="primary">trivia</Typography> questions and the community can review and rate to be approved.</Typography>
                             </CardContent>
                             <CardActions style={(activeContributions > 0) ? {justifyContent: "space-between"} : {justifyContent: "end"}}>

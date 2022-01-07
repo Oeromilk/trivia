@@ -276,11 +276,7 @@ export default function GameView(){
     }
 
     async function updateIfCorrect(){
-        console.log(currentQuestion)
-        await addDoc(collection(db, `users/${currentUser.uid}/questions-answered`), {
-            id: currentQuestion.id,
-            difficulty: currentQuestion.questionInfo.difficulty
-        })
+        await addDoc(collection(db, `users/${currentUser.uid}/questions-answered`), currentQuestion)
     }
 
     const countCharacters = () => {
