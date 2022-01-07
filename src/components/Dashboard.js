@@ -120,8 +120,7 @@ function FriendsList(){
 export default function Dashboard(props){
     const history = useHistory();
     const classes = useStyles();
-    const now = new Date();
-    const [hasPlayedToday, setHasPlayeToday] = useState(JSON.parse(localStorage.getItem("user-has-played-today")));
+    const [hasPlayedToday, setHasPlayeToday] = useState(checkTimeDifference());
     const [activeContributions, setActiveContributions] = useState(0);
     const [activeFriendRequests, setActiveFriendRequests] = useState(0);
 
@@ -150,6 +149,7 @@ export default function Dashboard(props){
       }
 
     useEffect(() => {
+        console.log(checkTimeDifference())
         checkContributions();
         checkFriendRequests();
     }, [])
@@ -175,18 +175,18 @@ export default function Dashboard(props){
     }
 
     function checkTimeDifference(){
-        var playedToday = hasPlayedToday;
-        
-        if(playedToday !== null){
-            var now = new Date();
-            if(now < playedToday.expiry){
-                console.log(now, "is greater than", playedToday.expiry)
-                playedToday.haveThey = false
-                setHasPlayeToday(playedToday);
-            } else {
-                console.log(playedToday.expiry, "is greater than", now)
-            }
+        const itemStr = localStorage.getItem("user-has-played-today")
+        if(!itemStr) {
+            return null;
         }
+        const item = JSON.parse(itemStr);
+        const now = new Date();
+        if(now.getTime() > item.expiry) {
+            item.hasPlayed = false;
+            item.expiry = ""
+            return item;
+        }
+        return item;
     }
 
     function handleNewGame(event){
@@ -222,7 +222,7 @@ export default function Dashboard(props){
         }
         var hasPlayed = {
             haveThey: true,
-            expiry: reset
+            expiry: reset.getTime()
         }
         localStorage.setItem("user-has-played-today", JSON.stringify(hasPlayed));
         history.push("/daily");
@@ -264,10 +264,10 @@ export default function Dashboard(props){
                         <Card className={classes.paper} elevation={3}>
                             <CardHeader title="Daily Question"></CardHeader>
                             <CardContent>
-                                {hasPlayedToday.haveThey === false ? <Typography color="secondary" variant="body1">Daily question is ready!</Typography>  : <DailyCountdown />}
+                                {hasPlayedToday === null ? <Typography color="secondary" variant="body1">Daily question is ready!</Typography>  : <DailyCountdown />}
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
-                                <Button disabled={hasPlayedToday.haveThey} color="secondary" variant="outlined" className={classes.cardAction} onClick={handleDaily}>Play</Button>
+                                <Button disabled={hasPlayedToday === null ? false : true} color="secondary" variant="outlined" className={classes.cardAction} onClick={handleDaily}>Play</Button>
                             </CardActions>
                         </Card>
                     </Grid>

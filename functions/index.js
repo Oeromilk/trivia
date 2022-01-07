@@ -9,7 +9,7 @@ exports.addNewPoints = functions.firestore.document('/users/{docId}/questions-an
         var userRef = db.collection('users').doc(context.params.docId);
         var newPoints;
         userRef.get().then(doc => {
-            newPoints = doc.data().achievementPoints + (snap.data().difficulty * 10);
+            newPoints = doc.data().achievementPoints + (snap.data().questionInfo.difficulty * 10);
             
             return userRef.update({achievementPoints: newPoints});
         })

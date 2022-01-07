@@ -43,15 +43,8 @@ export default function Daily(){
 
     useEffect(() => {
         if(dailyQuestion !== null){
-            var dailyStreakInfo = JSON.parse(localStorage.getItem("daily-streak-info"));
-            if(dailyStreakInfo === null){
-                dailyStreakInfo = {
-                    daysInARow: 0
-                }
-            }
             if(!timeUp && (isCorrect === null || false)){
-                dailyStreakInfo.daysInARow = 0;
-                localStorage.setItem("daily-streak-info", JSON.stringify(dailyStreakInfo));
+                updateLocalGameInfo(false);
                 setShowAlert(true);
             }
         }
@@ -59,20 +52,14 @@ export default function Daily(){
 
     useEffect(() => {
         if(dailyQuestion !== null){
-            var dailyStreakInfo = JSON.parse(localStorage.getItem("daily-streak-info"));
-            if(dailyStreakInfo === null){
-                dailyStreakInfo = {
-                    daysInARow: 0
-                }
-            }
+           
             if(isCorrect && isCorrect !== null){
                 updateIfCorrect();
-                dailyStreakInfo.daysInARow++;
+                updateLocalGameInfo(true);
             } else {
-                dailyStreakInfo.daysInARow = 0;
+                updateLocalGameInfo(false);
             }
             setShowAlert(true);
-            localStorage.setItem("daily-streak-info", JSON.stringify(dailyStreakInfo));
         }
     }, [isCorrect])
 
@@ -109,6 +96,30 @@ export default function Daily(){
 
     async function updateIfCorrect(){
         await addDoc(collection(db, `users/${localStorage.getItem("uid")}/questions-answered`), dailyQuestion)
+    }
+
+    const updateLocalGameInfo = (correct) => {
+        var dailyGameInfo = JSON.parse(localStorage.getItem("daily-game-info"));
+        if(dailyGameInfo === null){
+            dailyGameInfo = {
+                timesPlayed: 0,
+                timesWon: 0,
+                winPercentage: 0,
+                currentStreak: 0,
+                maxStreak: 0
+            }
+        }
+        dailyGameInfo.timesPlayed++;
+        if(correct){
+            dailyGameInfo.timesWon++;
+            dailyGameInfo.currentStreak++;
+        }
+        if(dailyGameInfo.currentStreak > dailyGameInfo.maxStreak){
+            dailyGameInfo.maxStreak = dailyGameInfo.currentStreak;
+        }
+        dailyGameInfo.winPercentage = dailyGameInfo.timesPlayed / dailyGameInfo.timesWon;
+
+        localStorage.setItem("daily-game-info", JSON.stringify(dailyGameInfo));
     }
 
     const countCharacters = () => {
