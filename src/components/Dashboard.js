@@ -120,7 +120,7 @@ function FriendsList(){
 export default function Dashboard(props){
     const history = useHistory();
     const classes = useStyles();
-    const [hasPlayedToday, setHasPlayeToday] = useState(checkTimeDifference());
+    const hasPlayedToday = checkTimeDifference();
     const [activeContributions, setActiveContributions] = useState(0);
     const [activeFriendRequests, setActiveFriendRequests] = useState(0);
 
@@ -149,7 +149,6 @@ export default function Dashboard(props){
       }
 
     useEffect(() => {
-        console.log(checkTimeDifference())
         checkContributions();
         checkFriendRequests();
     }, [])
@@ -179,13 +178,17 @@ export default function Dashboard(props){
         if(!itemStr) {
             return null;
         }
-        const item = JSON.parse(itemStr);
-        const now = new Date();
-        if(now.getTime() > item.expiry) {
-            item.hasPlayed = false;
+
+        var item = JSON.parse(itemStr);
+        var now = new Date();
+        
+        if(now > item.expiry) {
+            item.haveThey = false;
             item.expiry = ""
+            localStorage.setItem("user-has-played-today", JSON.stringify(item));
             return item;
         }
+
         return item;
     }
 
@@ -217,14 +220,12 @@ export default function Dashboard(props){
         var now = new Date();
         var reset = new Date();
         reset.setHours(7, 59, 59);
+
         if(now > reset){
             reset.setDate(reset.getDate() + 1);
         }
-        var hasPlayed = {
-            haveThey: true,
-            expiry: reset.getTime()
-        }
-        localStorage.setItem("user-has-played-today", JSON.stringify(hasPlayed));
+        
+        localStorage.setItem("user-has-played-today", JSON.stringify({ haveThey: true, expiry: reset }));
         history.push("/daily");
     }
 
