@@ -23,14 +23,6 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(3)
     },
     card: {
-        [theme.breakpoints.up('md')]: {
-            height: '400px'
-        },
-        [theme.breakpoints.down('md')]: {
-            height: '300px'
-        }
-    },
-    friendCard: {
         height: '400px'
     },
     paper: {
@@ -152,16 +144,16 @@ export default function Dashboard(props){
     }
 
     useEffect(() => {
-        if(userInfo !== null){
-            checkTimeDifference();
-        }
-    }, [userInfo])
-
-    useEffect(() => {
         getUserInfo();
         checkContributions();
         checkFriendRequests();
     }, [])
+
+    useEffect(() => {
+        if(userInfo !== null){
+            checkTimeDifference();
+        }
+    }, [userInfo])
 
     async function getUserInfo(){
         const userRef = doc(db, "users", localStorage.getItem("uid"));
@@ -204,16 +196,22 @@ export default function Dashboard(props){
             const last = new Date(userInfo.dailyLastPlayed.seconds * 1000);
             const now = Date.now();
             const reset = new Date();
+            const current = new Date();
+            current.setHours(8, 0, 0);
             reset.setHours(8, 0, 0);
 
-            if(now > reset){
+            if(now > reset.getTime()){
                 reset.setDate(reset.getDate() + 1);
             }
-            
-            if(last.getTime() > reset.getTime()){
+
+            if(last.getTime() > current.getTime() && last.getTime() < reset.getTime()){
                 setHasPlayedToday(true);
-            } else {
+                return;
+            }
+
+            if(last.getTime() < current.getTime() && last.getTime() < reset.getTime()){
                 setHasPlayedToday(false);
+                return;
             }
         } 
     }
@@ -280,7 +278,7 @@ export default function Dashboard(props){
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item lg={4} md={6} xs={12} className={classes.friendCard}>
+                    <Grid item lg={4} md={6} xs={12} className={classes.card}>
                         <Card className={classes.paper} elevation={3}>
                             <CardHeader title="Friends"></CardHeader>
                             <CardContent>
@@ -298,7 +296,7 @@ export default function Dashboard(props){
                             <CardHeader title="Daily Question"></CardHeader>
                             <CardContent>
                                 {hasPlayedToday ? <DailyCountdown />  : <Typography sx={{paddingBottom: 2}} color="secondary" variant="body1">Daily question is ready!</Typography>}
-                                <Typography sx={{fontSize: '1.2em'}} align="center">Stats</Typography>
+                                <Typography sx={{fontSize: '1.2em', marginBottom: 1}} align="center">Stats</Typography>
                                 {gameStats}
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
@@ -340,16 +338,16 @@ export default function Dashboard(props){
                             </CardContent>
                         </Card>
                     </Grid> */}
-                </Grid>
-                <Dialog maxWidth="md" onClose={handleDailyClose} open={showDaily}>
-                    <DialogTitle>
-                        <Typography color="primary">Daily Question!</Typography>
-                    </DialogTitle>
-                    <DialogContent>
-                        <Daily />
-                    </DialogContent>
-                </Dialog>
+                </Grid> 
             </Container>
+            <Dialog onClose={handleDailyClose} open={showDaily}>
+                <DialogTitle>
+                    <Typography color="primary">Daily Question!</Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <Daily />
+                </DialogContent>
+            </Dialog>
         </motion.div>
     )
 };
