@@ -23,7 +23,6 @@ import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import FeedbackRoundedIcon from '@mui/icons-material/FeedbackRounded';
 
 import Dashboard from './components/Dashboard';
-import Daily from './components/Daily';
 import GameView from './components/GameView';
 import GameEnding from './components/GameEnding';
 import LeaderBoard from './components/Leaderboard';
@@ -595,9 +594,6 @@ export default function App(){
             </Route>
             <Route path="/contribute">
               <Contribute />
-            </Route>
-            <Route path="/daily">
-              <Daily />
             </Route>
             <Route path="/feedback">
               <Feedback />

@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Timer from './Timer';
 import { db } from './firebase/firebaseConfig';
-import { getDocs, collection, query, orderBy, addDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getDocs, collection, query, orderBy, addDoc } from "firebase/firestore";
 import { Stack, Paper, Typography, Skeleton, FormControl, FormLabel, RadioGroup, Radio, FormControlLabel, Chip, Button, Alert, Collapse } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
 const useStyles = makeStyles((theme) => ({
     container: {
-        maxWidth: '600px',
-        margin: `${theme.spacing(15)} auto ${theme.spacing(5)} auto`
+        maxWidth: '600px'
     },
     stack: {
         padding: theme.spacing(3)
@@ -25,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Daily(){
     const classes = useStyles();
     const [dailyQuestion, setDailyQuestion] = useState(null);
+    const [userInfo, setUserInfo] = useState(null);
     const [choices, setChoices] = useState(null);
     const [choice, setChoice] = useState(null);
     const [characterCount, setCharacterCount] = useState(0);
@@ -44,7 +44,7 @@ export default function Daily(){
     useEffect(() => {
         if(dailyQuestion !== null){
             if(!timeUp && (isCorrect === null || false)){
-                updateLocalGameInfo(false);
+                updateDailyStats(false);
                 setShowAlert(true);
             }
         }
@@ -55,9 +55,9 @@ export default function Daily(){
            
             if(isCorrect && isCorrect !== null){
                 updateIfCorrect();
-                updateLocalGameInfo(true);
+                updateDailyStats(true);
             } else {
-                updateLocalGameInfo(false);
+                updateDailyStats(false);
             }
             setShowAlert(true);
         }
@@ -65,6 +65,7 @@ export default function Daily(){
 
     useEffect(() => {
         getDailyQuestion();
+        getUserInfo();
     }, [])
 
     async function getDailyQuestion() {
@@ -94,32 +95,44 @@ export default function Daily(){
         setTimeUp(true);
     }
 
+    async function getUserInfo(){
+        const userRef = doc(db, "users", localStorage.getItem("uid"));
+        const userSnap = await getDoc(userRef);
+        if(userSnap.exists()){
+            setUserInfo(userSnap.data())
+        }
+    }
+
     async function updateIfCorrect(){
         await addDoc(collection(db, `users/${localStorage.getItem("uid")}/questions-answered`), dailyQuestion)
     }
 
-    const updateLocalGameInfo = (correct) => {
-        var dailyGameInfo = JSON.parse(localStorage.getItem("daily-game-info"));
-        if(dailyGameInfo === null){
-            dailyGameInfo = {
-                timesPlayed: 0,
-                timesWon: 0,
-                winPercentage: 0,
-                currentStreak: 0,
-                maxStreak: 0
-            }
+    async function updateDailyStats(correct){
+        let stats = {
+            timesPlayed: userInfo.dailyTimesPlayed,
+            timesWon: userInfo.dailyTimesWon,
+            maxStreak: userInfo.dailyMaxStreak,
+            currentStreak: userInfo.dailyCurrentStreak,
+            winPercentage: userInfo.dailyWinPercentage
         }
-        dailyGameInfo.timesPlayed++;
+        stats.timesPlayed++;
         if(correct){
-            dailyGameInfo.timesWon++;
-            dailyGameInfo.currentStreak++;
+            stats.timesWon++;
+            stats.currentStreak++;
         }
-        if(dailyGameInfo.currentStreak > dailyGameInfo.maxStreak){
-            dailyGameInfo.maxStreak = dailyGameInfo.currentStreak;
+        if(stats.currentStreak > stats.maxStreak){
+            stats.maxStreak = stats.currentStreak;
         }
-        dailyGameInfo.winPercentage = dailyGameInfo.timesPlayed / dailyGameInfo.timesWon;
+        stats.winPercentage = Math.floor((stats.timesWon / stats.timesPlayed) * 100);
 
-        localStorage.setItem("daily-game-info", JSON.stringify(dailyGameInfo));
+        const userRef = doc(db, "users", localStorage.getItem("uid"));
+        await updateDoc(userRef, {
+            dailyCurrentStreak: stats.currentStreak,
+            dailyMaxStreak: stats.maxStreak,
+            dailyTimesPlayed: stats.timesPlayed,
+            dailyTimesWon: stats.timesWon,
+            dailyWinPercentage: stats.winPercentage
+        })
     }
 
     const countCharacters = () => {

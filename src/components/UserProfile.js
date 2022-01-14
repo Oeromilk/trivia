@@ -5,7 +5,7 @@ import { db, auth, analytics } from './firebase/firebaseConfig';
 import { onAuthStateChanged } from '@firebase/auth';
 import { logEvent } from "firebase/analytics";
 import { motion } from 'framer-motion/dist/framer-motion';
-import { doc, getDoc, addDoc, getDocs, setDoc, updateDoc, collection, query, where, increment } from '@firebase/firestore';
+import { doc, getDoc, addDoc, getDocs, setDoc, updateDoc, collection, query, where, increment, Timestamp } from '@firebase/firestore';
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
 import { Avatar, Container, Button, Input, InputLabel, Grid, Typography, FormHelperText, CircularProgress, TextField, FormControl, Select, MenuItem, Stack, Paper, Tooltip, Collapse, Divider } from '@mui/material';
@@ -111,10 +111,19 @@ function CreateProfile(props){
     }
 
     async function updateUser(){
+        let temp = new Date();
+        temp.setDate(temp.getDate() - 3);
         await setDoc(doc(db, "users", localStorage.getItem("uid")), {
             username: username,
             avatar: avatar,
-            achievementPoints: 0
+            achievementPoints: 0,
+            dailyCurrentStreak: 0,
+            dailyHasPlayed: false,
+            dailyLastPlayed: Timestamp.fromDate(temp),
+            dailyMaxStreak: 0,
+            dailyTimesPlayed: 0,
+            dailyTimesWon: 0,
+            dailyWinPercentage: 0
         }).then(function(){
             logEvent(analytics, 'profile_created');
             history.push("/");

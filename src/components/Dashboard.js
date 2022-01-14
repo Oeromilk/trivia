@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { db } from './firebase/firebaseConfig';
-import { getDocs, collection, query, orderBy, limit } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getDocs, collection, query, orderBy, limit, Timestamp } from "firebase/firestore";
 import { useHistory } from "react-router-dom";
 import { motion } from 'framer-motion/dist/framer-motion';
-import { Container, Grid, Button, Typography, List, ListItem, Card, CardActions, CardContent, CardHeader, Avatar, Badge, Stack, Divider } from '@mui/material';
+import { Container, Grid, Button, Typography, List, ListItem, Card, CardActions, CardContent, CardHeader, Avatar, Badge, Stack, Divider, Dialog, DialogTitle, DialogContent, Chip } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import AvatarContainer from './Avatar';
+import Daily from './Daily';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -75,7 +76,7 @@ function DailyCountdown(){
     }
     
     return (
-        <Typography variant="body1" color="secondary">Next question ready in: {timeLeft}</Typography>
+        <Typography sx={{paddingBottom: 2}} variant="body1" color="secondary">Next question ready in: {timeLeft}</Typography>
     )
 }
 
@@ -120,38 +121,63 @@ function FriendsList(){
 export default function Dashboard(props){
     const history = useHistory();
     const classes = useStyles();
-    const hasPlayedToday = checkTimeDifference();
+    const [hasPlayedToday, setHasPlayedToday] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
+    const [showDaily, setShowDaily] = useState(false);
     const [activeContributions, setActiveContributions] = useState(0);
     const [activeFriendRequests, setActiveFriendRequests] = useState(0);
 
     const containerVariants = {
         initial: {
-          opacity: 0,
-          x: '100vw'
+            opacity: 0,
+            x: '100vw'
         },
-        animate: {
-          opacity: 1,
-          x: 0,
-          transition: {
-            duration: 0.5,
-            type: 'spring',
-            bounce: 0.25
-          }
+            animate: {
+            opacity: 1,
+            x: 0,
+            transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
         },
-        exit: {
-          x: '-100vw',
-          transition: {
-            duration: 0.5,
-            type: 'spring',
-            bounce: 0.25
-          }
+            exit: {
+            x: '-100vw',
+                transition: {
+                duration: 0.5,
+                type: 'spring',
+                bounce: 0.25
+            }
         }
-      }
+    }
 
     useEffect(() => {
+        if(userInfo !== null){
+            checkTimeDifference();
+        }
+    }, [userInfo])
+
+    useEffect(() => {
+        getUserInfo();
         checkContributions();
         checkFriendRequests();
     }, [])
+
+    async function getUserInfo(){
+        const userRef = doc(db, "users", localStorage.getItem("uid"));
+        const userSnap = await getDoc(userRef);
+        if(userSnap.exists()){
+            setUserInfo(userSnap.data())
+        }
+    }
+
+    async function updateUserHasPlayed(){
+        const userRef = doc(db, "users", localStorage.getItem("uid"));
+        await updateDoc(userRef, {
+            dailyHasPlayed: true,
+            dailyLastPlayed: Timestamp.now()
+        })
+    }
 
     async function checkFriendRequests(){
         const requestsPath = `users/${localStorage.getItem("uid")}/friend-requests`;
@@ -173,23 +199,23 @@ export default function Dashboard(props){
         }
     }
 
-    function checkTimeDifference(){
-        const itemStr = localStorage.getItem("user-has-played-today")
-        if(!itemStr) {
-            return null;
-        }
+    const checkTimeDifference = () => {
+        if(userInfo !== null){
+            const last = new Date(userInfo.dailyLastPlayed.seconds * 1000);
+            const now = Date.now();
+            const reset = new Date();
+            reset.setHours(8, 0, 0);
 
-        var item = JSON.parse(itemStr);
-        var now = new Date();
-        
-        if(now > item.expiry) {
-            item.haveThey = false;
-            item.expiry = ""
-            localStorage.setItem("user-has-played-today", JSON.stringify(item));
-            return item;
-        }
-
-        return item;
+            if(now > reset){
+                reset.setDate(reset.getDate() + 1);
+            }
+            
+            if(last.getTime() > reset.getTime()){
+                setHasPlayedToday(true);
+            } else {
+                setHasPlayedToday(false);
+            }
+        } 
     }
 
     function handleNewGame(event){
@@ -215,19 +241,25 @@ export default function Dashboard(props){
         history.push("/review");
     }
 
+    const handleDailyClose = () => {
+        setShowDaily(false);
+    }
+
     const handleDaily = (event) => {
         event.preventDefault();
-        var now = new Date();
-        var reset = new Date();
-        reset.setHours(7, 59, 59);
-
-        if(now > reset){
-            reset.setDate(reset.getDate() + 1);
-        }
         
-        localStorage.setItem("user-has-played-today", JSON.stringify({ haveThey: true, expiry: reset }));
-        history.push("/daily");
+        setShowDaily(true);
+        updateUserHasPlayed();
+        setHasPlayedToday(true);
     }
+
+    const gameStats = userInfo !== null ? 
+        <Stack sx={{flexWrap: 'wrap'}} direction="row">
+            <Chip sx={{marginBottom: 1, marginRight: 1}} variant="outlined" color="primary" label={`Played: ${userInfo.dailyTimesPlayed}`} />
+            <Chip sx={{marginRight: 1}} variant="outlined" color="primary" label={`Win %: ${userInfo.dailyWinPercentage}`} />
+            <Chip sx={{marginRight: 1}} variant="outlined" color="primary" label={`Current Streak: ${userInfo.dailyCurrentStreak}`} />
+            <Chip variant="outlined" color="primary" label={`Max Streak: ${userInfo.dailyMaxStreak}`} />
+        </Stack> : null
 
     return (
         <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
@@ -241,7 +273,7 @@ export default function Dashboard(props){
                             <CardHeader title="Ready to test your knowledge?"></CardHeader>
                             <CardContent>
                                 <Typography color="primary">Start a new game and see how long you can last!</Typography>
-                                <Typography variant="subtitle2">Thats what she said!</Typography>
+                                <Typography variant="caption">Thats what she said!</Typography>
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
                                 <Button color="secondary" variant="contained" onClick={handleNewGame}>New Game</Button>
@@ -265,10 +297,12 @@ export default function Dashboard(props){
                         <Card className={classes.paper} elevation={3}>
                             <CardHeader title="Daily Question"></CardHeader>
                             <CardContent>
-                                {hasPlayedToday === null ? <Typography color="secondary" variant="body1">Daily question is ready!</Typography>  : <DailyCountdown />}
+                                {hasPlayedToday ? <DailyCountdown />  : <Typography sx={{paddingBottom: 2}} color="secondary" variant="body1">Daily question is ready!</Typography>}
+                                <Typography sx={{fontSize: '1.2em'}} align="center">Stats</Typography>
+                                {gameStats}
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
-                                <Button disabled={hasPlayedToday === null ? false : true} color="secondary" variant="outlined" className={classes.cardAction} onClick={handleDaily}>Play</Button>
+                                <Button disabled={hasPlayedToday} color="secondary" variant="outlined" className={classes.cardAction} onClick={handleDaily}>Play</Button>
                             </CardActions>
                         </Card>
                     </Grid>
@@ -307,6 +341,14 @@ export default function Dashboard(props){
                         </Card>
                     </Grid> */}
                 </Grid>
+                <Dialog maxWidth="md" onClose={handleDailyClose} open={showDaily}>
+                    <DialogTitle>
+                        <Typography color="primary">Daily Question!</Typography>
+                    </DialogTitle>
+                    <DialogContent>
+                        <Daily />
+                    </DialogContent>
+                </Dialog>
             </Container>
         </motion.div>
     )
