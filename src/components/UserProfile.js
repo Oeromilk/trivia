@@ -270,6 +270,8 @@ export default function UserProfile(props){
     const classes = createProfileStyles();
     const history = useHistory();
     const [profileExists, setProfileExists] = useState(false);
+    const [currentTitle, setCurrentTitle] = useState(null);
+    const [titles, setTitles] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
     const [updateAvatar, setUpdateAvatar] = useState(false);
@@ -302,6 +304,7 @@ export default function UserProfile(props){
     }
 
     useEffect(() => {
+        getTitles();
         onAuthStateChanged(auth, (user) => {
             if(user){
                 setCurrentUser(user);
@@ -323,10 +326,28 @@ export default function UserProfile(props){
         if(userSnap.exists()){
             setProfileExists(true);
             setUserInfo(userSnap.data());
+            setCurrentTitle(userSnap.data().title);
             setInvitesRemaining(userSnap.data().invitesRemaining);
         } else {
             setProfileExists(false);
         }
+    }
+
+    async function getTitles(){
+        const titlesRef = collection(db, `users/${localStorage.getItem("uid")}/titles`);
+        const titlesSnap = await getDocs(titlesRef);
+        let arr = [];
+        titlesSnap.forEach(doc => {
+            arr.push(doc.data())
+        })
+        setTitles(arr);
+    }
+
+    async function updateUserTitle(title){
+        const userRef = doc(db, "users", localStorage.getItem("uid"));
+        await updateDoc(userRef, {
+            title: title
+        })
     }
 
     async function setNewInviteCode(newCode){
@@ -347,6 +368,11 @@ export default function UserProfile(props){
 
     const handleInviteEmail = (event) => {
         setInviteEmail(event.target.value);
+    }
+
+    const handleTitleUpdate = (data) => {
+        setCurrentTitle(data.title);
+        updateUserTitle(data.title);
     }
 
     const createInviteCode = () => {
@@ -370,7 +396,7 @@ export default function UserProfile(props){
 
     return (
         <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
-            <Container sx={{marginTop: 15}} maxWidth="sm">
+            <Container sx={{marginTop: 15, marginBottom: 15}} maxWidth="sm">
                 {profileExists ?
                 <React.Fragment>
                     <Stack spacing={4}>
@@ -387,8 +413,28 @@ export default function UserProfile(props){
                                     </Tooltip>
                                     <UpdateProfile />
                                 </Collapse>
-                                <Typography variant="h5" align="center">Username: {userInfo != null ? userInfo.username : "loading"}</Typography>
-                                <Typography variant="h5" align="center">Avatar: {userInfo != null ? userInfo.avatar : "loading"}</Typography>
+                                <Typography sx={{fontSize: '1.75em', fontWeight: 'bold'}} >{userInfo !== null ? userInfo.username + " " : "loading"}<span>{currentTitle !== null ? currentTitle : "loading"} </span></Typography>
+                                <Typography sx={{fontSize: '1.25em'}}>{userInfo !== null ? userInfo.avatar : "loading"}</Typography>
+                            </Stack>
+                        </Paper>
+                        <Paper sx={{padding: 3}} variant="outlined">
+                            <Tooltip placement="top-start" title="Titles can be earned for various things like; completing acheivments, being an early user, completing tasks.">
+                                <Typography fontSize={'1.5em'}>Titles</Typography>
+                            </Tooltip>
+                            <Divider sx={{marginTop: 2, marginBottom: 2}} />
+                            <Stack direction="column" spacing={3}>
+                                {titles !== null ? titles.map((data) => {
+                                    return (
+                                        <Stack direction="row" justifyContent="space-between" alignItems="center" key={data.title}>
+                                            <Typography sx={{fontSize: '1.5em'}}>{data.title}</Typography>
+                                            {
+                                                currentTitle !== null && currentTitle !== data.title ? 
+                                                <Button variant="outlined" onClick={() => handleTitleUpdate(data)}>Make Title</Button> : 
+                                                <Typography sx={{fontSize: '1.25em'}} color="secondary">Current Title</Typography>
+                                            }
+                                        </Stack>
+                                    )
+                                }) : null}
                             </Stack>
                         </Paper>
                         <Paper sx={{padding: 3}} variant="outlined">
@@ -396,7 +442,7 @@ export default function UserProfile(props){
                             <Divider sx={{marginTop: 2, marginBottom: 2}} />
                             {invitesRemaining > 0 ? 
                             <Stack spacing={3}>
-                                <Typography sx={{fontSize: '1.5em'}}>Invites Remaing <span>{invitesRemaining}</span></Typography>
+                                <Typography sx={{fontSize: '1.5em'}}>Invites Remaing <Typography sx={{display: 'inline', fontSize: '1.5em', fontWeight: 'bold'}} paragraph={false} color="primary">{invitesRemaining}</Typography></Typography>
                                 <TextField id="invite-email" label="Email" variant="outlined" helperText="Email of who you want to invite, choose wisely." value={inviteEmail} onChange={handleInviteEmail} />
                                 <Button disabled={isCodeSending} size="large" variant="contained" onClick={createInviteCode}>{isCodeSending ? <CircularProgress /> : 'Send Invite'}</Button>
                             </Stack> : null}
