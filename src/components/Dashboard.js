@@ -163,14 +163,6 @@ export default function Dashboard(props){
         }
     }
 
-    async function updateUserHasPlayed(){
-        const userRef = doc(db, "users", localStorage.getItem("uid"));
-        await updateDoc(userRef, {
-            dailyHasPlayed: true,
-            dailyLastPlayed: Timestamp.now()
-        })
-    }
-
     async function checkFriendRequests(){
         const requestsPath = `users/${localStorage.getItem("uid")}/friend-requests`;
         const requestsRef = collection(db, requestsPath);
@@ -206,26 +198,12 @@ export default function Dashboard(props){
             }
 
             if(last.getTime() < reset.getTime() && last.getTime() > prev.getTime()){
-                console.log("last played between reset and previous day");
                 setHasPlayedToday(true)
             }
 
             if(last.getTime() < prev.getTime()){
-                console.log("last played before previous day")
                 setHasPlayedToday(false)
             }
-
-            // if(last.getTime() > current.getTime() && last.getTime() < reset.getTime()){
-            //     setHasPlayedToday(true);
-            //     console.log('played today')
-            //     return;
-            // }
-
-            // if(last.getTime() < current.getTime() && last.getTime() < reset.getTime()){
-            //     setHasPlayedToday(false);
-            //     console.log('not played today')
-            //     return;
-            // }
         } 
     }
 
@@ -260,7 +238,6 @@ export default function Dashboard(props){
         event.preventDefault();
         
         setShowDaily(true);
-        //updateUserHasPlayed();
         setHasPlayedToday(true);
     }
 
