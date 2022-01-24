@@ -278,20 +278,21 @@ function SignInButton(){
 
 function SignedInLinks(){
   const classes = useStyles();
+  const location = useLocation();
 
   return (
     <React.Fragment>
       <Link to="/" style={noTextDecoration}>
-        <Button className={classes.linkStyle} color="inherit" variant="outlined">Dashboard</Button>
+        <Button className={classes.linkStyle} color={location.pathname === '/' ? "primary" : "inherit"} variant="outlined">Dashboard</Button>
       </Link>
       <Link to="/leaderboard" style={noTextDecoration}>
-        <Button className={classes.linkStyle} color="inherit" variant="outlined">Leader Board</Button>
+        <Button className={classes.linkStyle} color={location.pathname === '/leaderboard' ? "primary" : "inherit"} variant="outlined">Leader Board</Button>
       </Link>
       <Link to="/profile" style={noTextDecoration}>
-        <Button className={classes.linkStyle} color="inherit" variant="outlined">Profile</Button>
+        <Button className={classes.linkStyle} color={location.pathname === '/profile' ? "primary" : "inherit"} variant="outlined">Profile</Button>
       </Link>
       <Link to="/feedback" style={noTextDecoration}>
-        <Button className={classes.linkStyle} color="inherit" variant="outlined">Feedback</Button>
+        <Button className={classes.linkStyle} color={location.pathname === '/feedback' ? "primary" : "inherit"} variant="outlined">Feedback</Button>
       </Link>
     </React.Fragment>
   )
