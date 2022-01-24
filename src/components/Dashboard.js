@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from './firebase/firebaseConfig';
-import { doc, getDoc, updateDoc, getDocs, collection, query, orderBy, limit, Timestamp } from "firebase/firestore";
+import { doc, getDoc, getDocs, collection, query, orderBy, limit } from "firebase/firestore";
 import { useHistory } from "react-router-dom";
 import { motion } from 'framer-motion/dist/framer-motion';
 import { Container, Grid, Button, Typography, List, ListItem, Card, CardActions, CardContent, CardHeader, Avatar, Badge, Stack, Divider, Dialog, DialogTitle, DialogContent, Chip } from '@mui/material';
@@ -243,10 +243,10 @@ export default function Dashboard(props){
 
     const gameStats = userInfo !== null ? 
         <Stack sx={{flexWrap: 'wrap'}} direction="row">
-            <Chip sx={{marginBottom: 1, marginRight: 1}} variant="outlined" color="primary" label={`Played: ${userInfo.dailyTimesPlayed}`} />
-            <Chip sx={{marginRight: 1}} variant="outlined" color="primary" label={`Win %: ${userInfo.dailyWinPercentage}`} />
-            <Chip sx={{marginRight: 1}} variant="outlined" color="primary" label={`Current Streak: ${userInfo.dailyCurrentStreak}`} />
-            <Chip variant="outlined" color="primary" label={`Max Streak: ${userInfo.dailyMaxStreak}`} />
+            <Chip sx={{marginBottom: 1, marginRight: 1}} variant="filled" color="primary" label={`Played: ${userInfo.dailyTimesPlayed}`} />
+            <Chip sx={{marginRight: 1}} variant="filled" color="primary" label={`Win Rate: ${userInfo.dailyWinPercentage}%`} />
+            <Chip sx={{marginRight: 1}} variant="filled" color="primary" label={`Current Streak: ${userInfo.dailyCurrentStreak}`} />
+            <Chip variant="filled" color="primary" label={`Max Streak: ${userInfo.dailyMaxStreak}`} />
         </Stack> : null
 
     return (
@@ -286,7 +286,7 @@ export default function Dashboard(props){
                             <CardHeader title="Daily Question"></CardHeader>
                             <CardContent>
                                 {hasPlayedToday ? <DailyCountdown />  : <Typography sx={{paddingBottom: 2}} color="secondary" variant="body1">Daily question is ready!</Typography>}
-                                <Typography sx={{fontSize: '1.2em', marginBottom: 1}} align="center">Stats</Typography>
+                                <Typography sx={{fontSize: '1.2em', marginBottom: 1}}>Stats</Typography>
                                 {gameStats}
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
