@@ -196,23 +196,36 @@ export default function Dashboard(props){
             const last = new Date(userInfo.dailyLastPlayed.seconds * 1000);
             const now = Date.now();
             const reset = new Date();
-            const current = new Date();
-            current.setHours(8, 0, 0);
+            const prev = new Date();
+            prev.setHours(8, 0, 0);
+            prev.setDate(prev.getDate() - 1);
             reset.setHours(8, 0, 0);
 
             if(now > reset.getTime()){
                 reset.setDate(reset.getDate() + 1);
             }
 
-            if(last.getTime() > current.getTime() && last.getTime() < reset.getTime()){
-                setHasPlayedToday(true);
-                return;
+            if(last.getTime() < reset.getTime() && last.getTime() > prev.getTime()){
+                console.log("last played between reset and previous day");
+                setHasPlayedToday(true)
             }
 
-            if(last.getTime() < current.getTime() && last.getTime() < reset.getTime()){
-                setHasPlayedToday(false);
-                return;
+            if(last.getTime() < prev.getTime()){
+                console.log("last played before previous day")
+                setHasPlayedToday(false)
             }
+
+            // if(last.getTime() > current.getTime() && last.getTime() < reset.getTime()){
+            //     setHasPlayedToday(true);
+            //     console.log('played today')
+            //     return;
+            // }
+
+            // if(last.getTime() < current.getTime() && last.getTime() < reset.getTime()){
+            //     setHasPlayedToday(false);
+            //     console.log('not played today')
+            //     return;
+            // }
         } 
     }
 
@@ -247,7 +260,7 @@ export default function Dashboard(props){
         event.preventDefault();
         
         setShowDaily(true);
-        updateUserHasPlayed();
+        //updateUserHasPlayed();
         setHasPlayedToday(true);
     }
 

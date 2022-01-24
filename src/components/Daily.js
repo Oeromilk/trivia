@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Timer from './Timer';
 import { db } from './firebase/firebaseConfig';
-import { doc, getDoc, updateDoc, getDocs, collection, query, orderBy, addDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getDocs, collection, query, orderBy, addDoc, Timestamp } from "firebase/firestore";
 import { Stack, Paper, Typography, Skeleton, FormControl, FormLabel, RadioGroup, Radio, FormControlLabel, Chip, Button, Alert, Collapse } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -88,7 +88,6 @@ export default function Daily(){
 
         const newQuestion = updatedQuestions[getRandomId(updatedQuestions.length)]
 
-        console.log(newQuestion)
         countCharacters();
         setChoices(newQuestion.questionInfo.choices);
         setDailyQuestion(newQuestion);
@@ -119,7 +118,10 @@ export default function Daily(){
         if(correct){
             stats.timesWon++;
             stats.currentStreak++;
+        } else {
+            stats.currentStreak = 0;
         }
+
         if(stats.currentStreak > stats.maxStreak){
             stats.maxStreak = stats.currentStreak;
         }
@@ -131,7 +133,9 @@ export default function Daily(){
             dailyMaxStreak: stats.maxStreak,
             dailyTimesPlayed: stats.timesPlayed,
             dailyTimesWon: stats.timesWon,
-            dailyWinPercentage: stats.winPercentage
+            dailyWinPercentage: stats.winPercentage,
+            dailyHasPlayed: true,
+            dailyLastPlayed: Timestamp.now()
         })
     }
 
