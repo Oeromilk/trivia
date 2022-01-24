@@ -187,8 +187,7 @@ const useStyles = makeStyles((theme) => ({
   },
   list: {
     width: 300,
-    height: '100%',
-    background: theme.palette.primary.main
+    height: '100%'
   },
   fullList: {
     width: 'auto'
@@ -301,6 +300,7 @@ function SignedInLinks(){
 function MobileDrawer(props){
   const [state, setState] = React.useState(false);
   const classes = useStyles();
+  const location = useLocation();
 
   const toggleDrawer = (open) => (event) => {
     if(event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')){
@@ -320,24 +320,24 @@ function MobileDrawer(props){
             <ListItem>
               <Link to="/" style={noTextDecoration}>
                 <Stack direction="row" justifyContent="space-around" alignItems="center" spacing={2}>
-                  <DashboardRoundedIcon />
-                  <Button color="inherit">Dashboard</Button>
+                  <DashboardRoundedIcon color={location.pathname === '/' ? "primary" : "inherit"}/>
+                  <Button color={location.pathname === '/' ? "primary" : "inherit"}>Dashboard</Button>
                 </Stack> 
               </Link>
             </ListItem>
             <ListItem>
               <Link to="/leaderboard" style={noTextDecoration}>
                 <Stack direction="row" justifyContent="space-around" alignItems="center" spacing={2}>
-                  <LeaderboardRoundedIcon />
-                  <Button color="inherit">Leader Board</Button>
+                  <LeaderboardRoundedIcon color={location.pathname === '/leaderboard' ? "primary" : "inherit"}/>
+                  <Button color={location.pathname === '/leaderboard' ? "primary" : "inherit"}>Leader Board</Button>
                 </Stack>
               </Link>
             </ListItem>
             <ListItem>
               <Link to="/profile" style={noTextDecoration}>
                 <Stack direction="row" justifyContent="space-around" alignItems="center" spacing={2}>
-                  <AccountCircleRoundedIcon />
-                  <Button color="inherit">Profile</Button>
+                  <AccountCircleRoundedIcon color={location.pathname === '/profile' ? "primary" : "inherit"}/>
+                  <Button color={location.pathname === '/profile' ? "primary" : "inherit"}>Profile</Button>
                 </Stack>
               </Link>
             </ListItem>
@@ -345,8 +345,8 @@ function MobileDrawer(props){
             <ListItem>
               <Link to="/feedback" style={noTextDecoration}>
               <Stack direction="row" justifyContent="space-around" alignItems="center" spacing={2}>
-                  <FeedbackRoundedIcon />
-                  <Button color="inherit">Feedback</Button>
+                  <FeedbackRoundedIcon color={location.pathname === '/feedback' ? "primary" : "inherit"}/>
+                  <Button color={location.pathname === '/feedback' ? "primary" : "inherit"}>Feedback</Button>
                 </Stack>
               </Link>
             </ListItem>
