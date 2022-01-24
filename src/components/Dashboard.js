@@ -261,7 +261,7 @@ export default function Dashboard(props){
                             <CardHeader title="Ready to test your knowledge?"></CardHeader>
                             <CardContent>
                                 <Typography color="primary">Start a new game and see how long you can last!</Typography>
-                                <Typography variant="caption">Thats what she said!</Typography>
+                                <Typography sx={{color: "#c9c9c9"}} variant="caption">Thats what she said!</Typography>
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
                                 <Button color="secondary" variant="contained" onClick={handleNewGame}>New Game</Button>
