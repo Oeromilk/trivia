@@ -260,8 +260,8 @@ export default function Dashboard(props){
                         <Card className={classes.paper} elevation={3}>
                             <CardHeader title="Ready to test your knowledge?"></CardHeader>
                             <CardContent>
-                                <Typography color="primary">Start a new game and see how long you can last!</Typography>
-                                <Typography sx={{color: "rgba(255, 255, 255, 0.3)"}} variant="caption">Thats what she said!</Typography>
+                                <Typography sx={{fontWeight: 'bold', fontSize: '1.25em'}} color="primary">Start a new game and see how long you can last!</Typography>
+                                <Typography sx={{color: "rgba(255, 255, 255, 0.4)"}} variant="caption">Thats what she said!</Typography>
                             </CardContent>
                             <CardActions style={{justifyContent: "end"}}>
                                 <Button color="secondary" variant="contained" onClick={handleNewGame}>New Game</Button>

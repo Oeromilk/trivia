@@ -137,7 +137,9 @@ export default function Contribute(){
             var search = question.toLowerCase();
             var label = tag.label.toLowerCase();
             if(search.includes(label)){
-                setTagList(prev => [...prev, tag]);
+                if(tagList.findIndex(x => x.label === tag.label)){
+                    setTagList(prev => [...prev, tag]);
+                }
             }
         }
     }, [debouncedQuestion])
@@ -147,7 +149,9 @@ export default function Contribute(){
             var search = answer.toLowerCase();
             var label = tag.label.toLowerCase();
             if(search.includes(label)){
-                setTagList(prev => [...prev, tag]);
+                if(tagList.findIndex(x => x.label === tag.label)){
+                    setTagList(prev => [...prev, tag]);
+                }
             }
         }
     }, [debouncedAnswer])
@@ -377,7 +381,7 @@ export default function Contribute(){
                                             <TextField fullWidth label="Choice" value={field.value || ""} onChange={e => handleChoiceChange(index, e)} />
                                         </Grid>
                                         <Grid item xs={3}>
-                                            <Button sx={{paddingTop: 2, paddingBottom: 2}} size="small" variant="outlined" color="warning" onClick={() => removeChoice(index)}>Remove Choice</Button>
+                                            <Button sx={{paddingTop: 2, paddingBottom: 2}} fullWidth={true} size="small" variant="outlined" color="warning" onClick={() => removeChoice(index)}>Remove</Button>
                                         </Grid>
                                     </Grid>
                                 )
