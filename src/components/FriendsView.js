@@ -23,6 +23,14 @@ const useStyles = makeStyles((theme) => ({
     drawerStyle: {
         borderTopLeftRadius: theme.spacing(2),
         borderTopRightRadius: theme.spacing(2)
+    },
+    fabStyle: {
+        position: 'fixed',
+        bottom: theme.spacing(2),
+        right: theme.spacing(2)
+    },
+    motionContainer: {
+        minHeight: `calc(100vh - ${theme.spacing(6)})`
     }
 }))
 
@@ -228,7 +236,7 @@ export default function FriendsView(props){
     }
     
     return (
-        <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
+        <motion.div className={classes.motionContainer} variants={containerVariants} initial="initial" animate="animate" exit="exit">
             <Grid className={classes.containerSize} sx={{padding: 3}} container spacing={3}>
                 <Grid item xs={12}>
                     <Typography variant="h3">Your Friends</Typography>
@@ -283,7 +291,7 @@ export default function FriendsView(props){
                     </Grid>
                 </Grid> : null}
             </Grid>
-           <Fab sx={{position: 'absolute', bottom: 12, right: 12}} color="secondary" variant="extended" onClick={openRequest}>New Friend Request</Fab>
+           
            <Drawer className={classes.drawerStyle} anchor="bottom" open={isDrawer} onClose={closeRequest}>
                <Grid sx={{padding: 3}}  container rowSpacing={3}>
                    <Grid item xs={3}>
@@ -310,6 +318,7 @@ export default function FriendsView(props){
                    </Grid>
                </Grid>
            </Drawer>
+           <Fab className={classes.fabStyle} color="secondary" variant="extended" onClick={openRequest}>New Friend Request</Fab>
         </motion.div>
     )
 }
