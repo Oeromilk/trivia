@@ -5,6 +5,8 @@ import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import { motion } from 'framer-motion/dist/framer-motion';
 import { Container, Grid, Typography, Button, TextField, Tooltip, InputLabel, Select, MenuItem, FormControl, CircularProgress, Snackbar, Autocomplete } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
+import { styled } from '@mui/material/styles';
+import PermMediaIcon from '@mui/icons-material/PermMedia';
 
 function useDebounce(value, delay) {
     // State and setters for debounced value
@@ -25,6 +27,10 @@ function useDebounce(value, delay) {
 
     return debouncedValue;
 }
+
+const Input = styled('input')({
+    display: 'none',
+  });
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -47,6 +53,7 @@ export default function Contribute(){
     const [questionValidation, setQuestionValidation] = useState({error: false, text: null});
     const [answer, setAnswer] = useState("");
     const [answerValidation, setAnswerValidation] = useState({error: false, text: null});
+    const [type, setType] = useState("text");
     const [difficulty, setDifficulty] = useState(1);
     const [season, setSeason] = useState(1);
     const [episode, setEpisode] = useState(1);
@@ -62,6 +69,7 @@ export default function Contribute(){
     const [tagHelperText, setTagHelperText] = useState(null);
     const debouncedQuestion = useDebounce(question, 1000);
     const debouncedAnswer = useDebounce(answer, 1000);
+    const typeToolTip = "What is the medium of the question? If text based, choose text. If image based, choose image. If audio based, choose audio.";
     const questionToolTip = "Remember, questions are timed.";
     const answerToolTip = "Keep it simple stupid.";
     const difficultyToolTip = "Rank it 1, 2, 3, 4, 5. 1 being easist and 5 being hardest. Think your question is almost impossible, then rank it 6.";
@@ -248,7 +256,8 @@ export default function Contribute(){
                     season: season,
                     episode: episode,
                     difficulty: difficulty,
-                    tags: tagList
+                    tags: tagList,
+                    type: type
                 }
                 sendNewContribution(contribution)
             } else {
@@ -272,6 +281,10 @@ export default function Contribute(){
 
     const handleDifficultyChange = (event) => {
         setDifficulty(event.target.value)
+    }
+
+    const handleTypeChange = (event) => {
+        setType(event.target.value)
     }
 
     const handleSeasonChange = (event) => {
@@ -313,6 +326,23 @@ export default function Contribute(){
 
         setOpen(false);
     };
+
+    const showUploadButton = () => {
+        let fileType = type === "audio" ? "audio/mp3" : "image/*"
+        let fileToolTip = type === "audio" ? "Mp3 is the only accepted audio format" : "Please use JPG for image file type."
+        return (
+            <Grid item xs={12}>
+                <Tooltip title={fileToolTip} placement="top-start">
+                    <label htmlFor="media-upload">
+                        <Input accept={fileType} id="media-upload" multiple type="file" />
+                        <Button fullWidth size="large" variant="contained" component="span" endIcon={<PermMediaIcon />}>
+                            Upload
+                        </Button>
+                    </label>
+                </Tooltip>
+            </Grid>
+        )
+    }
 
     return (
         <motion.div variants={containerVariants} initial="initial" animate="animate" exit="exit">
@@ -452,6 +482,25 @@ export default function Contribute(){
                             </FormControl>
                         </Tooltip>
                     </Grid>
+                    <Grid item xs={12}>
+                        <Tooltip title={typeToolTip} placement="top-start">
+                            <FormControl fullWidth>
+                                <InputLabel id="question-type">Question Type</InputLabel>
+                                <Select
+                                    labelId="question-type"
+                                    id="question-type-select"
+                                    value={type}
+                                    label="question-type"
+                                    onChange={handleTypeChange}
+                                >
+                                    <MenuItem value={"text"}>Text</MenuItem>
+                                    <MenuItem value={"audio"}>Audio</MenuItem>
+                                    <MenuItem value={"image"}>Image</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Tooltip>
+                    </Grid>
+                    {type !== "text" ? showUploadButton() : null}
                     <Grid item xs={12}>
                         <Button sx={{width: "100%", paddingTop: 2, paddingBottom: 2}} disabled={isSending} variant="outlined" color="primary" onClick={submitNewQuestion}>
                             {(isSending) ? <CircularProgress /> : "Contribute"}
