@@ -4,6 +4,7 @@ import { isMobile } from 'react-device-detect';
 import Timer from './Timer';
 import { auth, analytics, db, storage } from './firebase/firebaseConfig';
 import { collection, addDoc, getDocs, query, orderBy } from "firebase/firestore";
+import { ref, getDownloadURL } from "firebase/storage";
 import { logEvent } from "firebase/analytics";
 import chance from '../images/chance.svg';
 import makeStyles from '@mui/styles/makeStyles';
@@ -127,7 +128,8 @@ export default function GameView(){
     const currentUser = auth.currentUser;
     const [availableQuestions, setAvailableQuestions] = React.useState([]);
     const [allQuestionsSeen, setAllQuestionsSeen] = React.useState([]);
-
+    const [mediaSrc, setMediaSrc] = React.useState(null);
+    const [questionType, setQuestionType] = React.useState('text');
     const [choice, setChoice] = React.useState('');
     const [choices, setChoices] = React.useState(null);
     const [open, setOpen] = React.useState(false);
@@ -205,12 +207,31 @@ export default function GameView(){
 
         setCurrentQuestionId(nextQuestion.id);
         setCurrentQuestion(nextQuestion);
+        setQuestionType(nextQuestion.questionInfo.type);
         setChoices(nextQuestion.questionInfo.choices.sort(() => Math.random() - 0.5));
         setAllQuestionsSeen(seen => [...seen, nextQuestion]);
         setAvailableQuestions(questions => questions.filter((question) => question !== nextQuestion))
         countCharacters();
-        setIsQuestionLoading(false);
-        setTimeUp(true);
+        if(nextQuestion.questionInfo.type === "audio") {
+            getQuestionMedia('audio-clips/', nextQuestion.questionInfo.fileName);
+        }
+        if(nextQuestion.questionInfo.type === "image"){
+            getQuestionMedia('images/', nextQuestion.questionInfo.fileName);
+        }
+        if(nextQuestion.questionInfo.type === "text") {
+            setIsQuestionLoading(false);
+            setTimeUp(true);
+        }
+    }
+
+    const getQuestionMedia = (type, fileName) => {
+        getDownloadURL(ref(storage, `${type}/${fileName}`))
+            .then((url) => {
+                setMediaSrc(url);
+            })
+            .catch((error) => {
+                console.log(error);
+            })
     }
 
     const getRandomQuestion = () => {
@@ -249,10 +270,6 @@ export default function GameView(){
     }, [chances]);
 
     React.useEffect(() => {
-        countCharacters();
-    }, [currentQuestion])
-
-    React.useEffect(() => {
         if(isCorrect){
             setQuestionsCorrect((correct) => correct + 1);
             updateIfCorrect();
@@ -282,11 +299,20 @@ export default function GameView(){
         if(currentQuestion !== null){
             let questionCount = currentQuestion.questionInfo.question.length;
             let choicesCount = 0;
+            let mediaCount = 0;
             currentQuestion.questionInfo.choices.forEach((option) => {
                 choicesCount += option.length;
             })
+
+            if(currentQuestion.questionInfo.type === "audio"){
+               mediaCount += 25;
+            }
+
+            if(currentQuestion.questionInfo.type === "image"){
+                mediaCount += 20;
+            }
             
-            setCharacterCount(questionCount + choicesCount);
+            setCharacterCount(questionCount + choicesCount + mediaCount);
         }
     }
 
@@ -332,6 +358,25 @@ export default function GameView(){
         setOpen(false);
     };
 
+    const mediaLoaded = () => {
+        setIsQuestionLoading(false);
+        setTimeUp(true);
+    }
+
+    const questionMedia = () => {
+        if(questionType === "text") {
+            return null;
+        }
+
+        if(questionType === "audio"){
+            return <audio onCanPlayThrough={mediaLoaded} style={{width: '100%'}} controls src={mediaSrc}/>
+        }
+
+        if(questionType === "image"){
+            return <img onLoad={mediaLoaded} id="question-image" alt="question" src={mediaSrc}/>
+        }
+    }
+
     return (
         <React.Fragment>
             <CssBaseline />
@@ -366,6 +411,9 @@ export default function GameView(){
                     </Grid>
                     <Grid item xs={12}>
                         <Typography style={{fontSize: '24px'}} align="center">{isQuestionLoading === true ? "Question Loading" : currentQuestion.questionInfo.question}</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                        {questionMedia()}
                     </Grid>
                     <Grid item xs={12}>
                         <form className={classes.formStyle}>
