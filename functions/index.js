@@ -20,5 +20,5 @@ exports.countTheOfficeTriviaQuestions = functions.firestore.document('/theOffice
     .onCreate((snap, context) => {
         const countRef = db.collection('theOfficeTriviaQuestions').doc('count');
         
-        return countRef.update({count: admin.firestore.FieldValue.increment(1)})
+        return countRef.update({numberOfQuestions: admin.firestore.FieldValue.increment(1)})
     })
