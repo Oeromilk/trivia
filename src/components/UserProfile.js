@@ -9,7 +9,8 @@ import { doc, getDoc, addDoc, getDocs, setDoc, updateDoc, collection, query, whe
 import { useHistory } from "react-router-dom";
 import makeStyles from '@mui/styles/makeStyles';
 import { Avatar, Container, Button, Input, InputLabel, Grid, Typography, FormHelperText, CircularProgress, TextField, FormControl, Select, MenuItem, Stack, Paper, Tooltip, Collapse, Divider } from '@mui/material';
-import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 
 function useDebounce(value, delay) {
     // State and setters for debounced value
@@ -123,7 +124,11 @@ function CreateProfile(props){
             dailyMaxStreak: 0,
             dailyTimesPlayed: 0,
             dailyTimesWon: 0,
-            dailyWinPercentage: 0
+            dailyWinPercentage: 0,
+            audioUpload: 1,
+            imageUpload: 1,
+            title: null,
+            invitesRemaing: 2
         }).then(function(){
             logEvent(analytics, 'profile_created');
             history.push("/");
@@ -403,14 +408,14 @@ export default function UserProfile(props){
                         <Paper sx={{padding: 3}} variant="outlined">
                             <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
                                 <Tooltip title="Update Avatar">
-                                    <Avatar sx={{cursor: 'pointer'}} className={classes.updateAvatar} onClick={() => setUpdateAvatar(true)}>
-                                        {userInfo === null ? 'A' : <AvatarContainer avatar={userInfo.avatar.toLowerCase()} />}
-                                    </Avatar>
+                                    <div>
+                                        <Avatar className={classes.updateAvatar} onClick={() => setUpdateAvatar(true)}>
+                                            {userInfo === null ? 'A' : <AvatarContainer avatar={userInfo.avatar.toLowerCase()} />}
+                                        </Avatar>
+                                        {updateAvatar ? <ArrowDropUpIcon sx={{cursor: 'pointer', fontSize: '3em', marginLeft: 1}} onClick={() => setUpdateAvatar(false)}/> : <ArrowDropDownIcon sx={{cursor: 'pointer', fontSize: '3em', marginLeft: 1}} onClick={() => setUpdateAvatar(true)}/>}
+                                    </div>
                                 </Tooltip>
                                 <Collapse in={updateAvatar}>
-                                    <Tooltip title="Cancel Update">
-                                        <CancelRoundedIcon sx={{cursor: 'pointer'}} onClick={() => setUpdateAvatar(false)} />
-                                    </Tooltip>
                                     <UpdateProfile />
                                 </Collapse>
                                 <Typography sx={{fontSize: '1.75em', fontWeight: 'bold'}} >{userInfo !== null ? userInfo.username + " " : "loading"}<span>{currentTitle !== null ? currentTitle : "loading"} </span></Typography>
