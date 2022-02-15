@@ -581,6 +581,24 @@ export default function App(){
   const [currentUser, setCurrentUser] = React.useState(null);
   const userStatus = localStorage.getItem("uid");
   const location = useLocation();
+  const pageTitleList = {
+    "/contribute": "Create a new Question",
+    "/profile": "Profile",
+    "/friends": "Friends",
+    "/leaderboard": "Leaderboard",
+    "/game": "Game",
+    "/game/ending": "Game Over",
+    "/review": "Review Contributions",
+    "/feedback": "Provide Feedback",
+    "/sign-up": "Sign Up",
+    "/sign-in": " Sign In",
+    "forgot-password": "Forgot Password",
+    "/": "Dashboard"
+  }
+
+  useEffect(() => {
+      document.title = "Trivible | " + pageTitleList[location.pathname];
+  }, [location])
 
   useEffect(() => {
     logEvent(analytics, 'page_view');
