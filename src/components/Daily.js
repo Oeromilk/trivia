@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Timer from './Timer';
 import { db } from './firebase/firebaseConfig';
-import { doc, getDoc, updateDoc, getDocs, collection, query, orderBy, addDoc, Timestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getDocs, collection, query, where, orderBy, addDoc, Timestamp } from "firebase/firestore";
 import { Stack, Paper, Typography, Skeleton, FormControl, FormLabel, RadioGroup, Radio, FormControlLabel, Chip, Button, Alert, Collapse } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -69,7 +69,8 @@ export default function Daily(){
     }, [])
 
     async function getDailyQuestion() {
-        const questionsRef = query(collection(db, "theOfficeTriviaQuestions"), orderBy("id"));
+        // limit daily questions to text only for now.
+        const questionsRef = query(collection(db, "theOfficeTriviaQuestions"), where("questionInfo.type", "==", "text"), orderBy("id"));
         const questionsAnsweredRef = collection(db, `users/${localStorage.getItem("uid")}/questions-answered`);
         const questionsSnap = await getDocs(questionsRef);
         const questionsAnsweredSnap = await getDocs(questionsAnsweredRef);
@@ -87,6 +88,7 @@ export default function Daily(){
         });
 
         const newQuestion = updatedQuestions[getRandomId(updatedQuestions.length)]
+        console.log(newQuestion)
 
         countCharacters();
         setChoices(newQuestion.questionInfo.choices);
