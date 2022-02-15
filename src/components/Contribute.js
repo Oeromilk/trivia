@@ -4,9 +4,18 @@ import { logEvent } from "firebase/analytics";
 import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import { motion } from 'framer-motion/dist/framer-motion';
 import { Container, Grid, Typography, Button, TextField, Tooltip, InputLabel, Select, MenuItem, FormControl, CircularProgress, Snackbar, Autocomplete } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import MuiAlert from '@mui/material/Alert';
 import { styled } from '@mui/material/styles';
 import PermMediaIcon from '@mui/icons-material/PermMedia';
+
+const useStyles = makeStyles((theme) =>({
+    count: {
+        color: theme.palette.secondary.main,
+        fontSize: '1.25em',
+        fontWeight: 'bold'
+    }
+}))
 
 function useDebounce(value, delay) {
     // State and setters for debounced value
@@ -48,6 +57,7 @@ export default function Contribute(){
         8: 24,
         9: 25
     }
+    const classes = useStyles();
     const [userInfo, setUserInfo] = useState(null);
     const [question, setQuestion] = useState("");
     const [questionValidation, setQuestionValidation] = useState({error: false, text: null});
@@ -102,7 +112,8 @@ export default function Contribute(){
         {label: "David"},
         {label: "Jo"},
         {label: "Charles"},
-        {label: "Karen"}
+        {label: "Karen"},
+        {label: "General"}
     ]
     const containerVariants = {
         initial: {
@@ -327,7 +338,13 @@ export default function Contribute(){
         setOpen(false);
     };
 
-    const showUploadButton = () => {
+    const shouldShowUploadButton = () => {
+        if(userInfo !== null){
+            return type !== "text" && (userInfo.audioUpload + userInfo.imageUpload > 0);
+        }
+    }
+
+    const showUploadButton = () => { 
         let fileType = type === "audio" ? "audio/mp3" : "image/*"
         let fileToolTip = type === "audio" ? "Mp3 is the only accepted audio format" : "Please use JPG for image file type."
         return (
@@ -351,7 +368,7 @@ export default function Contribute(){
                 <Grid container spacing={3}>
                     <Grid item xs={12}>
                         <Typography variant="h4">Question Tags</Typography>
-                        <Typography sx={{color: "#808080"}} variant="caption">Tags should include the topic of the question. For Example, if your question is about Michael, the question should at least have a tag for Michael. Questions need at least one tag to be valid.</Typography>
+                        <Typography sx={{color: "#808080"}} variant="caption">Tags should include the topic of the question. For Example, if your question is about Michael, the question should at least have a tag for Michael. Questions need at least one tag to be valid. If the question is about just general knowledge of The Office and does not include a character, choose General.</Typography>
                     </Grid>
                     <Grid item xs={12}>
                         <Tooltip title="When you stop typing for a question or answer, we will search and apply tags automagically." placement="top-start">
@@ -499,8 +516,11 @@ export default function Contribute(){
                                 </Select>
                             </FormControl>
                         </Tooltip>
+                        <Typography sx={{paddingTop: 1}}>
+                            You have <span className={classes.count}>{userInfo !== null ? userInfo.audioUpload : 'loading'}</span> audio and <span className={classes.count}>{userInfo !== null ? userInfo.imageUpload : 'loading'}</span> image upload left. Limited for now with chances to earn more coming.
+                        </Typography>
                     </Grid>
-                    {type !== "text" ? showUploadButton() : null}
+                    {shouldShowUploadButton() ? showUploadButton() : null}
                     <Grid item xs={12}>
                         <Button sx={{width: "100%", paddingTop: 2, paddingBottom: 2}} disabled={isSending} variant="outlined" color="primary" onClick={submitNewQuestion}>
                             {(isSending) ? <CircularProgress /> : "Contribute"}
