@@ -19,6 +19,10 @@ exports.addNewPoints = functions.firestore.document('/users/{docId}/questions-an
 exports.countTheOfficeTriviaQuestions = functions.firestore.document('/theOfficeTriviaQuestions/{docId}')
     .onCreate((snap, context) => {
         const countRef = db.collection('theOfficeTriviaQuestions').doc('count');
+        const docRef = db.collection('theOfficeTriviaQuestions').doc(snap.id);
+        countRef.get().then(doc => {
+            docRef.update({id: doc.data().numberOfQuestions + 1})
+        })
         
         return countRef.update({numberOfQuestions: admin.firestore.FieldValue.increment(1)})
     })
