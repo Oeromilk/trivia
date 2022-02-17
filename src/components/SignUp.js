@@ -4,7 +4,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { logEvent } from "firebase/analytics";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useHistory } from "react-router-dom";
-import { Container, Stack, TextField, Button, Typography, CircularProgress, Alert, Paper } from '@mui/material';
+import { Container, Stack, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
 import { motion } from 'framer-motion/dist/framer-motion';
 
 export default function SignUp() {
@@ -12,6 +12,7 @@ export default function SignUp() {
     const [code, setCode] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [isTrueCode, setIsTrueCode] = useState(false);
+    const [signUpError, setSignUpError] = useState(null);
 
     const containerVariants = {
       initial: {
@@ -61,7 +62,11 @@ export default function SignUp() {
             history.push("/");
           }
         }).catch((error) => {
-          console.log(error)
+          setSignUpError(error);
+          setIsSearching(false);
+          if(error.code.includes("auth/popup-closed-by-user")){
+            console.log('userclosed')
+          }
         });
       }
 
@@ -91,6 +96,7 @@ export default function SignUp() {
           </Button>
           {isTrueCode ? <Alert severity="error">Oops, {code} is not valid. Either your entered incorrectly or that code has been used.</Alert> : null}
           <Button size="large" variant="text" onClick={handleSignIn}>Already have an account? Sign In</Button>
+          {signUpError !== null ? <Typography>We see you closed the Sign In Pop Up, currently we are limiting sign ups to Google Accounts to help limit spam or fake accounts. We are working to provide other types of sign in options in the future.</Typography> : null}
         </Stack>
       </Container>
     </motion.div>
