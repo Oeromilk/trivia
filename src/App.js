@@ -446,7 +446,7 @@ function FAQ(){
               <Typography variant="body2">Friends</Typography>
             </ListItem>
           </List>
-          <Typography variant="body2">Other shows will be considered based upon request and popularity.</Typography>
+          <Typography variant="caption">Other shows will be considered based upon request and popularity.</Typography>
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel4'} onChange={handleChange('panel4')}>
