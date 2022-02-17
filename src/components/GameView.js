@@ -205,6 +205,7 @@ export default function GameView(){
 
         const nextQuestion = getRandomQuestion();
 
+        logEvent(analytics, "question_seen", {questionID: nextQuestion.id});
         setCurrentQuestionId(nextQuestion.id);
         setCurrentQuestion(nextQuestion);
         setQuestionType(nextQuestion.questionInfo.type);
