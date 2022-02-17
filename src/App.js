@@ -436,6 +436,7 @@ function FAQ(){
           <Typography variant="subtitle1">What other shows will I be able to test my trivia knowledge?</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.accordionDivider}>
+          <Typography variant="body2">The Office will be our main focus, but we are excited about other shows such as:</Typography>
           <List>
             <ListItem>
               <Typography variant="body2">Parks and Recreation</Typography>
@@ -445,7 +446,7 @@ function FAQ(){
               <Typography variant="body2">Friends</Typography>
             </ListItem>
           </List>
-          <Typography variant="body2" >Other shows will be considered based upon request and popularity.</Typography>
+          <Typography variant="body2">Other shows will be considered based upon request and popularity.</Typography>
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel4'} onChange={handleChange('panel4')}>
@@ -469,7 +470,7 @@ function FAQ(){
           <Typography variant="subtitle1">Why is Trivible invite only?</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.accordionDivider}>
-          <Typography variant="body2">We are limiting users from joining so we can develop and scale at a slower pace to start.</Typography>
+          <Typography variant="body2">An invite system allows us to build and grow at a pace that is more controlled at first, which will help us early on with many different factors.</Typography>
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel6'} onChange={handleChange('panel6')}>
