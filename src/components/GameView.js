@@ -173,13 +173,17 @@ export default function GameView(){
             qsAnswered.push(doc.data())
         })
 
-        const questionsToRemove = new Set(qsAnswered);
-        const updatedQuestions = newQuestions.filter((question) => {
-            // return those elements not in the namesToDeleteSet
-            return !questionsToRemove.has(question);
-          });
+        const questionsSeenSet = new Set();
+
+        for(const item of qsAnswered){
+            questionsSeenSet.add(item.id)
+        }
+
+        const questionsNotSeen = newQuestions.filter((question) => {
+            return !questionsSeenSet.has(question.id)
+        })
         
-        setAvailableQuestions(updatedQuestions);
+        setAvailableQuestions(questionsNotSeen);
         setAllQuestionsSeen(qsAnswered);
     }
 
