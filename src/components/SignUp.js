@@ -59,13 +59,14 @@ export default function SignUp() {
           if(result.user){
             setIsSearching(false);
             logEvent(analytics, 'login', { email: "googleAuthProvider"});
-            history.push("/");
+            history.push("/profile");
           }
         }).catch((error) => {
-          setSignUpError(error);
           setIsSearching(false);
           if(error.code.includes("auth/popup-closed-by-user")){
-            console.log('userclosed')
+            setSignUpError(error);
+          } else {
+            
           }
         });
       }
@@ -96,7 +97,7 @@ export default function SignUp() {
           </Button>
           {isTrueCode ? <Alert severity="error">Oops, {code} is not valid. Either your entered incorrectly or that code has been used.</Alert> : null}
           <Button size="large" variant="text" onClick={handleSignIn}>Already have an account? Sign In</Button>
-          {signUpError !== null ? <Typography>We see you closed the Sign In Pop Up, currently we are limiting sign ups to Google Accounts to help limit spam or fake accounts. We are working to provide other types of sign in options in the future.</Typography> : null}
+          {signUpError !== null ? <Typography>Error: {signUpError.code} occured when signing up.</Typography> : null}
         </Stack>
       </Container>
     </motion.div>

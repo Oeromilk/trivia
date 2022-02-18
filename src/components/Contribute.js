@@ -3,11 +3,13 @@ import { db, analytics } from './firebase/firebaseConfig';
 import { logEvent } from "firebase/analytics";
 import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import { motion } from 'framer-motion/dist/framer-motion';
-import { Container, Grid, Typography, Button, TextField, Tooltip, InputLabel, Select, MenuItem, FormControl, CircularProgress, Snackbar, Autocomplete } from '@mui/material';
+import { Container, Grid, Stack, Typography, Button, TextField, Tooltip, InputLabel, Select, MenuItem, FormControl, CircularProgress, Snackbar, Autocomplete, Collapse, IconButton, AlertTitle } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import MuiAlert from '@mui/material/Alert';
 import { styled } from '@mui/material/styles';
 import PermMediaIcon from '@mui/icons-material/PermMedia';
+import CloseIcon from '@mui/icons-material/Close';
+import ThatsWhatSheSaid from './ThatsWhatSheSaid';
 
 const useStyles = makeStyles((theme) =>({
     count: {
@@ -77,6 +79,10 @@ export default function Contribute(){
     const [open, setOpen] = useState(false);
     const [tagList, setTagList] = useState([]);
     const [tagHelperText, setTagHelperText] = useState(null);
+    const [file, setFile] = useState(null);
+    const [fileAlertMessage, setFileAlertMessage] = useState(null);
+    const [openFileSizeDialog, setOpenFileSizeDialog] = useState(false);
+    const [showTHSS, setShowTHSS] = useState(true);
     const debouncedQuestion = useDebounce(question, 1000);
     const debouncedAnswer = useDebounce(answer, 1000);
     const typeToolTip = "What is the medium of the question? If text based, choose text. If image based, choose image. If audio based, choose audio.";
@@ -325,7 +331,6 @@ export default function Contribute(){
     }
 
     const handleTagChange = (event, values) => {
-        console.log(values)
         setTagList(values);
     }
 
@@ -344,19 +349,58 @@ export default function Contribute(){
         }
     }
 
+    const convertToMega = (fileSize) => {
+        return ((fileSize / 1024) / 1024).toFixed(2)
+    }
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        console.log(file)
+        if(file.size > 1048576){
+            setOpenFileSizeDialog(true);
+            setShowTHSS(true);
+            setFileAlertMessage(`File size of ${convertToMega(file.size)}mb is to big! Please use a size smaller than ${convertToMega(1250000)}`);
+            return;
+        }
+
+        if(file.type !== "image/jpg"){
+            setOpenFileSizeDialog(true);
+            setShowTHSS(false);
+            setFileAlertMessage('Please use JPG image type!')
+            return;
+        } 
+
+        setFile(file);
+    }
+
+    const noFileSelected = () => {
+        if(file === null){
+            return (
+                "No file chosen."
+            )
+        } else {
+            return (
+                `Chosen file ${file.name}, size: ${convertToMega(file.size)}mb`
+            )
+        }   
+    } 
+
     const showUploadButton = () => { 
-        let fileType = type === "audio" ? "audio/mp3" : "image/*"
+        let fileType = type === "audio" ? "audio/mp3" : "image/jpg"
         let fileToolTip = type === "audio" ? "Mp3 is the only accepted audio format" : "Please use JPG for image file type."
         return (
             <Grid item xs={12}>
-                <Tooltip title={fileToolTip} placement="top-start">
-                    <label htmlFor="media-upload">
-                        <Input accept={fileType} id="media-upload" multiple type="file" />
-                        <Button fullWidth size="large" variant="contained" component="span" endIcon={<PermMediaIcon />}>
-                            Upload
-                        </Button>
-                    </label>
-                </Tooltip>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography sx={{width: '2fr'}} variant="caption">{noFileSelected()}</Typography>
+                    <Tooltip title={fileToolTip} placement="top-start">
+                        <label style={{width: '1fr'}} htmlFor="media-upload">
+                            <Input accept={fileType} id="media-upload" type="file" onChange={handleFileChange}/>
+                            <Button fullWidth size="large" color="inherit" variant="outlined" component="span" endIcon={<PermMediaIcon />}>
+                                Choose File
+                            </Button>
+                        </label>
+                    </Tooltip>
+                </Stack>
             </Grid>
         )
     }
@@ -521,6 +565,19 @@ export default function Contribute(){
                         </Typography>
                     </Grid>
                     {shouldShowUploadButton() ? showUploadButton() : null}
+                    <Grid item xs={12}>
+                        <Collapse in={openFileSizeDialog}>
+                            <Alert variant="outlined" severity="warning" action={<IconButton aria-label="close" color="inherit" size="small" onClick={() => setOpenFileSizeDialog(false)}><CloseIcon fontSize="inherit" /></IconButton>}>
+                                <AlertTitle>{fileAlertMessage}</AlertTitle>
+                                {showTHSS ? 
+                                <Stack direction="column">
+                                    <ThatsWhatSheSaid />
+                                    <Typography><Button variant="text" target="_blank" rel="noopener noreferrer" href="https://squoosh.app/">Squoosh</Button> is a free and easy to use image compressor!</Typography>
+                                </Stack>
+                                : null }
+                            </Alert>
+                        </Collapse>
+                    </Grid>
                     <Grid item xs={12}>
                         <Button sx={{width: "100%", paddingTop: 2, paddingBottom: 2}} disabled={isSending} variant="outlined" color="primary" onClick={submitNewQuestion}>
                             {(isSending) ? <CircularProgress /> : "Contribute"}
